@@ -1,0 +1,19 @@
+{
+  "name": "prysma",
+  "version": "0.1.0-alpha",
+  "description": "prysma LED light hub",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rooknj/prysma.git"
+  },
+  "author": "Nick Rook",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Rooknj/prysma/issues"
+  },
+  "homepage": "https://github.com/Rooknj/prysma#readme"
+}
