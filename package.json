@@ -4,7 +4,10 @@
   "description": "prysma LED light hub",
   "main": "src/index.js",
   "scripts": {
-    "test": "jest"
+    "test": "node scripts/test",
+    "build": "node scripts/build",
+    "start": "node scripts/start",
+    "clean": "node scripts/clean"
   },
   "repository": {
     "type": "git",
@@ -17,11 +20,16 @@
   },
   "homepage": "https://github.com/Rooknj/prysma#readme",
   "devDependencies": {
+    "cross-spawn": "^6.0.5",
     "eslint": "^5.16.0",
     "husky": "^2.1.0",
     "jest": "^24.7.1",
     "lint-staged": "^8.1.5",
-    "prettier": "1.17.0"
+    "nodemon": "^1.18.11",
+    "pkg": "^4.3.7",
+    "prettier": "1.17.0",
+    "rimraf": "^2.6.3",
+    "spawn-args": "^0.2.0"
   },
   "husky": {
     "hooks": {
@@ -33,5 +41,8 @@
       "prettier --write",
       "git add"
     ]
+  },
+  "bin": {
+    "prod-server": "src/index.js"
   }
 }
