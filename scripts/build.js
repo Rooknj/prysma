@@ -34,4 +34,4 @@ if (process.env.PKG_TARGET) {
   }
 }
 
-exec([".", "--target", target, "--output", `./build/prysmalight`]);
+exec([".", "--target", target, "--output", `./build/prysma`]);
