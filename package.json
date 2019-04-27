@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/Rooknj/prysma/issues"
   },
-  "homepage": "https://github.com/Rooknj/prysma#readme"
+  "homepage": "https://github.com/Rooknj/prysma#readme",
+  "devDependencies": {
+    "eslint": "^5.16.0"
+  }
 }
