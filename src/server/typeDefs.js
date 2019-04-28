@@ -32,6 +32,7 @@ const Light = gql`
   type Light {
     id: String # uique id of accessory
     name: String # user given name of accessory
+    supportedEffects: [String] # List of supported effects
     state: LightState
     configuration: LightConfig
   }
@@ -39,7 +40,7 @@ const Light = gql`
 
 const LightState = gql`
   type LightState {
-    connected: Int
+    connected: Boolean
     state: String # curent power status
     brightness: Int # current brightness
     color: Color # current color
@@ -50,7 +51,6 @@ const LightState = gql`
 
 const LightConfig = gql`
   type LightConfig {
-    supportedEffects: [String] # List of supported effects
     ipAddress: String
     macAddress: String
     numLeds: Int
@@ -92,14 +92,7 @@ const ColorInput = gql`
 const DiscoveredLight = gql`
   type DiscoveredLight {
     id: String!
-    ipAddress: String
-    macAddress: String
-    numLeds: Int
-    udpPort: Int
-    version: String
-    hardware: String
-    colorOrder: String
-    stripType: String
+    configuration: LightConfig
   }
 `;
 

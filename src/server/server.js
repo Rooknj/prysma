@@ -7,7 +7,12 @@ const resolvers = require("./resolvers");
 class Server {
   constructor() {
     const context = async () => ({});
-    const apolloServer = new ApolloServer({ typeDefs, resolvers, context });
+    const apolloServer = new ApolloServer({
+      typeDefs,
+      resolvers,
+      context,
+      mocks: process.env.MOCK ? require("./mocks") : false
+    });
     this.graphqlPath = apolloServer.graphqlPath;
     this.subscriptionsPath = apolloServer.subscriptionsPath;
 
