@@ -32,3 +32,5 @@ server.start(config.server.port).then(() => {
     }`
   );
 });
+
+console.log(require("async-mqtt"));

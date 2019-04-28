@@ -47,6 +47,8 @@
   },
   "dependencies": {
     "apollo-server-express": "^2.4.8",
+    "async-mqtt": "^2.2.1",
+    "debug": "^4.1.1",
     "express": "^4.16.4",
     "faker": "^4.1.0",
     "graphql": "^14.2.1"
