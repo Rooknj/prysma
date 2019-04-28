@@ -4,9 +4,19 @@
 
 const config = require("./config");
 const Server = require("./server");
+const packageJson = require("../package.json");
 
-console.log("Hello");
-console.log(config);
+// Verbose statement of service starting
+const { version } = packageJson;
+console.log(`--- Prysma v${version} ---`);
+
+// Unhandled error logging
+process.on("uncaughtException", err => {
+  console.log("Unhandled Exception", err);
+});
+process.on("uncaughtRejection", err => {
+  console.log("Unhandled Rejection", err);
+});
 
 const server = new Server();
 
