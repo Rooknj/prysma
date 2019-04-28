@@ -10,12 +10,15 @@ console.log(config);
 
 const server = new Server();
 
-server
-  .start(config.server.port)
-  .then(
-    console.log(
-      `🚀 Server ready at http://localhost:${config.server.port}${
-        server.graphqlPath
-      }`
-    )
+server.start(config.server.port).then(() => {
+  console.log(
+    `🚀 Server ready at http://localhost:${config.server.port}${
+      server.graphqlPath
+    }`
   );
+  console.log(
+    `🚀 Subscriptions ready at ws://localhost:${config.server.port}${
+      server.subscriptionsPath
+    }`
+  );
+});
