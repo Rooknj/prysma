@@ -156,7 +156,7 @@ class PrysmaMqtt extends EventEmitter {
 
       const { top, command } = this._topics;
       try {
-        this._client.publish(
+        await this._client.publish(
           `${top}/${lightId}/${command}`,
           Buffer.from(JSON.stringify(message))
         );
