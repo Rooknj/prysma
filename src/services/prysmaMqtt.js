@@ -135,6 +135,43 @@ class PrysmaMqtt extends EventEmitter {
     }
   }
 
+  /**
+   * Publishes a message to the light's command topic.
+   * @param {string} id
+   * @param {string} message
+   */
+  async publishToLight(lightId, message) {
+    {
+      if (!this.connected) {
+        const errorMessage = `Can not publish to (${lightId}). MQTT client not connected`;
+        debug(errorMessage);
+        return new Error(errorMessage);
+      }
+
+      if (!lightId) {
+        const errorMessage = "You must provide a light id";
+        debug(errorMessage);
+        return new Error(errorMessage);
+      }
+      if (!message) {
+        const errorMessage = "You must provide a message";
+        debug(errorMessage);
+        return new Error(errorMessage);
+      }
+
+      const { top, command } = this.topics;
+      try {
+        this.client.publish(
+          `${top}/${lightId}/${command}`,
+          Buffer.from(message)
+        );
+      } catch (error) {
+        debug(`Error publishing to ${lightId}`);
+        return error;
+      }
+    }
+  }
+
   testAsyncMethod(data) {
     this.emit("data", data);
   }
