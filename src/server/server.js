@@ -1,4 +1,5 @@
 "use strict";
+const http = require("http");
 const express = require("express");
 const { ApolloServer } = require("apollo-server-express");
 const typeDefs = require("./typeDefs");
@@ -16,13 +17,15 @@ class Server {
     this.graphqlPath = apolloServer.graphqlPath;
     this.subscriptionsPath = apolloServer.subscriptionsPath;
 
-    this.app = express();
-    apolloServer.applyMiddleware({ app: this.app });
+    const app = express();
+    apolloServer.applyMiddleware({ app });
+    this.httpServer = http.createServer(app);
+    apolloServer.installSubscriptionHandlers(this.httpServer);
   }
 
   start(port) {
     return new Promise(resolve => {
-      this.app.listen(port, resolve);
+      this.httpServer.listen(port, resolve);
     });
   }
 }
