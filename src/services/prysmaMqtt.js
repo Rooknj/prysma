@@ -26,8 +26,9 @@ class PrysmaMqtt extends EventEmitter {
    * @param {string} host - MQTT broker host
    * @param {*} options - MQTT connection options
    */
-  connect(host, options) {
+  connect(host, options = {}) {
     debug(`Connecting to MQTT broker at ${host}`);
+
     this._client = mqtt.connect(host, {
       reconnectPeriod: options.reconnectPeriod, // Amount of time between reconnection attempts
       username: options.username,
@@ -44,7 +45,7 @@ class PrysmaMqtt extends EventEmitter {
   /**
    * Disconnects from MQTT broker
    */
-  disconnect() {
+  end() {
     return this._client.end();
   }
 
@@ -179,19 +180,34 @@ class PrysmaMqtt extends EventEmitter {
     }
   }
 
-  startDiscovery() {
+  async startDiscovery() {
     const { top, discoveryResponse } = this._topics;
-    this._client.subscribe(`${top}/+/${discoveryResponse}`);
+    try {
+      await this._client.subscribe(`${top}/+/${discoveryResponse}`);
+      return null;
+    } catch (error) {
+      return error;
+    }
   }
 
-  stopDiscovery() {
+  async stopDiscovery() {
     const { top, discoveryResponse } = this._topics;
-    this._client.unsubscribe(`${top}/+/${discoveryResponse}`);
+    try {
+      await this._client.unsubscribe(`${top}/+/${discoveryResponse}`);
+      return null;
+    } catch (error) {
+      return error;
+    }
   }
 
-  publishDiscovery() {
+  async publishDiscovery() {
     const { top, discovery } = this._topics;
-    this.publish(`${top}/${discovery}`, "ping");
+    try {
+      await this._client.publish(`${top}/${discovery}`, "ping");
+      return null;
+    } catch (error) {
+      return error;
+    }
   }
 
   _handleConnect(data) {
@@ -258,7 +274,7 @@ class PrysmaMqtt extends EventEmitter {
     if (!validation.error) {
       this.emit(event, validation.value);
     } else {
-      console.log(validation); // eslint-disable-line no-console
+      debug(validation);
     }
   }
 }
