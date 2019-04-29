@@ -167,6 +167,21 @@ class PrysmaMqtt extends EventEmitter {
     }
   }
 
+  startDiscovery() {
+    const { top, discoveryResponse } = this._topics;
+    this._client.subscribe(`${top}/+/${discoveryResponse}`);
+  }
+
+  stopDiscovery() {
+    const { top, discoveryResponse } = this._topics;
+    this._client.unsubscribe(`${top}/+/${discoveryResponse}`);
+  }
+
+  publishDiscovery() {
+    const { top, discovery } = this._topics;
+    this.publish(`${top}/${discovery}`, "ping");
+  }
+
   _handleConnect(data) {
     this.connected = true;
     debug(`Connected to MQTT broker at ${this._host}`);
@@ -180,7 +195,14 @@ class PrysmaMqtt extends EventEmitter {
   }
 
   _handleMessage(topic, message) {
-    const { top, connected, state, effectList, config } = this._topics;
+    const {
+      top,
+      connected,
+      state,
+      effectList,
+      config,
+      discoveryResponse
+    } = this._topics;
     const topicTokens = topic.split("/");
     if (topicTokens.length < 2) {
       debug(`Ignoring Message on ${topic}: topic too short`);
@@ -204,6 +226,9 @@ class PrysmaMqtt extends EventEmitter {
         break;
       case config:
         this.emit("configMessage", parseMessage(message));
+        break;
+      case discoveryResponse:
+        this.emit("discoveryMessage");
         break;
     }
   }
