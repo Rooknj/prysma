@@ -6,25 +6,37 @@ const Debug = require("debug").default;
 const debug = Debug("mqtt");
 
 class PrysmaMqtt extends EventEmitter {
-  constructor(config) {
+  constructor() {
     super();
     this.connected = false;
-    this.client = mqtt.connect(config.host, {
-      reconnectPeriod: config.reconnectPeriod, // Amount of time between reconnection attempts
-      username: config.username,
-      password: config.password
+    this.client = null;
+    this.topics = null;
+  }
+
+  connect(host, topics, options) {
+    debug(`Connecting to MQTT broker at ${host}`);
+    this.client = mqtt.connect(host, {
+      reconnectPeriod: options.reconnectPeriod, // Amount of time between reconnection attempts
+      username: options.username,
+      password: options.password
     });
 
+    this.topics = topics;
+
     this.client.on("connect", data => {
+      debug(`Connected to MQTT broker at ${host}`);
       this.emit("connect", data);
-      debug("Connected to MQTT");
       this.connected = true;
     });
     this.client.on("close", data => {
+      debug(`disconnected from MQTT broker at ${host}`);
       this.emit("close", data);
-      debug("disconnected from MQTT");
       this.connected = false;
     });
+  }
+
+  disconnect() {
+    return this.client.end();
   }
 
   testAsyncMethod(data) {
