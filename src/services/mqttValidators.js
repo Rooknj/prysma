@@ -44,7 +44,7 @@ const lightUdpPort = Joi.number();
 const connectedMessageSchema = Joi.object()
   .keys({
     name: lightId.required(),
-    connection: Joi.number().required()
+    connection: Joi.number().valid(0, 2)
   })
   .required();
 
