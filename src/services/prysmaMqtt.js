@@ -1,6 +1,13 @@
 "use strict";
 const EventEmitter = require("events");
 const mqtt = require("async-mqtt");
+const {
+  validateConnectedMessage,
+  validateStateMessage,
+  validateEffectListMessage,
+  validateConfigMessage,
+  validateDiscoveryMessage
+} = require("./mqttValidators");
 const Debug = require("debug").default;
 
 const debug = Debug("mqtt");
@@ -212,24 +219,41 @@ class PrysmaMqtt extends EventEmitter {
       return;
     }
 
-    const parseMessage = msg => JSON.parse(msg.toString());
+    const data = JSON.parse(message.toString());
+    let validation = null;
+    let event = null;
 
     switch (topicTokens[2]) {
       case connected:
-        this.emit("connectedMessage", parseMessage(message));
+        validation = validateConnectedMessage(data);
+        event = "connectedMessage";
         break;
       case state:
-        this.emit("stateMessage", parseMessage(message));
+        validation = validateStateMessage(data);
+        event = "stateMessage";
         break;
       case effectList:
-        this.emit("effectListMessage", parseMessage(message));
+        validation = validateEffectListMessage(data);
+        event = "effectListMessage";
         break;
       case config:
-        this.emit("configMessage", parseMessage(message));
+        validation = validateConfigMessage(data);
+        event = "configMessage";
         break;
       case discoveryResponse:
-        this.emit("discoveryMessage");
+        validation = validateDiscoveryMessage(data);
+        event = "discoveryMessage";
         break;
+    }
+
+    if (!validation) {
+      return;
+    }
+
+    if (!validation.error) {
+      this.emit(event, validation.value);
+    } else {
+      console.log(validation); // eslint-disable-line no-console
     }
   }
 }

@@ -46,6 +46,7 @@
     "prod-server": "src/index.js"
   },
   "dependencies": {
+    "@hapi/joi": "^15.0.0",
     "apollo-server-express": "^2.4.8",
     "async-mqtt": "^2.2.1",
     "debug": "^4.1.1",
