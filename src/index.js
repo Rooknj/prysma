@@ -32,15 +32,3 @@ server.start(config.server.port).then(() => {
     }`
   );
 });
-
-const PrysmaMqtt = require("./services/prysmaMqtt");
-
-const prysmaMqtt = new PrysmaMqtt();
-prysmaMqtt.connect(config.mqtt.host, config.mqtt.topics, config.mqtt.options);
-prysmaMqtt.once("connect", async () => {
-  await prysmaMqtt.subscribeToLight("Prysma-807D3A41B465");
-});
-
-prysmaMqtt.on("connectedMessage", data => {
-  console.log(data);
-});
