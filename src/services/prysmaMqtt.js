@@ -9,8 +9,9 @@ class PrysmaMqtt extends EventEmitter {
   constructor() {
     super();
     this.connected = false;
-    this.client = null;
-    this.topics = null;
+    this._client = null;
+    this._topics = null;
+    this._host = null;
   }
 
   /**
@@ -21,31 +22,25 @@ class PrysmaMqtt extends EventEmitter {
    */
   connect(host, topics, options) {
     debug(`Connecting to MQTT broker at ${host}`);
-    this.client = mqtt.connect(host, {
+    this._client = mqtt.connect(host, {
       reconnectPeriod: options.reconnectPeriod, // Amount of time between reconnection attempts
       username: options.username,
       password: options.password
     });
 
-    this.topics = topics;
+    this._host = host;
+    this._topics = topics;
 
-    this.client.on("connect", data => {
-      this.connected = true;
-      debug(`Connected to MQTT broker at ${host}`);
-      this.emit("connect", data);
-    });
-    this.client.on("close", data => {
-      this.connected = false;
-      debug(`disconnected from MQTT broker at ${host}`);
-      this.emit("close", data);
-    });
+    this._client.on("connect", this._handleConnect.bind(this));
+    this._client.on("close", this._handleDisconnect.bind(this));
+    this._client.on("message", this._handleMessage.bind(this));
   }
 
   /**
    * Disconnects from MQTT broker
    */
   disconnect() {
-    return this.client.end();
+    return this._client.end();
   }
 
   /**
@@ -66,17 +61,17 @@ class PrysmaMqtt extends EventEmitter {
       return new Error(errorMessage);
     }
 
-    const { top, connected, state, effectList, config } = this.topics;
+    const { top, connected, state, effectList, config } = this._topics;
     try {
       // Subscribe to all relavent fields
-      const connectedPromise = this.client.subscribe(
+      const connectedPromise = this._client.subscribe(
         `${top}/${lightId}/${connected}`
       );
-      const statePromise = this.client.subscribe(`${top}/${lightId}/${state}`);
-      const effectListPromise = this.client.subscribe(
+      const statePromise = this._client.subscribe(`${top}/${lightId}/${state}`);
+      const effectListPromise = this._client.subscribe(
         `${top}/${lightId}/${effectList}`
       );
-      const configPromise = this.client.subscribe(
+      const configPromise = this._client.subscribe(
         `${top}/${lightId}/${config}`
       );
 
@@ -105,19 +100,19 @@ class PrysmaMqtt extends EventEmitter {
       return new Error(errorMessage);
     }
 
-    const { top, connected, state, effectList, config } = this.topics;
+    const { top, connected, state, effectList, config } = this._topics;
     try {
       // Subscribe to all relavent fields
-      const connectedPromise = this.client.unsubscribe(
+      const connectedPromise = this._client.unsubscribe(
         `${top}/${lightId}/${connected}`
       );
-      const statePromise = this.client.unsubscribe(
+      const statePromise = this._client.unsubscribe(
         `${top}/${lightId}/${state}`
       );
-      const effectListPromise = this.client.unsubscribe(
+      const effectListPromise = this._client.unsubscribe(
         `${top}/${lightId}/${effectList}`
       );
-      const configPromise = this.client.unsubscribe(
+      const configPromise = this._client.unsubscribe(
         `${top}/${lightId}/${config}`
       );
 
@@ -159,11 +154,11 @@ class PrysmaMqtt extends EventEmitter {
         return new Error(errorMessage);
       }
 
-      const { top, command } = this.topics;
+      const { top, command } = this._topics;
       try {
-        this.client.publish(
+        this._client.publish(
           `${top}/${lightId}/${command}`,
-          Buffer.from(message)
+          Buffer.from(JSON.stringify(message))
         );
       } catch (error) {
         debug(`Error publishing to ${lightId}`);
@@ -172,8 +167,45 @@ class PrysmaMqtt extends EventEmitter {
     }
   }
 
-  testAsyncMethod(data) {
-    this.emit("data", data);
+  _handleConnect(data) {
+    this.connected = true;
+    debug(`Connected to MQTT broker at ${this._host}`);
+    this.emit("connect", data);
+  }
+
+  _handleDisconnect(data) {
+    this.connected = false;
+    debug(`disconnected from MQTT broker at ${this._host}`);
+    this.emit("close", data);
+  }
+
+  _handleMessage(topic, message) {
+    const { top, connected, state, effectList, config } = this._topics;
+    const topicTokens = topic.split("/");
+    if (topicTokens.length < 2) {
+      debug(`Ignoring Message on ${topic}: topic too short`);
+      return;
+    } else if (topicTokens[0] !== top) {
+      debug(`Ignoring Message on ${topic}: topic is unrealted to this app`);
+      return;
+    }
+
+    const parseMessage = msg => JSON.parse(msg.toString());
+
+    switch (topicTokens[2]) {
+      case connected:
+        this.emit("connectedMessage", parseMessage(message));
+        break;
+      case state:
+        this.emit("stateMessage", parseMessage(message));
+        break;
+      case effectList:
+        this.emit("effectListMessage", parseMessage(message));
+        break;
+      case config:
+        this.emit("configMessage", parseMessage(message));
+        break;
+    }
   }
 }
 
