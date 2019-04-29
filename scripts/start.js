@@ -1,13 +1,13 @@
 "use strict";
 
 process.env.NODE_ENV = "development";
-process.env.DEBUG = "";
+process.env.DEBUG = "mqtt";
 
 const spawn = require("cross-spawn");
 const spawnArgs = require("spawn-args");
 const { delimiter } = require("path");
 const pathResolve = require("path").resolve;
-//const { execSync } = require("child_process");
+const { execSync } = require("child_process");
 
 // Crash on unhandled rejections
 process.on("unhandledRejection", err => {
@@ -26,15 +26,15 @@ if (argv.indexOf("--mock") >= 0) {
   process.env.MQTT_HOST = "prysma.local";
   process.env.REDIS_HOST = "prysma.local";
 } else {
-  console.log("Starting Prysma using local services")
-  // Start docker containers
-  // console.log("Spinning up Local MQTT broker");
-  // process.env.MQTT_HOST = "localhost";
+  console.log("Starting Prysma using local services");
+  //Start docker containers
+  console.log("Spinning up Local MQTT broker");
+  process.env.MQTT_HOST = "localhost";
   // console.log("Spinning up Local Redis Server");
   // process.env.REDIS_HOST = "localhost";
-  // execSync("docker-compose up -d broker redis", {
-  //   stdio: [process.stdin, process.stdout] // Ignore stderr so nothing prints to the console if this fails.
-  // });
+  execSync("docker-compose up -d mqtt", {
+    stdio: [process.stdin, process.stdout] // Ignore stderr so nothing prints to the console if this fails.
+  });
 }
 
 // Start Nodemon with cross-spawn
