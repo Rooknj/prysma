@@ -13,22 +13,22 @@ const Debug = require("debug").default;
 const debug = Debug("mqtt");
 
 class PrysmaMqtt extends EventEmitter {
-  constructor() {
+  constructor(topics) {
     super();
     this.connected = false;
     this._client = null;
-    this._topics = null;
+    this._topics = topics;
     this._host = null;
   }
 
   /**
    * Connect to the MQTT broker
    * @param {string} host - MQTT broker host
-   * @param {object} topics - Object containing topic name info
    * @param {*} options - MQTT connection options
    */
-  connect(host, topics, options) {
+  connect(host, options = {}) {
     debug(`Connecting to MQTT broker at ${host}`);
+
     this._client = mqtt.connect(host, {
       reconnectPeriod: options.reconnectPeriod, // Amount of time between reconnection attempts
       username: options.username,
@@ -36,7 +36,6 @@ class PrysmaMqtt extends EventEmitter {
     });
 
     this._host = host;
-    this._topics = topics;
 
     this._client.on("connect", this._handleConnect.bind(this));
     this._client.on("close", this._handleDisconnect.bind(this));
@@ -46,7 +45,7 @@ class PrysmaMqtt extends EventEmitter {
   /**
    * Disconnects from MQTT broker
    */
-  disconnect() {
+  end() {
     return this._client.end();
   }
 
@@ -90,6 +89,7 @@ class PrysmaMqtt extends EventEmitter {
       ]);
 
       debug(`Successfully subscribed to ${lightId}`);
+      return null;
     } catch (error) {
       debug(`Error subscribing to ${lightId}`);
       return error;
@@ -101,6 +101,10 @@ class PrysmaMqtt extends EventEmitter {
    * @param {string} lightId
    */
   async unsubscribeFromLight(lightId) {
+    if (!this.connected) {
+      return null;
+    }
+
     if (!lightId) {
       const errorMessage = "You must provide a light id";
       debug(errorMessage);
@@ -131,6 +135,7 @@ class PrysmaMqtt extends EventEmitter {
       ]);
 
       debug(`Successfully unsubscribed from ${lightId}`);
+      return null;
     } catch (error) {
       debug(`Error unsubscribing from ${lightId}`);
       return error;
@@ -143,50 +148,66 @@ class PrysmaMqtt extends EventEmitter {
    * @param {string} message
    */
   async publishToLight(lightId, message) {
-    {
-      if (!this.connected) {
-        const errorMessage = `Can not publish to (${lightId}). MQTT client not connected`;
-        debug(errorMessage);
-        return new Error(errorMessage);
-      }
+    if (!this.connected) {
+      const errorMessage = `Can not publish to (${lightId}). MQTT client not connected`;
+      debug(errorMessage);
+      return new Error(errorMessage);
+    }
 
-      if (!lightId) {
-        const errorMessage = "You must provide a light id";
-        debug(errorMessage);
-        return new Error(errorMessage);
-      }
-      if (!message) {
-        const errorMessage = "You must provide a message";
-        debug(errorMessage);
-        return new Error(errorMessage);
-      }
+    if (!lightId) {
+      const errorMessage = "You must provide a light id";
+      debug(errorMessage);
+      return new Error(errorMessage);
+    }
+    if (!message) {
+      const errorMessage = "You must provide a message";
+      debug(errorMessage);
+      return new Error(errorMessage);
+    }
 
-      const { top, command } = this._topics;
-      try {
-        await this._client.publish(
-          `${top}/${lightId}/${command}`,
-          Buffer.from(JSON.stringify(message))
-        );
-      } catch (error) {
-        debug(`Error publishing to ${lightId}`);
-        return error;
-      }
+    const { top, command } = this._topics;
+    try {
+      await this._client.publish(
+        `${top}/${lightId}/${command}`,
+        Buffer.from(JSON.stringify(message))
+      );
+
+      debug(`Successfully published ${message} to ${lightId}`);
+      return null;
+    } catch (error) {
+      debug(`Error publishing to ${lightId}`);
+      return error;
     }
   }
 
-  startDiscovery() {
+  async startDiscovery() {
     const { top, discoveryResponse } = this._topics;
-    this._client.subscribe(`${top}/+/${discoveryResponse}`);
+    try {
+      await this._client.subscribe(`${top}/+/${discoveryResponse}`);
+      return null;
+    } catch (error) {
+      return error;
+    }
   }
 
-  stopDiscovery() {
+  async stopDiscovery() {
     const { top, discoveryResponse } = this._topics;
-    this._client.unsubscribe(`${top}/+/${discoveryResponse}`);
+    try {
+      await this._client.unsubscribe(`${top}/+/${discoveryResponse}`);
+      return null;
+    } catch (error) {
+      return error;
+    }
   }
 
-  publishDiscovery() {
+  async publishDiscovery() {
     const { top, discovery } = this._topics;
-    this.publish(`${top}/${discovery}`, "ping");
+    try {
+      await this._client.publish(`${top}/${discovery}`, "ping");
+      return null;
+    } catch (error) {
+      return error;
+    }
   }
 
   _handleConnect(data) {
@@ -253,7 +274,7 @@ class PrysmaMqtt extends EventEmitter {
     if (!validation.error) {
       this.emit(event, validation.value);
     } else {
-      console.log(validation); // eslint-disable-line no-console
+      debug(validation);
     }
   }
 }
