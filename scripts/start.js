@@ -1,7 +1,7 @@
 "use strict";
 
 process.env.NODE_ENV = "development";
-process.env.DEBUG = "mqtt";
+process.env.DEBUG = "mqtt,db";
 
 const spawn = require("cross-spawn");
 const spawnArgs = require("spawn-args");
