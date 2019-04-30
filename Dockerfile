@@ -33,7 +33,11 @@ RUN npm run build
 FROM balenalib/armv7hf:stretch-run
 
 WORKDIR /usr/app
+
+# Start QEMU support for building on all architectures
+RUN [ "cross-build-start" ]
 RUN mkdir data
+RUN [ "cross-build-end" ]
 
 COPY --from=builder /usr/app/build/prysma /usr/app
 # Note: We are including the sqlite native module addon here so zeit/pkg can use it
