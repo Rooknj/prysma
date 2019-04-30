@@ -1,6 +1,7 @@
 #
 .vscode
 *.sqlite
+
 # production
 /build
 
