@@ -14,6 +14,8 @@ COPY . .
 RUN [ "cross-build-start" ]
 
 # Install app dependencies
+RUN install_packages sqlite3
+RUN npm install sqlite3 --build-from-source --sqlite=/usr/bin
 RUN npm install
 
 # Test app
