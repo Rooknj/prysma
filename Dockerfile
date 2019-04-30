@@ -30,6 +30,7 @@ FROM balenalib/armv7hf:stretch-run
 WORKDIR /usr/app
 
 COPY --from=builder /usr/app/build/prysma /usr/app
+COPY --from=builder /usr/bin/sqlite3 /usr/bin
 
 # Make port 4001 available to the world outside this container
 EXPOSE 4001
