@@ -28,10 +28,10 @@ RUN npm run build
 FROM balenalib/armv7hf:stretch-run
 
 WORKDIR /usr/app
+RUN mkdir data
 
 COPY --from=builder /usr/app/build/prysma /usr/app
-COPY --from=builder /usr/bin/sqlite3 /usr/bin
-
+COPY --from=builder /usr/app/node_modules/sqlite3/lib/binding/node-v64-linux-arm/node_sqlite3.node /usr/app
 # Make port 4001 available to the world outside this container
 EXPOSE 4001
 
