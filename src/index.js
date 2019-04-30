@@ -32,3 +32,7 @@ server.start(config.server.port).then(() => {
     }`
   );
 });
+
+const PrysmaDb = require("./services/prysmaDb");
+const prysmaDb = new PrysmaDb();
+prysmaDb.connect(config.db);
