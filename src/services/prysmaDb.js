@@ -22,6 +22,7 @@ class PrysmaDb extends EventEmitter {
       debug(`Database & tables created!`);
     } catch (error) {
       // TODO: Handle what happens if authenticate fails vs if sync fails
+      // Note: We are throwing the errors here because the caller will need to handle them
       throw error;
     }
   }
@@ -33,20 +34,38 @@ class PrysmaDb extends EventEmitter {
     } catch (error) {
       throw error;
     }
-    return lights;
+    return lights.map(light => light.get({ plain: true }));
   }
 
   async getLight(lightId) {
+    if (!lightId) throw new Error("No ID provided");
     let light = null;
     try {
-      light = await this._models.Light.findOne({ where: { id: lightId } });
+      light = await this._models.Light.findByPk(lightId);
     } catch (error) {
       throw error;
     }
-    return light;
+    if (!light) throw new Error(`"${lightId}" not found`);
+    return light.get({ plain: true });
+  }
+
+  async setLight(lightId, lightData) {
+    if (!lightId) throw new Error("No ID provided");
+    let changedLight = null;
+    try {
+      const lightToChange = await this._models.Light.findByPk(lightId);
+      if (!lightToChange) throw new Error(`"${lightId}" not found`);
+      await lightToChange.update(lightData);
+      changedLight = lightToChange;
+    } catch (error) {
+      // TODO: Handle what happens if findOne errors vs if .destroy() fails
+      throw error;
+    }
+    return changedLight.get({ plain: true });
   }
 
   async addLight(lightId, lightName) {
+    if (!lightId) throw new Error("No ID provided");
     let addedLight = null;
     try {
       addedLight = await this._models.Light.create({
@@ -56,15 +75,15 @@ class PrysmaDb extends EventEmitter {
     } catch (error) {
       throw error;
     }
-    return addedLight;
+    return addedLight.get({ plain: true });
   }
 
   async removeLight(lightId) {
+    if (!lightId) throw new Error("No ID provided");
     let removedLight = null;
     try {
-      const lightToRemove = await this._models.Light.findOne({
-        where: { id: lightId }
-      });
+      const lightToRemove = await this._models.Light.findByPk(lightId);
+      if (!lightToRemove) throw new Error(`"${lightId}" not found`);
       await lightToRemove.destroy();
       removedLight = lightId;
     } catch (error) {
