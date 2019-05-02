@@ -28,7 +28,7 @@ class PrysmaDb extends EventEmitter {
   }
 
   async getLights() {
-    let lights = null;
+    let lights;
     try {
       lights = await this._models.Light.findAll();
     } catch (error) {
@@ -39,7 +39,7 @@ class PrysmaDb extends EventEmitter {
 
   async getLight(lightId) {
     if (!lightId) throw new Error("No ID provided");
-    let light = null;
+    let light;
     try {
       light = await this._models.Light.findByPk(lightId);
     } catch (error) {
@@ -51,22 +51,20 @@ class PrysmaDb extends EventEmitter {
 
   async setLight(lightId, lightData) {
     if (!lightId) throw new Error("No ID provided");
-    let changedLight = null;
+    if (!lightData) throw new Error("No Data provided");
     try {
       const lightToChange = await this._models.Light.findByPk(lightId);
       if (!lightToChange) throw new Error(`"${lightId}" not found`);
       await lightToChange.update(lightData);
-      changedLight = lightToChange;
     } catch (error) {
       // TODO: Handle what happens if findOne errors vs if .destroy() fails
       throw error;
     }
-    return changedLight.get({ plain: true });
   }
 
   async addLight(lightId, lightName) {
     if (!lightId) throw new Error("No ID provided");
-    let addedLight = null;
+    let addedLight;
     try {
       addedLight = await this._models.Light.create({
         id: lightId,
@@ -80,7 +78,7 @@ class PrysmaDb extends EventEmitter {
 
   async removeLight(lightId) {
     if (!lightId) throw new Error("No ID provided");
-    let removedLight = null;
+    let removedLight;
     try {
       const lightToRemove = await this._models.Light.findByPk(lightId);
       if (!lightToRemove) throw new Error(`"${lightId}" not found`);
