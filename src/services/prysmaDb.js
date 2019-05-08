@@ -13,6 +13,7 @@ class PrysmaDb extends EventEmitter {
   }
 
   async connect(options) {
+    //console.log(Sequelize)
     this._sequelize = new Sequelize({ ...options, logging: false });
     try {
       await this._sequelize.authenticate();

@@ -1,12 +1,70 @@
 const PrysmaDB = require("./prysmaDb");
+const Sequelize = require("sequelize");
 
+jest.mock("sequelize");
+jest.mock("../models/light.js");
+
+// Mock light model with customized sequelize-mock module (add findByPk as findById) (make sure it is a function that returns the mock model instance)
+// Mock sequelize with a model that calls authenticate and sync
 describe("constructor", () => {
-  test("initializes correctly", () => {});
+  test("initializes correctly", () => {
+    const prysmaDB = new PrysmaDB();
+
+    expect(prysmaDB._sequelize).toBeNull();
+    expect(prysmaDB._models).toEqual({});
+  });
 });
 
 describe("connect", () => {
-  test("Connects to the database with the given options", () => {});
-  test("Throws an error if the connection fails", () => {});
+  test("Connects and syncs models to the database", async () => {
+    const prysmaDB = new PrysmaDB();
+
+    await prysmaDB.connect();
+
+    expect(prysmaDB._sequelize).toBeDefined();
+    expect(prysmaDB._sequelize.authenticate).toBeCalledTimes(1);
+    expect(prysmaDB._sequelize.sync).toBeCalledTimes(1);
+    expect(prysmaDB._models.Light).toBeDefined();
+  });
+  test("Throws an error if the connection fails (1)", async () => {
+    const ERROR_MESSAGE = "test error 1";
+    Sequelize.mockImplementationOnce(() => {
+      return {
+        authenticate: async () => {
+          throw new Error(ERROR_MESSAGE);
+        }
+      };
+    });
+
+    const prysmaDB = new PrysmaDB();
+
+    try {
+      await prysmaDB.connect();
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toBe(ERROR_MESSAGE);
+    }
+  });
+  test("Throws an error if the connection fails (2)", async () => {
+    const ERROR_MESSAGE = "test error 2";
+    Sequelize.mockImplementationOnce(() => {
+      return {
+        authenticate: jest.fn(),
+        sync: async () => {
+          throw new Error(ERROR_MESSAGE);
+        }
+      };
+    });
+
+    const prysmaDB = new PrysmaDB();
+
+    try {
+      await prysmaDB.connect();
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toBe(ERROR_MESSAGE);
+    }
+  });
 });
 
 describe("getLight", () => {
