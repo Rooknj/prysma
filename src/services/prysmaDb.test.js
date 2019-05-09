@@ -6,6 +6,7 @@ jest.mock("../models/light.js");
 
 let mockLightModel;
 const NO_ID_ERROR = "No ID provided";
+const NO_DATA_ERROR = "No Data provided";
 
 beforeEach(() => {
   mockLightModel = {
@@ -187,22 +188,113 @@ describe("getLights", () => {
 });
 
 describe("setLight", () => {
-  test("Correctly sets the light", async () => {});
-  test("Throws an error if no id is given", async () => {});
-  test("Throws an error if no data is given", async () => {});
-  test("Throws an error if it cant set the light", async () => {});
-  test("Throws an error if id is improperly formatted", async () => {});
-  test("Throws an error if name is improperly formatted", async () => {});
-  test("Throws an error if supportedEffects is improperly formatted", async () => {});
-  test("Throws an error if idAddress is improperly formatted", async () => {});
-  test("Throws an error if macAddress is improperly formatted", async () => {});
-  test("Throws an error if numLeds is improperly formatted", async () => {});
-  test("Throws an error if udpPort is improperly formatted", async () => {});
-  test("Throws an error if version is improperly formatted", async () => {});
-  test("Throws an error if hardware is improperly formatted", async () => {});
-  test("Throws an error if colorOrder is improperly formatted", async () => {});
-  test("Throws an error if stripType is improperly formatted", async () => {});
-  test("Throws an error if rank is improperly formatted", async () => {});
+  test("Correctly sets the light", async () => {
+    const prysmaDB = new PrysmaDB();
+    await prysmaDB.connect();
+
+    const ID = "Mock 1";
+    const DATA = {
+      name: "New name",
+      supportedEffects: "test 1,test 2, test 3, test 4",
+      ipAddress: "1.0.0.0",
+      macAddress: "AA:BB:CC:DD:EE:GG",
+      numLeds: 61,
+      udpPort: 7777,
+      version: "0.0.1",
+      hardware: "D1MINI",
+      colorOrder: "RGB",
+      stripType: "WS2811",
+      rank: 2
+    };
+    mockLightModel.update = jest.fn();
+    prysmaDB._models.Light.findByPk = jest.fn(() => mockLightModel);
+    await prysmaDB.setLight(ID, DATA);
+
+    expect(prysmaDB._models.Light.findByPk).toBeCalledTimes(1);
+    expect(prysmaDB._models.Light.findByPk).toBeCalledWith(ID);
+    expect(mockLightModel.update).toBeCalledTimes(1);
+    expect(mockLightModel.update).toBeCalledWith(expect.objectContaining(DATA));
+  });
+  test("Throws an error if no id is given", async () => {
+    const prysmaDB = new PrysmaDB();
+    await prysmaDB.connect();
+
+    try {
+      await prysmaDB.setLight();
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toBe(NO_ID_ERROR);
+    }
+  });
+  test("Throws an error if no data is given", async () => {
+    const prysmaDB = new PrysmaDB();
+    await prysmaDB.connect();
+
+    try {
+      await prysmaDB.setLight("Mock ID");
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toBe(NO_DATA_ERROR);
+    }
+  });
+  test("Throws an error if the light doesnt exist", async () => {
+    const prysmaDB = new PrysmaDB();
+    await prysmaDB.connect();
+
+    prysmaDB._models.Light.findByPk = jest.fn();
+    const ID = "Prysma-Mock";
+    const DATA = {
+      name: "New name",
+      supportedEffects: "test 1,test 2, test 3, test 4",
+      ipAddress: "1.0.0.0",
+      macAddress: "AA:BB:CC:DD:EE:GG",
+      numLeds: 61,
+      udpPort: 7777,
+      version: "0.0.1",
+      hardware: "D1MINI",
+      colorOrder: "RGB",
+      stripType: "WS2811",
+      rank: 2
+    };
+
+    try {
+      await prysmaDB.setLight(ID, DATA);
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toBe(`"${ID}" not found`);
+    }
+  });
+  test("Throws an error if it cant set the light", async () => {
+    const prysmaDB = new PrysmaDB();
+    await prysmaDB.connect();
+
+    const ID = "Mock 1";
+    const DATA = {
+      name: "New name",
+      supportedEffects: "test 1,test 2, test 3, test 4",
+      ipAddress: "1.0.0.0",
+      macAddress: "AA:BB:CC:DD:EE:GG",
+      numLeds: 61,
+      udpPort: 7777,
+      version: "0.0.1",
+      hardware: "D1MINI",
+      colorOrder: "RGB",
+      stripType: "WS2811",
+      rank: 2
+    };
+    const ERROR_MESSAGE = "Mock Error Update";
+    mockLightModel.update = jest.fn(async () => {
+      throw new Error(ERROR_MESSAGE);
+    });
+    prysmaDB._models.Light.findByPk = jest.fn(() => mockLightModel);
+
+    try {
+      await prysmaDB.setLight(ID, DATA);
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toBe(ERROR_MESSAGE);
+    }
+  });
 });
 
 describe("addLight", () => {
