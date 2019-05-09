@@ -356,7 +356,38 @@ describe("addLight", () => {
 });
 
 describe("removeLight", () => {
-  test("Removes the light", async () => {});
-  test("Throws an error if the light was not already added", async () => {});
-  test("Throws an error if no id is given", async () => {});
+  test("Removes the light", async () => {
+    const prysmaDB = new PrysmaDB();
+    await prysmaDB.connect();
+
+    const ID = "Prysma-334455667788";
+    const testLight = await prysmaDB.removeLight(ID);
+
+    expect(testLight).toBe(ID);
+  });
+  test("Throws an error if the light doesnt exist", async () => {
+    const prysmaDB = new PrysmaDB();
+    await prysmaDB.connect();
+
+    prysmaDB._models.Light.findByPk = jest.fn();
+    const ID = "Prysma-334455667788";
+
+    try {
+      await prysmaDB.removeLight(ID);
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toBe(`"${ID}" not found`);
+    }
+  });
+  test("Throws an error if no id is given", async () => {
+    const prysmaDB = new PrysmaDB();
+    await prysmaDB.connect();
+
+    try {
+      await prysmaDB.removeLight();
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toBe(NO_ID_ERROR);
+    }
+  });
 });
