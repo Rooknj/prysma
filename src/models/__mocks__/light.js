@@ -17,6 +17,10 @@ module.exports = jest.fn(() => {
     stripType: "WS2812B",
     rank: 1
   });
-  LightModelMock.findByPk = LightModelMock.findById;
+  LightModelMock.findByPk = jest.fn(id => {
+    let lightModel = LightModelMock.findById(id);
+    lightModel.get = jest.fn(options => lightModel.get(options));
+    return lightModel;
+  });
   return LightModelMock;
 });
