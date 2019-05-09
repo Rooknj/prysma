@@ -298,9 +298,61 @@ describe("setLight", () => {
 });
 
 describe("addLight", () => {
-  test("Adds the light", async () => {});
-  test("Throws an error if no id is given", async () => {});
-  test("Throws an error if the light was already created", async () => {});
+  test("Adds the light", async () => {
+    const prysmaDB = new PrysmaDB();
+    await prysmaDB.connect();
+
+    const ID = "Prysma-334455667788";
+    const NAME = "Window";
+    const testLight = await prysmaDB.addLight(ID, NAME);
+
+    expect(testLight.id).toBe(ID);
+    expect(testLight.name).toBe(NAME);
+    expect(Object.keys(testLight)).toEqual(
+      expect.arrayContaining(Object.keys(mockLightModel))
+    );
+  });
+  test("Adds the light with name = ID if no name was given", async () => {
+    const prysmaDB = new PrysmaDB();
+    await prysmaDB.connect();
+
+    const ID = "Prysma-334455667788";
+    const testLight = await prysmaDB.addLight(ID);
+
+    expect(testLight.id).toBe(ID);
+    expect(testLight.name).toBe(ID);
+    expect(Object.keys(testLight)).toEqual(
+      expect.arrayContaining(Object.keys(mockLightModel))
+    );
+  });
+  test("Throws an error if no id is given", async () => {
+    const prysmaDB = new PrysmaDB();
+    await prysmaDB.connect();
+
+    try {
+      await prysmaDB.addLight();
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toBe(NO_ID_ERROR);
+    }
+  });
+  test("Throws an error if it cant add the light", async () => {
+    const prysmaDB = new PrysmaDB();
+    await prysmaDB.connect();
+
+    const ERROR_MESSAGE = "Mock Error Add";
+    prysmaDB._models.Light.create = jest.fn(async () => {
+      throw new Error(ERROR_MESSAGE);
+    });
+    const ID = "Prysma-112233445566";
+
+    try {
+      await prysmaDB.addLight(ID);
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toBe(ERROR_MESSAGE);
+    }
+  });
 });
 
 describe("removeLight", () => {
