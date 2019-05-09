@@ -4,11 +4,11 @@ const Sequelize = require("sequelize");
 jest.mock("sequelize");
 jest.mock("../models/light.js");
 
-let mockLight;
+let mockLightModel;
 const NO_ID_ERROR = "No ID provided";
 
 beforeEach(() => {
-  mockLight = {
+  mockLightModel = {
     id: "Mock1",
     name: "Mock Light",
     supportedEffects: "test 1,test 2, test 3",
@@ -96,6 +96,9 @@ describe("getLight", () => {
     const testLight = await prysmaDB.getLight(ID);
 
     expect(testLight.id).toBe(ID);
+    expect(Object.keys(testLight)).toEqual(
+      expect.arrayContaining(Object.keys(mockLightModel))
+    );
   });
   test("Returns the light with the specified id (2)", async () => {
     const prysmaDB = new PrysmaDB();
@@ -105,6 +108,9 @@ describe("getLight", () => {
     const testLight = await prysmaDB.getLight(ID);
 
     expect(testLight.id).toBe(ID);
+    expect(Object.keys(testLight)).toEqual(
+      expect.arrayContaining(Object.keys(mockLightModel))
+    );
   });
   test("Throws an error if no id is given", async () => {
     const prysmaDB = new PrysmaDB();
@@ -151,8 +157,33 @@ describe("getLight", () => {
 });
 
 describe("getLights", () => {
-  test("Returns all the lights", async () => {});
-  test("Throws an error if it cant get the lights", async () => {});
+  test("Returns all the lights", async () => {
+    const prysmaDB = new PrysmaDB();
+    await prysmaDB.connect();
+
+    const testLights = await prysmaDB.getLights();
+
+    expect(Array.isArray(testLights));
+    expect(Object.keys(testLights[0])).toEqual(
+      expect.arrayContaining(Object.keys(mockLightModel))
+    );
+  });
+  test("Throws an error if it cant get the lights", async () => {
+    const prysmaDB = new PrysmaDB();
+    await prysmaDB.connect();
+
+    const ERROR_MESSAGE = "Mock Error";
+    prysmaDB._models.Light.findAll = jest.fn(async () => {
+      throw new Error(ERROR_MESSAGE);
+    });
+
+    try {
+      await prysmaDB.getLights();
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toBe(ERROR_MESSAGE);
+    }
+  });
 });
 
 describe("setLight", () => {
