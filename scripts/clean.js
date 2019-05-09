@@ -11,6 +11,15 @@ const clean = async () => {
     }
   });
 
+  // Remove database
+  rimraf("data/*.sqlite", function(error) {
+    if (error) {
+      console.log("Error removing data: ", error);
+    } else {
+      console.log("Successfully removed data");
+    }
+  });
+
   //Bring down docker containers
   console.log("Bringing docker containers down");
   execSync("docker-compose down");

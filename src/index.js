@@ -13,9 +13,11 @@ console.log(`--- Prysma v${version} ---`);
 // Unhandled error logging
 process.on("uncaughtException", err => {
   console.log("Unhandled Exception", err);
+  process.exit(1);
 });
-process.on("uncaughtRejection", err => {
-  console.log("Unhandled Rejection", err);
+process.on("unhandledRejection", err => {
+  console.error("Unhandled Rejection", err);
+  process.exit(1);
 });
 
 const server = new Server();

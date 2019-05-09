@@ -41,7 +41,7 @@ const Light = gql`
 const LightState = gql`
   type LightState {
     connected: Boolean
-    state: String # curent power status
+    on: Boolean # curent power status
     brightness: Int # current brightness
     color: Color # current color
     effect: String # current effect
