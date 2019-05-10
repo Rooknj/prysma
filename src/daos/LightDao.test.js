@@ -1,8 +1,8 @@
-const PrysmaDB = require("./prysmaDb");
+const PrysmaDB = require("./LightDao");
 const Sequelize = require("sequelize");
 
 jest.mock("sequelize");
-jest.mock("../models/light.js");
+jest.mock("../models/LightModel.js");
 
 let mockLightModel;
 const NO_ID_ERROR = "No ID provided";
