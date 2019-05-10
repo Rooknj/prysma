@@ -7,12 +7,12 @@ const {
   validateEffectListMessage,
   validateConfigMessage,
   validateDiscoveryMessage
-} = require("./mqttValidators");
+} = require("../validators/mqttValidators");
 const Debug = require("debug").default;
 
 const debug = Debug("mqtt");
 
-class PrysmaMqtt extends EventEmitter {
+class LightController extends EventEmitter {
   constructor(topics) {
     super();
     this.connected = false;
@@ -279,4 +279,4 @@ class PrysmaMqtt extends EventEmitter {
   }
 }
 
-module.exports = PrysmaMqtt;
+module.exports = LightController;

@@ -1,11 +1,11 @@
 const EventEmitter = require("events");
 const Sequelize = require("sequelize");
-const LightModel = require("../models/light");
+const LightModel = require("../models/LightModel");
 const Debug = require("debug").default;
 
 const debug = Debug("db");
 
-class PrysmaDb extends EventEmitter {
+class LightDao extends EventEmitter {
   constructor() {
     super();
     this._sequelize = null;
@@ -93,4 +93,4 @@ class PrysmaDb extends EventEmitter {
   }
 }
 
-module.exports = PrysmaDb;
+module.exports = LightDao;

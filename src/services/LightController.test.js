@@ -1,4 +1,4 @@
-const PrysmaMqtt = require("./prysmaMqtt");
+const LightController = require("./LightController");
 
 const TOPICS = {
   top: "prysmalight",
@@ -23,18 +23,18 @@ const createMockClient = () => {
 
 describe("constructor", () => {
   test("properly initializes everything", () => {
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
+    let lightController = new LightController(TOPICS);
 
-    expect(prysmaMqtt.connected).toBe(false);
-    expect(prysmaMqtt._topics).toBe(TOPICS);
-    expect(prysmaMqtt._host).toBe(null);
-    expect(prysmaMqtt._client).toBe(null);
+    expect(lightController.connected).toBe(false);
+    expect(lightController._topics).toBe(TOPICS);
+    expect(lightController._host).toBe(null);
+    expect(lightController._client).toBe(null);
   });
 });
 
 describe("connect", () => {
   test("calls mqtt with the provided arguments", () => {
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
+    let lightController = new LightController(TOPICS);
 
     const HOST =
       `tcp://${process.env.MQTT_HOST}:1883` || "tcp://localhost:1883";
@@ -43,13 +43,13 @@ describe("connect", () => {
       username: "pi",
       password: "MQTTIsBetterThanUDP"
     };
-    prysmaMqtt.connect(HOST, OPTIONS);
-    expect(prysmaMqtt._client.host).toBe(HOST);
-    expect(prysmaMqtt._client.options).toEqual(OPTIONS);
+    lightController.connect(HOST, OPTIONS);
+    expect(lightController._client.host).toBe(HOST);
+    expect(lightController._client.options).toEqual(OPTIONS);
   });
 
   test("assigns the appropriate listeners to the client", () => {
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
+    let lightController = new LightController(TOPICS);
 
     const HOST =
       `tcp://${process.env.MQTT_HOST}:1883` || "tcp://localhost:1883";
@@ -58,20 +58,20 @@ describe("connect", () => {
       username: "pi",
       password: "MQTTIsBetterThanUDP"
     };
-    prysmaMqtt.connect(HOST, OPTIONS);
-    expect(prysmaMqtt._client._events.connect).toBeDefined();
-    expect(prysmaMqtt._client._events.close).toBeDefined();
-    expect(prysmaMqtt._client._events.message).toBeDefined();
+    lightController.connect(HOST, OPTIONS);
+    expect(lightController._client._events.connect).toBeDefined();
+    expect(lightController._client._events.close).toBeDefined();
+    expect(lightController._client._events.message).toBeDefined();
   });
 });
 
 describe("end", () => {
   test("calls _client.end()", () => {
     let mockClient = createMockClient();
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt._client = mockClient;
+    let lightController = new LightController(TOPICS);
+    lightController._client = mockClient;
 
-    prysmaMqtt.end();
+    lightController.end();
 
     expect(mockClient.end).toBeCalledTimes(1);
   });
@@ -79,16 +79,16 @@ describe("end", () => {
 
 describe("subscribeToLight", () => {
   test("Subscribes to all the correct topics (Example 1)", async () => {
-    // Create the client and prysmaMqtt
+    // Create the client and lightController
     let mockClient = createMockClient();
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt._client = mockClient;
-    prysmaMqtt.connected = true;
+    let lightController = new LightController(TOPICS);
+    lightController._client = mockClient;
+    lightController.connected = true;
 
     const ID = "Test A";
 
     // Call The Method
-    const error = await prysmaMqtt.subscribeToLight(ID);
+    const error = await lightController.subscribeToLight(ID);
 
     // Test
     expect(error).toBeNull();
@@ -107,16 +107,16 @@ describe("subscribeToLight", () => {
     );
   });
   test("Subscribes to all the correct topics (Example 2)", async () => {
-    // Create the client and prysmaMqtt
+    // Create the client and lightController
     let mockClient = createMockClient();
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt._client = mockClient;
-    prysmaMqtt.connected = true;
+    let lightController = new LightController(TOPICS);
+    lightController._client = mockClient;
+    lightController.connected = true;
 
     const ID = "Test 123";
 
     // Call The Method
-    const error = await prysmaMqtt.subscribeToLight(ID);
+    const error = await lightController.subscribeToLight(ID);
 
     // Test
     expect(error).toBeNull();
@@ -135,48 +135,48 @@ describe("subscribeToLight", () => {
     );
   });
   test("returns an error if the client is not connected", async () => {
-    // Create the client and prysmaMqtt
+    // Create the client and lightController
     let mockClient = createMockClient();
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt._client = mockClient;
-    prysmaMqtt.connected = false;
+    let lightController = new LightController(TOPICS);
+    lightController._client = mockClient;
+    lightController.connected = false;
 
     const ID = "Test A";
 
     // Call The Method
-    const error = await prysmaMqtt.subscribeToLight(ID);
+    const error = await lightController.subscribeToLight(ID);
 
     // Test
     expect(error).toBeInstanceOf(Error);
   });
   test("returns an error if it fails to subscribe to at least one topic", async () => {
-    // Create the client and prysmaMqtt
+    // Create the client and lightController
     let mockClient = createMockClient();
     mockClient.subscribe = jest.fn(async () => {
       throw new Error();
     });
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt._client = mockClient;
-    prysmaMqtt.connected = true;
+    let lightController = new LightController(TOPICS);
+    lightController._client = mockClient;
+    lightController.connected = true;
 
     const ID = "Test A";
 
     // Call The Method
-    const error = await prysmaMqtt.subscribeToLight(ID);
+    const error = await lightController.subscribeToLight(ID);
 
     // Test
     expect(error).toBeInstanceOf(Error);
     expect(mockClient.subscribe).toBeCalled();
   });
   test("returns an error if no id was provided", async () => {
-    // Create the client and prysmaMqtt
+    // Create the client and lightController
     let mockClient = createMockClient();
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt._client = mockClient;
-    prysmaMqtt.connected = true;
+    let lightController = new LightController(TOPICS);
+    lightController._client = mockClient;
+    lightController.connected = true;
 
     // Call The Method
-    const error = await prysmaMqtt.subscribeToLight();
+    const error = await lightController.subscribeToLight();
 
     // Test
     expect(error).toBeInstanceOf(Error);
@@ -185,17 +185,17 @@ describe("subscribeToLight", () => {
 
 describe("publishToLight", () => {
   test("Publishes the message to the correct topic as a buffer (Example 1)", async () => {
-    // Create the client and prysmaMqtt
+    // Create the client and lightController
     let mockClient = createMockClient();
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt._client = mockClient;
-    prysmaMqtt.connected = true;
+    let lightController = new LightController(TOPICS);
+    lightController._client = mockClient;
+    lightController.connected = true;
 
     const ID = "Test A";
     const MESSAGE = { brightness: 40 };
 
     // Call The Method
-    const error = await prysmaMqtt.publishToLight(ID, MESSAGE);
+    const error = await lightController.publishToLight(ID, MESSAGE);
 
     // Test
     expect(error).toBeNull();
@@ -206,17 +206,17 @@ describe("publishToLight", () => {
     );
   });
   test("Publishes the message to the correct topic as a buffer (Example 2)", async () => {
-    // Create the client and prysmaMqtt
+    // Create the client and lightController
     let mockClient = createMockClient();
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt._client = mockClient;
-    prysmaMqtt.connected = true;
+    let lightController = new LightController(TOPICS);
+    lightController._client = mockClient;
+    lightController.connected = true;
 
     const ID = "Test A";
     const MESSAGE = { effect: "Cylon" };
 
     // Call The Method
-    const error = await prysmaMqtt.publishToLight(ID, MESSAGE);
+    const error = await lightController.publishToLight(ID, MESSAGE);
 
     // Test
     expect(error).toBeNull();
@@ -227,69 +227,69 @@ describe("publishToLight", () => {
     );
   });
   test("returns an error if the client is not connected", async () => {
-    // Create the client and prysmaMqtt
+    // Create the client and lightController
     let mockClient = createMockClient();
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt._client = mockClient;
-    prysmaMqtt.connected = false;
+    let lightController = new LightController(TOPICS);
+    lightController._client = mockClient;
+    lightController.connected = false;
 
     const ID = "Test A";
     const MESSAGE = { effect: "Cylon" };
 
     // Call The Method
-    const error = await prysmaMqtt.publishToLight(ID, MESSAGE);
+    const error = await lightController.publishToLight(ID, MESSAGE);
 
     // Test
     expect(error).toBeInstanceOf(Error);
   });
   test("returns an error if the client fails to publish", async () => {
-    // Create the client and prysmaMqtt
+    // Create the client and lightController
     let mockClient = createMockClient();
     mockClient.publish = jest.fn(() => {
       throw new Error();
     });
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt._client = mockClient;
-    prysmaMqtt.connected = true;
+    let lightController = new LightController(TOPICS);
+    lightController._client = mockClient;
+    lightController.connected = true;
 
     const ID = "Test A";
     const MESSAGE = { effect: "Cylon" };
 
     // Call The Method
-    const error = await prysmaMqtt.publishToLight(ID, MESSAGE);
+    const error = await lightController.publishToLight(ID, MESSAGE);
 
     // Test
     expect(error).toBeInstanceOf(Error);
     expect(mockClient.publish).toBeCalled();
   });
   test("returns an error if no id was provided", async () => {
-    // Create the client and prysmaMqtt
+    // Create the client and lightController
     let mockClient = createMockClient();
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt._client = mockClient;
-    prysmaMqtt.connected = true;
+    let lightController = new LightController(TOPICS);
+    lightController._client = mockClient;
+    lightController.connected = true;
 
     const ID = null;
     const MESSAGE = { effect: "Cylon" };
 
     // Call The Method
-    const error = await prysmaMqtt.publishToLight(ID, MESSAGE);
+    const error = await lightController.publishToLight(ID, MESSAGE);
 
     // Test
     expect(error).toBeInstanceOf(Error);
   });
   test("returns an error if no message was provided", async () => {
-    // Create the client and prysmaMqtt
+    // Create the client and lightController
     let mockClient = createMockClient();
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt._client = mockClient;
-    prysmaMqtt.connected = true;
+    let lightController = new LightController(TOPICS);
+    lightController._client = mockClient;
+    lightController.connected = true;
 
     const ID = "Test A";
     const MESSAGE = null;
 
     // Call The Method
-    const error = await prysmaMqtt.publishToLight(ID, MESSAGE);
+    const error = await lightController.publishToLight(ID, MESSAGE);
 
     // Test
     expect(error).toBeInstanceOf(Error);
@@ -298,16 +298,16 @@ describe("publishToLight", () => {
 
 describe("unsubscribeFromLight", () => {
   test("Unsubscribes from all the correct topics (Example 1)", async () => {
-    // Create the client and prysmaMqtt
+    // Create the client and lightController
     let mockClient = createMockClient();
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt._client = mockClient;
-    prysmaMqtt.connected = true;
+    let lightController = new LightController(TOPICS);
+    lightController._client = mockClient;
+    lightController.connected = true;
 
     const ID = "Test A";
 
     // Call The Method
-    const error = await prysmaMqtt.unsubscribeFromLight(ID);
+    const error = await lightController.unsubscribeFromLight(ID);
 
     // Test
     expect(error).toBeNull();
@@ -326,16 +326,16 @@ describe("unsubscribeFromLight", () => {
     );
   });
   test("Unsubscribes from all the correct topics (Example 2)", async () => {
-    // Create the client and prysmaMqtt
+    // Create the client and lightController
     let mockClient = createMockClient();
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt._client = mockClient;
-    prysmaMqtt.connected = true;
+    let lightController = new LightController(TOPICS);
+    lightController._client = mockClient;
+    lightController.connected = true;
 
     const ID = "Test 123";
 
     // Call The Method
-    const error = await prysmaMqtt.unsubscribeFromLight(ID);
+    const error = await lightController.unsubscribeFromLight(ID);
 
     // Test
     expect(error).toBeNull();
@@ -354,48 +354,48 @@ describe("unsubscribeFromLight", () => {
     );
   });
   test("returns an null if the client is not connected", async () => {
-    // Create the client and prysmaMqtt
+    // Create the client and lightController
     let mockClient = createMockClient();
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt._client = mockClient;
-    prysmaMqtt.connected = false;
+    let lightController = new LightController(TOPICS);
+    lightController._client = mockClient;
+    lightController.connected = false;
 
     const ID = "Test A";
 
     // Call The Method
-    const error = await prysmaMqtt.unsubscribeFromLight(ID);
+    const error = await lightController.unsubscribeFromLight(ID);
 
     // Test
     expect(error).toBeNull();
   });
   test("returns an error if it fails to unsubscribe from at least one topic", async () => {
-    // Create the client and prysmaMqtt
+    // Create the client and lightController
     let mockClient = createMockClient();
     mockClient.unsubscribe = jest.fn(async () => {
       throw new Error();
     });
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt._client = mockClient;
-    prysmaMqtt.connected = true;
+    let lightController = new LightController(TOPICS);
+    lightController._client = mockClient;
+    lightController.connected = true;
 
     const ID = "Test A";
 
     // Call The Method
-    const error = await prysmaMqtt.unsubscribeFromLight(ID);
+    const error = await lightController.unsubscribeFromLight(ID);
 
     // Test
     expect(error).toBeInstanceOf(Error);
     expect(mockClient.unsubscribe).toBeCalled();
   });
   test("returns an error if no id was provided", async () => {
-    // Create the client and prysmaMqtt
+    // Create the client and lightController
     let mockClient = createMockClient();
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt._client = mockClient;
-    prysmaMqtt.connected = true;
+    let lightController = new LightController(TOPICS);
+    lightController._client = mockClient;
+    lightController.connected = true;
 
     // Call The Method
-    const error = await prysmaMqtt.unsubscribeFromLight();
+    const error = await lightController.unsubscribeFromLight();
 
     // Test
     expect(error).toBeInstanceOf(Error);
@@ -404,65 +404,68 @@ describe("unsubscribeFromLight", () => {
 
 describe("_handleConnect", () => {
   test("sets connected to true", () => {
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
+    let lightController = new LightController(TOPICS);
 
-    prysmaMqtt._handleConnect();
+    lightController._handleConnect();
 
-    expect(prysmaMqtt.connected).toBe(true);
+    expect(lightController.connected).toBe(true);
   });
 
   test("emits connect", () => {
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt.__proto__.emit = jest.fn();
+    let lightController = new LightController(TOPICS);
+    lightController.__proto__.emit = jest.fn();
 
     const DATA = {
       data: "123"
     };
-    prysmaMqtt._handleConnect(DATA);
+    lightController._handleConnect(DATA);
 
-    expect(prysmaMqtt.__proto__.emit).toBeCalledWith("connect", DATA);
+    expect(lightController.__proto__.emit).toBeCalledWith("connect", DATA);
   });
 });
 
 describe("_handleDisconnect", () => {
   test("sets connected to false", () => {
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt.connected = true;
+    let lightController = new LightController(TOPICS);
+    lightController.connected = true;
 
-    prysmaMqtt._handleDisconnect();
+    lightController._handleDisconnect();
 
-    expect(prysmaMqtt.connected).toBe(false);
+    expect(lightController.connected).toBe(false);
   });
 
   test("emits close", () => {
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt.__proto__.emit = jest.fn();
+    let lightController = new LightController(TOPICS);
+    lightController.__proto__.emit = jest.fn();
 
     const DATA = {
       data: "123"
     };
-    prysmaMqtt._handleDisconnect(DATA);
+    lightController._handleDisconnect(DATA);
 
-    expect(prysmaMqtt.__proto__.emit).toBeCalledWith("close", DATA);
+    expect(lightController.__proto__.emit).toBeCalledWith("close", DATA);
   });
 });
 
 describe("_handleMessage", () => {
   test("emits connectedMessage on a connected message", () => {
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt.__proto__.emit = jest.fn();
+    let lightController = new LightController(TOPICS);
+    lightController.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test/${TOPICS.connected}`;
     const data = { name: "Prysma-807D3A41B465", connection: 2 };
     const message = Buffer.from(JSON.stringify(data));
-    prysmaMqtt._handleMessage(topic, message);
+    lightController._handleMessage(topic, message);
 
-    expect(prysmaMqtt.__proto__.emit).toBeCalledWith("connectedMessage", data);
+    expect(lightController.__proto__.emit).toBeCalledWith(
+      "connectedMessage",
+      data
+    );
   });
 
   test("emits stateMessage on a state message", () => {
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt.__proto__.emit = jest.fn();
+    let lightController = new LightController(TOPICS);
+    lightController.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test/${TOPICS.state}`;
     const data = {
@@ -474,14 +477,14 @@ describe("_handleMessage", () => {
       speed: 4
     };
     const message = Buffer.from(JSON.stringify(data));
-    prysmaMqtt._handleMessage(topic, message);
+    lightController._handleMessage(topic, message);
 
-    expect(prysmaMqtt.__proto__.emit).toBeCalledWith("stateMessage", data);
+    expect(lightController.__proto__.emit).toBeCalledWith("stateMessage", data);
   });
 
   test("emits effectListMessage on an effect list message", () => {
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt.__proto__.emit = jest.fn();
+    let lightController = new LightController(TOPICS);
+    lightController.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test/${TOPICS.effectList}`;
     const data = {
@@ -503,14 +506,17 @@ describe("_handleMessage", () => {
       ]
     };
     const message = Buffer.from(JSON.stringify(data));
-    prysmaMqtt._handleMessage(topic, message);
+    lightController._handleMessage(topic, message);
 
-    expect(prysmaMqtt.__proto__.emit).toBeCalledWith("effectListMessage", data);
+    expect(lightController.__proto__.emit).toBeCalledWith(
+      "effectListMessage",
+      data
+    );
   });
 
   test("emits configMessage on a config message", () => {
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt.__proto__.emit = jest.fn();
+    let lightController = new LightController(TOPICS);
+    lightController.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test/${TOPICS.config}`;
     const data = {
@@ -526,14 +532,17 @@ describe("_handleMessage", () => {
       udpPort: 7778
     };
     const message = Buffer.from(JSON.stringify(data));
-    prysmaMqtt._handleMessage(topic, message);
+    lightController._handleMessage(topic, message);
 
-    expect(prysmaMqtt.__proto__.emit).toBeCalledWith("configMessage", data);
+    expect(lightController.__proto__.emit).toBeCalledWith(
+      "configMessage",
+      data
+    );
   });
 
   test("emits discoveryMessage on a discovery message", () => {
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt.__proto__.emit = jest.fn();
+    let lightController = new LightController(TOPICS);
+    lightController.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test/${TOPICS.discoveryResponse}`;
     const data = {
@@ -549,117 +558,120 @@ describe("_handleMessage", () => {
       udpPort: 7778
     };
     const message = Buffer.from(JSON.stringify(data));
-    prysmaMqtt._handleMessage(topic, message);
+    lightController._handleMessage(topic, message);
 
-    expect(prysmaMqtt.__proto__.emit).toBeCalledWith("discoveryMessage", data);
+    expect(lightController.__proto__.emit).toBeCalledWith(
+      "discoveryMessage",
+      data
+    );
   });
 
   test("does not emit anything on a bad connected message", () => {
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt.__proto__.emit = jest.fn();
+    let lightController = new LightController(TOPICS);
+    lightController.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test/${TOPICS.connected}`;
     const data = {};
     const message = Buffer.from(JSON.stringify(data));
-    prysmaMqtt._handleMessage(topic, message);
+    lightController._handleMessage(topic, message);
 
-    expect(prysmaMqtt.__proto__.emit).not.toBeCalled();
+    expect(lightController.__proto__.emit).not.toBeCalled();
   });
 
   test("does not emit anything on a bad state message", () => {
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt.__proto__.emit = jest.fn();
+    let lightController = new LightController(TOPICS);
+    lightController.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test/${TOPICS.state}`;
     const data = {};
     const message = Buffer.from(JSON.stringify(data));
-    prysmaMqtt._handleMessage(topic, message);
+    lightController._handleMessage(topic, message);
 
-    expect(prysmaMqtt.__proto__.emit).not.toBeCalled();
+    expect(lightController.__proto__.emit).not.toBeCalled();
   });
 
   test("does not emit anything on a bad effect list message", () => {
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt.__proto__.emit = jest.fn();
+    let lightController = new LightController(TOPICS);
+    lightController.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test/${TOPICS.effectList}`;
     const data = {};
     const message = Buffer.from(JSON.stringify(data));
-    prysmaMqtt._handleMessage(topic, message);
+    lightController._handleMessage(topic, message);
 
-    expect(prysmaMqtt.__proto__.emit).not.toBeCalled();
+    expect(lightController.__proto__.emit).not.toBeCalled();
   });
 
   test("does not emit anything on a bad config message", () => {
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt.__proto__.emit = jest.fn();
+    let lightController = new LightController(TOPICS);
+    lightController.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test/${TOPICS.config}`;
     const data = {};
     const message = Buffer.from(JSON.stringify(data));
-    prysmaMqtt._handleMessage(topic, message);
+    lightController._handleMessage(topic, message);
 
-    expect(prysmaMqtt.__proto__.emit).not.toBeCalled();
+    expect(lightController.__proto__.emit).not.toBeCalled();
   });
 
   test("does not emit anything on a bad discovery message", () => {
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt.__proto__.emit = jest.fn();
+    let lightController = new LightController(TOPICS);
+    lightController.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test/${TOPICS.discoveryResponse}`;
     const data = {};
     const message = Buffer.from(JSON.stringify(data));
-    prysmaMqtt._handleMessage(topic, message);
+    lightController._handleMessage(topic, message);
 
-    expect(prysmaMqtt.__proto__.emit).not.toBeCalled();
+    expect(lightController.__proto__.emit).not.toBeCalled();
   });
 
   test("does not emit anything on an unrelated top level topic", () => {
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt.__proto__.emit = jest.fn();
+    let lightController = new LightController(TOPICS);
+    lightController.__proto__.emit = jest.fn();
 
     const topic = `unrelated/test/${TOPICS.state}`;
     const data = {};
     const message = Buffer.from(JSON.stringify(data));
-    prysmaMqtt._handleMessage(topic, message);
+    lightController._handleMessage(topic, message);
 
-    expect(prysmaMqtt.__proto__.emit).not.toBeCalled();
+    expect(lightController.__proto__.emit).not.toBeCalled();
   });
 
   test("does not emit anything on an unrelated bottom level topic", () => {
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt.__proto__.emit = jest.fn();
+    let lightController = new LightController(TOPICS);
+    lightController.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test/unrelated`;
     const data = {};
     const message = Buffer.from(JSON.stringify(data));
-    prysmaMqtt._handleMessage(topic, message);
+    lightController._handleMessage(topic, message);
 
-    expect(prysmaMqtt.__proto__.emit).not.toBeCalled();
+    expect(lightController.__proto__.emit).not.toBeCalled();
   });
 
   test("does not emit anything on a too short topic", () => {
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt.__proto__.emit = jest.fn();
+    let lightController = new LightController(TOPICS);
+    lightController.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test`;
     const data = {};
     const message = Buffer.from(JSON.stringify(data));
-    prysmaMqtt._handleMessage(topic, message);
+    lightController._handleMessage(topic, message);
 
-    expect(prysmaMqtt.__proto__.emit).not.toBeCalled();
+    expect(lightController.__proto__.emit).not.toBeCalled();
   });
 });
 
 describe("startDiscovery", () => {
   test("subscribes to the discovery response topic", async () => {
     let mockClient = createMockClient();
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt._client = mockClient;
-    prysmaMqtt.connected = true;
+    let lightController = new LightController(TOPICS);
+    lightController._client = mockClient;
+    lightController.connected = true;
 
     // Call The Method
-    const error = await prysmaMqtt.startDiscovery();
+    const error = await lightController.startDiscovery();
 
     // Test
     expect(error).toBeNull();
@@ -673,12 +685,12 @@ describe("startDiscovery", () => {
 describe("stopDiscovery", () => {
   test("unsubscribes from the discovery response topic", async () => {
     let mockClient = createMockClient();
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt._client = mockClient;
-    prysmaMqtt.connected = true;
+    let lightController = new LightController(TOPICS);
+    lightController._client = mockClient;
+    lightController.connected = true;
 
     // Call The Method
-    const error = await prysmaMqtt.stopDiscovery();
+    const error = await lightController.stopDiscovery();
 
     // Test
     expect(error).toBeNull();
@@ -692,12 +704,12 @@ describe("stopDiscovery", () => {
 describe("publishDiscovery", () => {
   test("publishes to the discovery topic", async () => {
     let mockClient = createMockClient();
-    let prysmaMqtt = new PrysmaMqtt(TOPICS);
-    prysmaMqtt._client = mockClient;
-    prysmaMqtt.connected = true;
+    let lightController = new LightController(TOPICS);
+    lightController._client = mockClient;
+    lightController.connected = true;
 
     // Call The Method
-    const error = await prysmaMqtt.publishDiscovery();
+    const error = await lightController.publishDiscovery();
 
     // Test
     expect(error).toBeNull();
