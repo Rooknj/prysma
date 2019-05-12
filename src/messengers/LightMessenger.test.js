@@ -1,4 +1,4 @@
-const LightController = require("./LightController");
+const LightController = require("./LightMessenger");
 
 const TOPICS = {
   top: "prysmalight",
