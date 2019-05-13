@@ -3,7 +3,6 @@ const { validateLightState } = require("./cacheValidators");
 describe("validateLightState", () => {
   test("validates a correct message", () => {
     const CORRECT_MESSAGE = {
-      id: "Prysma-807D3A41B465",
       on: false,
       color: { r: 255, g: 0, b: 0 },
       brightness: 100,
@@ -19,22 +18,8 @@ describe("validateLightState", () => {
     expect(result.error).not.toBeNull();
   });
 
-  test("does not validate an incorrect id", () => {
-    const INCORRECT_MESSAGE = {
-      id: 12345,
-      on: false,
-      color: { r: 255, g: 0, b: 0 },
-      brightness: 100,
-      effect: "None",
-      speed: 4
-    };
-    const result = validateLightState(INCORRECT_MESSAGE);
-    expect(result.error).not.toBeNull();
-  });
-
   test("does not validate an incorrect on", () => {
     const INCORRECT_MESSAGE = {
-      id: "Prysma-807D3A41B465",
       on: "ON",
       color: { r: 255, g: 0, b: 0 },
       brightness: 100,
@@ -47,7 +32,6 @@ describe("validateLightState", () => {
 
   test("does not validate an incorrect color", () => {
     const INCORRECT_MESSAGE = {
-      id: "Prysma-807D3A41B465",
       on: false,
       color: { r: 256, g: -3, b: "Hello" },
       brightness: 100,
@@ -60,7 +44,6 @@ describe("validateLightState", () => {
 
   test("does not validate an incorrect brightness", () => {
     const INCORRECT_MESSAGE = {
-      id: "Prysma-807D3A41B465",
       on: false,
       color: { r: 255, g: 0, b: 0 },
       brightness: 101,
@@ -73,7 +56,6 @@ describe("validateLightState", () => {
 
   test("does not validate an incorrect effect", () => {
     const INCORRECT_MESSAGE = {
-      id: "Prysma-807D3A41B465",
       on: false,
       color: { r: 255, g: 0, b: 0 },
       brightness: 100,
@@ -86,7 +68,6 @@ describe("validateLightState", () => {
 
   test("does not validate an incorrect speed", () => {
     const INCORRECT_MESSAGE = {
-      id: "Prysma-807D3A41B465",
       on: false,
       color: { r: 255, g: 0, b: 0 },
       brightness: 100,
