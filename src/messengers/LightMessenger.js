@@ -12,7 +12,7 @@ const Debug = require("debug").default;
 
 const debug = Debug("mqtt");
 
-class LightController extends EventEmitter {
+class LightMessenger extends EventEmitter {
   constructor(topics) {
     super();
     this.connected = false;
@@ -279,4 +279,4 @@ class LightController extends EventEmitter {
   }
 }
 
-module.exports = LightController;
+module.exports = LightMessenger;
