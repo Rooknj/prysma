@@ -3,9 +3,9 @@ node_js: 10
 sudo: required
 services:
 - docker
-cache: npm
+cache: yarn
 before_install:
-- npm i minimist cross-spawn
+- yarn add minimist cross-spawn
 script: node scripts/dockerUtil.js build
 before_deploy:
 - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
