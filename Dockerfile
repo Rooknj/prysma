@@ -20,14 +20,17 @@ RUN [ "cross-build-start" ]
 # it takes forever to build from source normally. 
 # We specify where sqlite is installed to get it to use those files
 RUN install_packages sqlite3
-RUN npm install sqlite3 --build-from-source --sqlite=/usr/bin
-RUN npm install
+#--build-from-source --sqlite=/usr/bin
+RUN npm_config_build_from_source=true npm_config_sqlite=/usr/bin yarn add sqlite3 
+
+# install deps
+RUN yarn install
 
 # Test app
-RUN npm run test -- --no-watch
+RUN yarn test --no-watch
 
 # Install pkg and Build App
-RUN npm run build
+RUN yarn build
 
 ## Prod Environment
 FROM balenalib/armv7hf:stretch-run
