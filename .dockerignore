@@ -78,4 +78,7 @@ typings/
 # next.js build output
 .next
 
+# MacOS files
+.DS_Store
+
 
