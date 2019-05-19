@@ -84,8 +84,8 @@ class LightDao extends EventEmitter {
     try {
       const lightToRemove = await this._models.Light.findByPk(lightId);
       if (!lightToRemove) throw new Error(`"${lightId}" not found`);
+      removedLight = { id: lightToRemove.id, name: lightToRemove.name };
       await lightToRemove.destroy();
-      removedLight = lightId;
     } catch (error) {
       // TODO: Handle what happens if findOne errors vs if .destroy() fails
       throw error;

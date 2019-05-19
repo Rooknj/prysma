@@ -6,6 +6,17 @@ const debug = Debug("LightCache");
 class LightCache {
   constructor() {
     this._lightStates = {};
+    this.DEFAULT_LIGHT_STATE = {
+      on: false,
+      color: {
+        r: 255,
+        g: 255,
+        b: 255
+      },
+      brightness: 100,
+      effect: "None",
+      speed: 4
+    };
   }
 
   async connect(options) {
@@ -17,7 +28,6 @@ class LightCache {
   async getLightState(lightId) {
     if (!lightId) throw new Error("No ID provided");
     const lightState = this._lightStates[lightId];
-
     if (!lightState) throw new Error(`${lightId}'s state not found in cache`);
 
     const validation = validateLightState(lightState);
@@ -36,6 +46,14 @@ class LightCache {
     if (validation.error) throw validation.error;
 
     this._lightStates[lightId] = lightState;
+  }
+
+  async initializeLightState(lightId) {
+    this._lightStates[lightId] = this.DEFAULT_LIGHT_STATE;
+  }
+
+  async clearLightState(lightId) {
+    delete this._lightStates[lightId];
   }
 }
 

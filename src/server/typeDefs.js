@@ -13,7 +13,7 @@ const Mutation = gql`
   type Mutation {
     setLight(lightId: String!, lightState: LightStateInput!): Light
     addLight(lightId: String!, lightName: String): Light
-    removeLight(lightId: String!): String
+    removeLight(lightId: String!): RemovedLight
     updateHub: String
     rebootHub: String
   }
@@ -73,6 +73,13 @@ const LightStateInput = gql`
   }
 `;
 
+const RemovedLight = gql`
+  type RemovedLight {
+    id: String # uique id of accessory
+    name: String # user given name of accessory
+  }
+`;
+
 const Color = gql`
   type Color {
     r: Int!
@@ -104,6 +111,7 @@ const typeDefs = [
   LightState,
   LightConfig,
   LightStateInput,
+  RemovedLight,
   Color,
   ColorInput,
   DiscoveredLight
