@@ -10,7 +10,7 @@ const {
 } = require("../validators/mqttValidators");
 const Debug = require("debug").default;
 
-const debug = Debug("mqtt");
+const debug = Debug("LightMessenger");
 
 class LightMessenger extends EventEmitter {
   constructor(topics) {
@@ -27,7 +27,7 @@ class LightMessenger extends EventEmitter {
    * @param {*} options - MQTT connection options
    */
   connect(host, options = {}) {
-    debug(`Connecting to MQTT broker at ${host}`);
+    debug(`Connecting to MQTT broker at ${host}...`);
 
     this._client = mqtt.connect(host, {
       reconnectPeriod: options.reconnectPeriod, // Amount of time between reconnection attempts

@@ -1,8 +1,17 @@
 const { validateLightState } = require("../validators/cacheValidators");
+const Debug = require("debug").default;
+
+const debug = Debug("LightCache");
 
 class LightCache {
   constructor() {
     this._lightStates = {};
+  }
+
+  async connect(options) {
+    debug(`Connecting to Cache with options ${options}...`);
+    debug(`Connected to Cache`);
+    return;
   }
 
   async getLightState(lightId) {

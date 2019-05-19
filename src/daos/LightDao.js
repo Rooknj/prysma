@@ -3,7 +3,7 @@ const Sequelize = require("sequelize");
 const LightModel = require("../models/LightModel");
 const Debug = require("debug").default;
 
-const debug = Debug("db");
+const debug = Debug("LightDao");
 
 class LightDao extends EventEmitter {
   constructor() {
@@ -16,8 +16,9 @@ class LightDao extends EventEmitter {
     //console.log(Sequelize)
     this._sequelize = new Sequelize({ ...options, logging: false });
     try {
+      debug(`Connecting to Sequelize...`);
       await this._sequelize.authenticate();
-      debug("Connection has been established successfully.");
+      debug("Connected to Sequelize");
       this._models.Light = LightModel(this._sequelize, Sequelize);
       await this._sequelize.sync();
       debug(`Database & tables created!`);
