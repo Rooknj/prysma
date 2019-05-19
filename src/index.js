@@ -5,6 +5,7 @@
 const config = require("./config");
 const Server = require("./server");
 const packageJson = require("../package.json");
+const LightService = require("./services/LightService");
 
 // Verbose statement of service starting
 const { version } = packageJson;
@@ -20,9 +21,24 @@ process.on("unhandledRejection", err => {
   process.exit(1);
 });
 
-const server = new Server();
+const initializeServices = async conf => {
+  // Initialize services
+  const lightService = new LightService();
+  await lightService.init(conf);
+  return { lightService };
+};
 
-server.start(config.server.port).then(() => {
+const start = async () => {
+  let services;
+  if (!process.env.MOCK) {
+    console.log("Initializing Services...");
+    services = await initializeServices(config);
+    console.log("Initialization Complete");
+  }
+
+  console.log("Starting Server...");
+  const server = new Server(services);
+  server.start(config.server.port);
   console.log(
     `🚀 Server ready at http://localhost:${config.server.port}${
       server.graphqlPath
@@ -33,4 +49,6 @@ server.start(config.server.port).then(() => {
       server.subscriptionsPath
     }`
   );
-});
+};
+
+start();

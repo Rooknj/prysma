@@ -6,13 +6,24 @@ const typeDefs = require("./typeDefs");
 const resolvers = require("./resolvers");
 
 class Server {
-  constructor() {
-    const context = async () => ({});
+  constructor(services) {
+    let mocks = false;
+    let context = undefined;
+
+    if (process.env.MOCK) {
+      mocks = require("./mocks");
+    } else {
+      const { lightService } = services;
+      context = () => ({
+        lightService
+      });
+    }
+
     const apolloServer = new ApolloServer({
       typeDefs,
       resolvers,
       context,
-      mocks: process.env.MOCK ? require("./mocks") : false
+      mocks
     });
     this.graphqlPath = apolloServer.graphqlPath;
     this.subscriptionsPath = apolloServer.subscriptionsPath;
