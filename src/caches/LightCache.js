@@ -7,6 +7,7 @@ class LightCache {
   constructor() {
     this._lightStates = {};
     this.DEFAULT_LIGHT_STATE = {
+      connected: false,
       on: false,
       color: {
         r: 255,
