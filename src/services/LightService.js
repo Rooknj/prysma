@@ -1,11 +1,11 @@
 const LightMessenger = require("../messengers/LightMessenger");
 const LightDao = require("../daos/LightDao");
 const LightCache = require("../caches/LightCache");
+const { promisify } = require("util");
+const mediator = require("./mediator");
 
-const mapToGraphqlLight = (lightData, state) => {
-  const { id, name, ...configuration } = lightData;
-  return { id, name, state, configuration };
-};
+const TIMEOUT_WAIT = 5000;
+const asyncSetTimeout = promisify(setTimeout);
 
 let mutationId = 0;
 const getUniqueId = () => {
@@ -28,6 +28,23 @@ class LightService {
     this._messenger = new LightMessenger(mqtt.topics);
     this._cache = new LightCache();
 
+    // Add Event Listeners
+    this._messenger.on("connect", this._handleMessengerConnect.bind(this));
+    this._messenger.on(
+      "connectedMessage",
+      this._handleConnectedMessage.bind(this)
+    );
+    this._messenger.on("stateMessage", this._handleStateMessage.bind(this));
+    this._messenger.on(
+      "effectListMessage",
+      this._handleEffectListMessage.bind(this)
+    );
+    this._messenger.on("configMessage", this._handleConfigMessage.bind(this));
+    this._messenger.on(
+      "discoveryMessage",
+      this._handleDiscoveryMessage.bind(this)
+    );
+
     // Connect to db and cache
     const connectionPromises = [
       this._dao.connect(db),
@@ -47,89 +64,26 @@ class LightService {
 
   async getLight(lightId) {
     const light = await this._dao.getLight(lightId);
-    console.log(light);
     return light;
   }
 
-  async getLightState(lightId) {
-    const lightState = await this._cache.getLightState(lightId);
-  }
-
   async getLights() {
-    // Get all the lights
     const lights = await this._dao.getLights();
-
     return lights;
   }
 
   async getDiscoveredLights() {}
 
-  async setLight(lightId, lightState) {
-    // Check if the light exists already before doing anything else
-    const currentState = await this._cache.getLightState(lightId);
-    if (!currentState) throw new Error(`"${lightId}" was never added`);
-    //if (!currentState.connected) throw new Error(`"${lightId}" is not connected`);
-
-    // Create the command payload
-    const mutationId = getUniqueId();
-    if ("on" in lightState) {
-      lightState.state = lightState.on ? "ON" : "OFF";
-      delete lightState.on;
-    }
-    let payload = { mutationId, name: lightId, ...lightState };
-    console.log(payload);
-
-    // Return a promise which resolves when the light responds to this message or rejects if it takes too long
-    // return new Promise(async (resolve, reject) => {
-    //   const handleMutationResponse = ({ mutationId, changedLight }) => {
-    //     if (mutationId === payload.mutationId) {
-    //       // Remove this mutation's event listener
-    //       mediator.unsubscribe("mutationResponse", handleMutationResponse);
-
-    //       // Resolve with the light's response data
-    //       resolve(changedLight);
-    //     }
-    //   };
-
-    //   // Set the light's name if provided
-    //   if (lightData.name) {
-    //     const error = await db.setLight(id, { name: lightData.name });
-    //     if (error) {
-    //       reject(error);
-    //       return error;
-    //     }
-    //   }
-
-    //   // If only the name was changed or nothing was sent, just return the current state of the light
-    //   if (Object.keys(payload).length <= 2) {
-    //     const { error, light } = await db.getLight(id);
-    //     if (error) {
-    //       reject(error);
-    //       return error;
-    //     }
-    //     resolve(light);
-    //     mediator.publish(LIGHT_CHANGED, { lightChanged: light });
-    //     return null;
-    //   }
-
-    //   // If we need to send data directly to the light, continue here
-    //   // Every time we get a new message from the light, check to see if it has the same mutationId
-    //   mediator.subscribe("mutationResponse", handleMutationResponse);
-    //   // Publish to the light
-    //   const error = await pubsub.publishToLight(id, payload);
-    //   if (error) reject(error);
-
-    //   // if the response takes too long, error out
-    //   await asyncSetTimeout(TIMEOUT_WAIT);
-    //   mediator.unsubscribe("mutationResponse", handleMutationResponse);
-    //   reject(new Error(`Response from ${id} timed out`));
-    // });
+  async setLight(lightId, lightData) {
+    await this._dao.setLight(lightId, lightData);
+    return this._dao.getLight(lightId);
   }
 
   // TODO: Add error handling and cleanup here if something fails
-  async addLight(lightId, lightName) {
+  async addLight(lightId, lightData) {
+    const { name } = lightData;
     // Add new light to light database
-    await this._dao.addLight(lightId, lightName);
+    await this._dao.addLight(lightId, name);
 
     // Add a default state to the light
     await this._cache.initializeLightState(lightId);
@@ -153,17 +107,93 @@ class LightService {
     return lightRemoved;
   }
 
+  async getLightState(lightId) {
+    const lightState = await this._cache.getLightState(lightId);
+    return lightState;
+  }
+
+  async setLightState(lightId, lightState) {
+    // Check if the light exists already before doing anything else
+    const currentState = await this._cache.getLightState(lightId);
+    if (!currentState) throw new Error(`"${lightId}" was never added`);
+    if (!currentState.connected)
+      throw new Error(`"${lightId}" is not connected`);
+
+    // TODO: Implement the hardware to support on instead of state
+    // Map the on property to the state property
+    if ("on" in lightState) {
+      lightState.state = lightState.on ? "ON" : "OFF";
+      delete lightState.on;
+    }
+
+    // Create the command payload
+    const mutationId = getUniqueId();
+    const payload = { mutationId, name: lightId, ...lightState };
+
+    const fireSetLight = new Promise((resolve, reject) => {
+      // Every time we get a new message from the light, check to see if it has the same mutationId
+      const handleMutationResponse = ({ mutationId, changedLight }) => {
+        if (mutationId === payload.mutationId) {
+          // Remove this mutation's event listener
+          mediator.removeListener("mutationResponse", handleMutationResponse);
+
+          // Resolve with the light's response data
+          resolve(changedLight);
+        }
+      };
+      mediator.addListener("mutationResponse", handleMutationResponse);
+
+      // Publish to the light with a timeout of 5 seconds
+      this._messenger
+        .publishToLight(lightId, payload)
+        .then(() => {
+          setTimeout(() => {
+            reject(new Error(`Response from ${lightId} timed out`));
+          }, 5000);
+        })
+        .catch(error => {
+          reject(error);
+        })
+        .finally(() => {
+          console.log("Removing Listener");
+          mediator.removeListener("mutationResponse", handleMutationResponse);
+        });
+
+      // if the response takes too long, error out
+    });
+
+    //Return a promise which resolves when the light responds to this message or rejects if it takes too long
+    return fireSetLight();
+  }
+
   async _handleMessengerConnect() {
-    console.log("Messenger Connected");
+    try {
+      const lights = await this._dao.getLights();
+      const subscriptionPromises = lights.map(({ id }) =>
+        this._messenger.subscribeToLight(id)
+      );
+      //subscriptionPromises.push(this._messenger.startDiscovery);
+      await Promise.all(subscriptionPromises);
+    } catch (error) {
+      console.log("Error subscribing to all the lights", error);
+      throw error;
+    }
   }
 
-  async _handleMessengerDisconnect() {
-    console.log("Messenger Disconnected");
+  async _handleConnectedMessage(message) {
+    const { name, ...state } = message;
+    state.connected = state.connection === 2;
+    delete state.connection;
+    this._cache.setLightState(name, state);
   }
 
-  async _handleConnectedMessage(message) {}
-
-  async _handleStateMessage(message) {}
+  async _handleStateMessage(message) {
+    const { name, ...state } = message;
+    state.on = state.state === "ON";
+    delete state.state;
+    delete state.mutationId;
+    this._cache.setLightState(name, state);
+  }
 
   async _handleEffectListMessage(message) {}
 
