@@ -6,5 +6,10 @@ module.exports = {
         ? plainLight.supportedEffects.split(",")
         : [];
     return plainLight;
+  },
+  toLightModel: light => {
+    if (light.supportedEffects)
+      light.supportedEffects = light.supportedEffects.join(",");
+    return light;
   }
 };

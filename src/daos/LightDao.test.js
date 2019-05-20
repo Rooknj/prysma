@@ -12,7 +12,7 @@ beforeEach(() => {
   mockLightModel = {
     id: "Mock1",
     name: "Mock Light",
-    supportedEffects: "test 1,test 2, test 3",
+    supportedEffects: ["test 1", "test 2", "test 3", "test 4"],
     ipAddress: "10.0.0.1",
     macAddress: "AA:BB:CC:DD:EE:FF",
     numLeds: 60,
@@ -195,7 +195,7 @@ describe("setLight", () => {
     const ID = "Mock 1";
     const DATA = {
       name: "New name",
-      supportedEffects: "test 1,test 2, test 3, test 4",
+      supportedEffects: ["test 1", "test 2", "test 3", "test 4"],
       ipAddress: "1.0.0.0",
       macAddress: "AA:BB:CC:DD:EE:GG",
       numLeds: 61,
@@ -245,7 +245,7 @@ describe("setLight", () => {
     const ID = "Prysma-Mock";
     const DATA = {
       name: "New name",
-      supportedEffects: "test 1,test 2, test 3, test 4",
+      supportedEffects: ["test 1", "test 2", "test 3", "test 4"],
       ipAddress: "1.0.0.0",
       macAddress: "AA:BB:CC:DD:EE:GG",
       numLeds: 61,
@@ -271,7 +271,7 @@ describe("setLight", () => {
     const ID = "Mock 1";
     const DATA = {
       name: "New name",
-      supportedEffects: "test 1,test 2, test 3, test 4",
+      supportedEffects: ["test 1", "test 2", "test 3", "test 4"],
       ipAddress: "1.0.0.0",
       macAddress: "AA:BB:CC:DD:EE:GG",
       numLeds: 61,

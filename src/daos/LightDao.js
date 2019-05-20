@@ -1,7 +1,7 @@
 const EventEmitter = require("events");
 const Sequelize = require("sequelize");
 const LightModel = require("../models/LightModel");
-const { toLightObject } = require("../utils/lightUtils");
+const { toLightObject, toLightModel } = require("../utils/lightUtils");
 const Debug = require("debug").default;
 
 const debug = Debug("LightDao");
@@ -58,7 +58,7 @@ class LightDao extends EventEmitter {
     try {
       const lightToChange = await this._models.Light.findByPk(lightId);
       if (!lightToChange) throw new Error(`"${lightId}" not found`);
-      await lightToChange.update(lightData);
+      await lightToChange.update(toLightModel(lightData));
     } catch (error) {
       // TODO: Handle what happens if findOne errors vs if .destroy() fails
       throw error;
