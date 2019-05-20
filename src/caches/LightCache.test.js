@@ -19,13 +19,16 @@ describe("getLightState", () => {
 
     const lightState = await lightCache.getLightState(LIGHT_ID);
 
-    expect(lightState).toEqual(LIGHT_STATE);
+    expect(lightState).toEqual(
+      Object.assign({}, LIGHT_STATE, { id: LIGHT_ID })
+    );
   });
   test("Rejects if no id was provided", async () => {
     const lightCache = new LightCache();
 
     const LIGHT_ID = "mockLight";
     const LIGHT_STATE = {
+      id: LIGHT_ID,
       on: true,
       color: { r: 255, g: 43, b: 2 },
       brightness: 22,
