@@ -39,4 +39,4 @@ COPY --from=builder /usr/app/node_modules/sqlite3/lib/binding/node-v64-linux-arm
 EXPOSE 4001
 
 # Start the app
-CMD ./prysma
+ENTRYPOINT ["./prysma"]
