@@ -361,9 +361,10 @@ describe("removeLight", () => {
     await prysmaDB.connect();
 
     const ID = "Prysma-334455667788";
+    const NAME = "Mock Light";
     const testLight = await prysmaDB.removeLight(ID);
 
-    expect(testLight).toBe(ID);
+    expect(testLight).toEqual({ id: ID, name: NAME });
   });
   test("Throws an error if the light doesnt exist", async () => {
     const prysmaDB = new PrysmaDB();

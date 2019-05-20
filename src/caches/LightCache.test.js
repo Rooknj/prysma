@@ -157,3 +157,37 @@ describe("setLightState", () => {
     }
   });
 });
+
+describe("initializeLightState", () => {
+  test("sets the light to the defaunt light state", async () => {
+    const lightCache = new LightCache();
+
+    const LIGHT_ID = "mockLight";
+
+    await lightCache.initializeLightState(LIGHT_ID);
+
+    expect(lightCache._lightStates[LIGHT_ID]).toEqual(
+      lightCache.DEFAULT_LIGHT_STATE
+    );
+  });
+});
+
+describe("clearLightState", () => {
+  test("Clears the light's state", async () => {
+    const lightCache = new LightCache();
+
+    const LIGHT_ID = "mockLight";
+    const LIGHT_STATE = {
+      on: true,
+      color: { r: 255, g: 43, b: 2 },
+      brightness: 22,
+      effect: "None",
+      speed: 5
+    };
+    lightCache._lightStates[LIGHT_ID] = LIGHT_STATE;
+
+    await lightCache.clearLightState(LIGHT_ID);
+
+    expect(lightCache._lightStates[LIGHT_ID]).toBeUndefined();
+  });
+});

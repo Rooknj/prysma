@@ -1,6 +1,7 @@
 const Joi = require("@hapi/joi");
 
 // Light Validation Constants
+const lightConnected = Joi.boolean();
 const lightOn = Joi.boolean();
 const lightColor = Joi.object().keys({
   r: Joi.number()
@@ -32,6 +33,7 @@ const lightSpeed = Joi.number()
 // Light State Validation
 const lightStateSchema = Joi.object()
   .keys({
+    connected: lightConnected,
     on: lightOn,
     color: lightColor,
     brightness: lightBrightness,
