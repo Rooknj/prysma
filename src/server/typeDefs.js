@@ -22,6 +22,7 @@ const Mutation = gql`
 
 const Subscription = gql`
   type Subscription {
+    lightChanged: Light
     lightAdded: Light
     lightRemoved: Light
     lightStateChanged: LightState

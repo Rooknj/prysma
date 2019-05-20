@@ -7,10 +7,10 @@ const resolvers = {
       lightService.getDiscoveredLights()
   },
   Mutation: {
-    setLight: (_, { lightId, lightName }, { lightService }) =>
-      lightService.setLight(lightId, lightName),
-    addLight: (_, { lightId, lightName }, { lightService }) =>
-      lightService.addLight(lightId, lightName),
+    setLight: (_, { lightId, lightData }, { lightService }) =>
+      lightService.setLight(lightId, lightData),
+    addLight: (_, { lightId, lightData }, { lightService }) =>
+      lightService.addLight(lightId, lightData),
     removeLight: (_, { lightId }, { lightService }) =>
       lightService.removeLight(lightId),
     setLightState: (_, { lightId, lightState }, { lightService }) =>
