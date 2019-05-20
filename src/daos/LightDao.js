@@ -1,6 +1,7 @@
 const EventEmitter = require("events");
 const Sequelize = require("sequelize");
 const LightModel = require("../models/LightModel");
+const { toLightObject } = require("../utils/lightUtils");
 const Debug = require("debug").default;
 
 const debug = Debug("LightDao");
@@ -36,7 +37,7 @@ class LightDao extends EventEmitter {
     } catch (error) {
       throw error;
     }
-    return lights.map(light => light.get({ plain: true }));
+    return lights.map(toLightObject);
   }
 
   async getLight(lightId) {
@@ -48,7 +49,7 @@ class LightDao extends EventEmitter {
       throw error;
     }
     if (!light) throw new Error(`"${lightId}" not found`);
-    return light.get({ plain: true });
+    return toLightObject(light);
   }
 
   async setLight(lightId, lightData) {
@@ -75,7 +76,7 @@ class LightDao extends EventEmitter {
     } catch (error) {
       throw error;
     }
-    return addedLight.get({ plain: true });
+    return toLightObject(addedLight);
   }
 
   async removeLight(lightId) {
