@@ -45,7 +45,11 @@ class LightCache {
     if (!validation) throw new Error(`Error Validating the state`);
     if (validation.error) throw validation.error;
 
-    this._lightStates[lightId] = lightState;
+    this._lightStates[lightId] = Object.assign(
+      {},
+      this._lightStates[lightId],
+      lightState
+    );
   }
 
   async initializeLightState(lightId) {
