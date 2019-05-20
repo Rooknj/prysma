@@ -47,7 +47,7 @@ describe("connect", () => {
     expect(prysmaDB._sequelize.sync).toBeCalledTimes(1);
     expect(prysmaDB._models.Light).toBeDefined();
   });
-  test("Throws an error if the connection fails (1)", async () => {
+  test("Rejects if the connection fails (1)", async () => {
     const ERROR_MESSAGE = "test error 1";
     Sequelize.mockImplementationOnce(() => {
       return {
@@ -66,7 +66,7 @@ describe("connect", () => {
       expect(error.message).toBe(ERROR_MESSAGE);
     }
   });
-  test("Throws an error if the connection fails (2)", async () => {
+  test("Rejects if the connection fails (2)", async () => {
     const ERROR_MESSAGE = "test error 2";
     Sequelize.mockImplementationOnce(() => {
       return {
@@ -113,7 +113,7 @@ describe("getLight", () => {
       expect.arrayContaining(Object.keys(mockLightModel))
     );
   });
-  test("Throws an error if no id is given", async () => {
+  test("Rejects if no id is given", async () => {
     const prysmaDB = new PrysmaDB();
     await prysmaDB.connect();
 
@@ -124,7 +124,7 @@ describe("getLight", () => {
       expect(error.message).toBe(NO_ID_ERROR);
     }
   });
-  test("Throws an error if the light wasnt found", async () => {
+  test("Rejects if the light wasnt found", async () => {
     const prysmaDB = new PrysmaDB();
     await prysmaDB.connect();
 
@@ -138,7 +138,7 @@ describe("getLight", () => {
       expect(error.message).toBe(`"${ID}" not found`);
     }
   });
-  test("Throws an error if it cant get the light", async () => {
+  test("Rejects if it cant get the light", async () => {
     const prysmaDB = new PrysmaDB();
     await prysmaDB.connect();
 
@@ -169,7 +169,7 @@ describe("getLights", () => {
       expect.arrayContaining(Object.keys(mockLightModel))
     );
   });
-  test("Throws an error if it cant get the lights", async () => {
+  test("Rejects if it cant get the lights", async () => {
     const prysmaDB = new PrysmaDB();
     await prysmaDB.connect();
 
@@ -215,7 +215,7 @@ describe("setLight", () => {
     expect(mockLightModel.update).toBeCalledTimes(1);
     expect(mockLightModel.update).toBeCalledWith(expect.objectContaining(DATA));
   });
-  test("Throws an error if no id is given", async () => {
+  test("Rejects if no id is given", async () => {
     const prysmaDB = new PrysmaDB();
     await prysmaDB.connect();
 
@@ -226,7 +226,7 @@ describe("setLight", () => {
       expect(error.message).toBe(NO_ID_ERROR);
     }
   });
-  test("Throws an error if no data is given", async () => {
+  test("Rejects if no data is given", async () => {
     const prysmaDB = new PrysmaDB();
     await prysmaDB.connect();
 
@@ -237,7 +237,7 @@ describe("setLight", () => {
       expect(error.message).toBe(NO_DATA_ERROR);
     }
   });
-  test("Throws an error if the light doesnt exist", async () => {
+  test("Rejects if the light doesnt exist", async () => {
     const prysmaDB = new PrysmaDB();
     await prysmaDB.connect();
 
@@ -264,7 +264,7 @@ describe("setLight", () => {
       expect(error.message).toBe(`"${ID}" not found`);
     }
   });
-  test("Throws an error if it cant set the light", async () => {
+  test("Rejects if it cant set the light", async () => {
     const prysmaDB = new PrysmaDB();
     await prysmaDB.connect();
 
@@ -325,7 +325,7 @@ describe("addLight", () => {
       expect.arrayContaining(Object.keys(mockLightModel))
     );
   });
-  test("Throws an error if no id is given", async () => {
+  test("Rejects if no id is given", async () => {
     const prysmaDB = new PrysmaDB();
     await prysmaDB.connect();
 
@@ -336,7 +336,7 @@ describe("addLight", () => {
       expect(error.message).toBe(NO_ID_ERROR);
     }
   });
-  test("Throws an error if it cant add the light", async () => {
+  test("Rejects if it cant add the light", async () => {
     const prysmaDB = new PrysmaDB();
     await prysmaDB.connect();
 
@@ -366,7 +366,7 @@ describe("removeLight", () => {
 
     expect(testLight).toEqual({ id: ID, name: NAME });
   });
-  test("Throws an error if the light doesnt exist", async () => {
+  test("Rejects if the light doesnt exist", async () => {
     const prysmaDB = new PrysmaDB();
     await prysmaDB.connect();
 
@@ -380,7 +380,7 @@ describe("removeLight", () => {
       expect(error.message).toBe(`"${ID}" not found`);
     }
   });
-  test("Throws an error if no id is given", async () => {
+  test("Rejects if no id is given", async () => {
     const prysmaDB = new PrysmaDB();
     await prysmaDB.connect();
 

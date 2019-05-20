@@ -21,7 +21,7 @@ describe("getLightState", () => {
 
     expect(lightState).toEqual(LIGHT_STATE);
   });
-  test("throws an error if no id was provided", async () => {
+  test("Rejects if no id was provided", async () => {
     const lightCache = new LightCache();
 
     const LIGHT_ID = "mockLight";
@@ -41,7 +41,7 @@ describe("getLightState", () => {
       expect(error).toBeInstanceOf(Error);
     }
   });
-  test("throws an error if no light state exists", async () => {
+  test("Rejects if no light state exists", async () => {
     const lightCache = new LightCache();
 
     const LIGHT_ID = "mockLight";
@@ -53,7 +53,7 @@ describe("getLightState", () => {
       expect(error).toBeInstanceOf(Error);
     }
   });
-  test("throws an error if lightState fails validation", async () => {
+  test("Rejects if lightState fails validation", async () => {
     const lightCache = new LightCache();
 
     const LIGHT_ID = "mockLight";
@@ -72,7 +72,7 @@ describe("getLightState", () => {
       expect(error).toBeInstanceOf(Error);
     }
   });
-  test("throws an error if lightState is empty", async () => {
+  test("Rejects if lightState is empty", async () => {
     const lightCache = new LightCache();
 
     const LIGHT_ID = "mockLight";
@@ -104,7 +104,7 @@ describe("setLightState", () => {
 
     expect(lightCache._lightStates[LIGHT_ID]).toEqual(LIGHT_STATE);
   });
-  test("throws an error if no id was provided", async () => {
+  test("Rejects if no id was provided", async () => {
     const lightCache = new LightCache();
 
     try {
@@ -114,7 +114,7 @@ describe("setLightState", () => {
       expect(error).toBeInstanceOf(Error);
     }
   });
-  test("throws an error if no state was provided", async () => {
+  test("Rejects if no state was provided", async () => {
     const lightCache = new LightCache();
 
     const LIGHT_ID = "mockLight";
@@ -126,7 +126,7 @@ describe("setLightState", () => {
       expect(error).toBeInstanceOf(Error);
     }
   });
-  test("throws an error if lightState fails validation", async () => {
+  test("Rejects if lightState fails validation", async () => {
     const lightCache = new LightCache();
 
     const LIGHT_ID = "mockLight";
@@ -144,7 +144,7 @@ describe("setLightState", () => {
       expect(error).toBeInstanceOf(Error);
     }
   });
-  test("throws an error if lightState is empty", async () => {
+  test("Rejects if lightState is empty", async () => {
     const lightCache = new LightCache();
 
     const LIGHT_ID = "mockLight";
