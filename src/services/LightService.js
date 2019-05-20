@@ -46,30 +46,20 @@ class LightService {
   }
 
   async getLight(lightId) {
-    const promises = [
-      this._dao.getLight(lightId),
-      this._cache.getLightState(lightId)
-    ];
+    const light = await this._dao.getLight(lightId);
+    console.log(light);
+    return light;
+  }
 
-    const [lightData, lightState] = await Promise.all(promises);
-    return mapToGraphqlLight(lightData, lightState);
+  async getLightState(lightId) {
+    const lightState = await this._cache.getLightState(lightId);
   }
 
   async getLights() {
-    // Get all the lights data
-    const lightsData = await this._dao.getLights();
+    // Get all the lights
+    const lights = await this._dao.getLights();
 
-    // Get all the state info for each light then add it to a nested array with lightData
-    const lights = await Promise.all(
-      lightsData.map(lightData =>
-        Promise.all([lightData, this._cache.getLightState(lightData.id)])
-      )
-    );
-
-    // Return graphql
-    return lights.map(([lightData, lightState]) =>
-      mapToGraphqlLight(lightData, lightState)
-    );
+    return lights;
   }
 
   async getDiscoveredLights() {}
