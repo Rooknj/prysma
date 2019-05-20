@@ -88,10 +88,9 @@ describe("subscribeToLight", () => {
     const ID = "Test A";
 
     // Call The Method
-    const error = await lightController.subscribeToLight(ID);
+    await lightController.subscribeToLight(ID);
 
     // Test
-    expect(error).toBeNull();
     expect(mockClient.subscribe).toBeCalledTimes(4);
     expect(mockClient.subscribe).toBeCalledWith(
       `${TOPICS.top}/${ID}/${TOPICS.connected}`
@@ -116,10 +115,9 @@ describe("subscribeToLight", () => {
     const ID = "Test 123";
 
     // Call The Method
-    const error = await lightController.subscribeToLight(ID);
+    await lightController.subscribeToLight(ID);
 
     // Test
-    expect(error).toBeNull();
     expect(mockClient.subscribe).toBeCalledTimes(4);
     expect(mockClient.subscribe).toBeCalledWith(
       `${TOPICS.top}/${ID}/${TOPICS.connected}`
@@ -134,7 +132,7 @@ describe("subscribeToLight", () => {
       `${TOPICS.top}/${ID}/${TOPICS.config}`
     );
   });
-  test("returns an error if the client is not connected", async () => {
+  test("rejects if the client is not connected", async () => {
     // Create the client and lightController
     let mockClient = createMockClient();
     let lightController = new LightController(TOPICS);
@@ -144,12 +142,14 @@ describe("subscribeToLight", () => {
     const ID = "Test A";
 
     // Call The Method
-    const error = await lightController.subscribeToLight(ID);
-
-    // Test
-    expect(error).toBeInstanceOf(Error);
+    try {
+      await lightController.subscribeToLight(ID);
+    } catch (error) {
+      // Test
+      expect(error).toBeInstanceOf(Error);
+    }
   });
-  test("returns an error if it fails to subscribe to at least one topic", async () => {
+  test("rejects if it fails to subscribe to at least one topic", async () => {
     // Create the client and lightController
     let mockClient = createMockClient();
     mockClient.subscribe = jest.fn(async () => {
@@ -162,13 +162,15 @@ describe("subscribeToLight", () => {
     const ID = "Test A";
 
     // Call The Method
-    const error = await lightController.subscribeToLight(ID);
-
-    // Test
-    expect(error).toBeInstanceOf(Error);
-    expect(mockClient.subscribe).toBeCalled();
+    try {
+      await lightController.subscribeToLight(ID);
+    } catch (error) {
+      // Test
+      expect(error).toBeInstanceOf(Error);
+      expect(mockClient.subscribe).toBeCalled();
+    }
   });
-  test("returns an error if no id was provided", async () => {
+  test("rejects if no id was provided", async () => {
     // Create the client and lightController
     let mockClient = createMockClient();
     let lightController = new LightController(TOPICS);
@@ -176,10 +178,12 @@ describe("subscribeToLight", () => {
     lightController.connected = true;
 
     // Call The Method
-    const error = await lightController.subscribeToLight();
-
-    // Test
-    expect(error).toBeInstanceOf(Error);
+    try {
+      await lightController.subscribeToLight();
+    } catch (error) {
+      // Test
+      expect(error).toBeInstanceOf(Error);
+    }
   });
 });
 
@@ -192,13 +196,12 @@ describe("publishToLight", () => {
     lightController.connected = true;
 
     const ID = "Test A";
-    const MESSAGE = { brightness: 40 };
+    const MESSAGE = { mutationId: 9, name: ID, brightness: 40 };
 
     // Call The Method
-    const error = await lightController.publishToLight(ID, MESSAGE);
+    await lightController.publishToLight(ID, MESSAGE);
 
     // Test
-    expect(error).toBeNull();
     expect(mockClient.publish).toBeCalledTimes(1);
     expect(mockClient.publish).toBeCalledWith(
       `${TOPICS.top}/${ID}/${TOPICS.command}`,
@@ -213,20 +216,19 @@ describe("publishToLight", () => {
     lightController.connected = true;
 
     const ID = "Test A";
-    const MESSAGE = { effect: "Cylon" };
+    const MESSAGE = { mutationId: 9, name: ID, effect: "Cylon" };
 
     // Call The Method
-    const error = await lightController.publishToLight(ID, MESSAGE);
+    await lightController.publishToLight(ID, MESSAGE);
 
     // Test
-    expect(error).toBeNull();
     expect(mockClient.publish).toBeCalledTimes(1);
     expect(mockClient.publish).toBeCalledWith(
       `${TOPICS.top}/${ID}/${TOPICS.command}`,
       Buffer.from(JSON.stringify(MESSAGE))
     );
   });
-  test("returns an error if the client is not connected", async () => {
+  test("rejects if the client is not connected", async () => {
     // Create the client and lightController
     let mockClient = createMockClient();
     let lightController = new LightController(TOPICS);
@@ -234,15 +236,17 @@ describe("publishToLight", () => {
     lightController.connected = false;
 
     const ID = "Test A";
-    const MESSAGE = { effect: "Cylon" };
+    const MESSAGE = { mutationId: 9, name: ID, effect: "Cylon" };
 
     // Call The Method
-    const error = await lightController.publishToLight(ID, MESSAGE);
-
-    // Test
-    expect(error).toBeInstanceOf(Error);
+    try {
+      await lightController.publishToLight(ID, MESSAGE);
+    } catch (error) {
+      // Test
+      expect(error).toBeInstanceOf(Error);
+    }
   });
-  test("returns an error if the client fails to publish", async () => {
+  test("rejects if the client fails to publish", async () => {
     // Create the client and lightController
     let mockClient = createMockClient();
     mockClient.publish = jest.fn(() => {
@@ -253,16 +257,18 @@ describe("publishToLight", () => {
     lightController.connected = true;
 
     const ID = "Test A";
-    const MESSAGE = { effect: "Cylon" };
+    const MESSAGE = { mutationId: 9, name: ID, effect: "Cylon" };
 
     // Call The Method
-    const error = await lightController.publishToLight(ID, MESSAGE);
-
-    // Test
-    expect(error).toBeInstanceOf(Error);
-    expect(mockClient.publish).toBeCalled();
+    try {
+      await lightController.publishToLight(ID, MESSAGE);
+    } catch (error) {
+      // Test
+      expect(error).toBeInstanceOf(Error);
+      expect(mockClient.publish).toBeCalled();
+    }
   });
-  test("returns an error if no id was provided", async () => {
+  test("rejects if no id was provided", async () => {
     // Create the client and lightController
     let mockClient = createMockClient();
     let lightController = new LightController(TOPICS);
@@ -270,15 +276,17 @@ describe("publishToLight", () => {
     lightController.connected = true;
 
     const ID = null;
-    const MESSAGE = { effect: "Cylon" };
+    const MESSAGE = { mutationId: 9, name: ID, effect: "Cylon" };
 
     // Call The Method
-    const error = await lightController.publishToLight(ID, MESSAGE);
-
-    // Test
-    expect(error).toBeInstanceOf(Error);
+    try {
+      await lightController.publishToLight(ID, MESSAGE);
+    } catch (error) {
+      // Test
+      expect(error).toBeInstanceOf(Error);
+    }
   });
-  test("returns an error if no message was provided", async () => {
+  test("rejects if no message was provided", async () => {
     // Create the client and lightController
     let mockClient = createMockClient();
     let lightController = new LightController(TOPICS);
@@ -286,13 +294,32 @@ describe("publishToLight", () => {
     lightController.connected = true;
 
     const ID = "Test A";
-    const MESSAGE = null;
 
     // Call The Method
-    const error = await lightController.publishToLight(ID, MESSAGE);
+    try {
+      await lightController.publishToLight(ID);
+    } catch (error) {
+      // Test
+      expect(error).toBeInstanceOf(Error);
+    }
+  });
+  test("rejects if the message fails verification", async () => {
+    // Create the client and lightController
+    let mockClient = createMockClient();
+    let lightController = new LightController(TOPICS);
+    lightController._client = mockClient;
+    lightController.connected = true;
 
-    // Test
-    expect(error).toBeInstanceOf(Error);
+    const ID = "Test A";
+    const MESSAGE = { mutationId: 9, name: ID, effect: 123456 };
+
+    // Call The Method
+    try {
+      await lightController.publishToLight(ID, MESSAGE);
+    } catch (error) {
+      // Test
+      expect(error).toBeInstanceOf(Error);
+    }
   });
 });
 
@@ -307,10 +334,9 @@ describe("unsubscribeFromLight", () => {
     const ID = "Test A";
 
     // Call The Method
-    const error = await lightController.unsubscribeFromLight(ID);
+    await lightController.unsubscribeFromLight(ID);
 
     // Test
-    expect(error).toBeNull();
     expect(mockClient.unsubscribe).toBeCalledTimes(4);
     expect(mockClient.unsubscribe).toBeCalledWith(
       `${TOPICS.top}/${ID}/${TOPICS.connected}`
@@ -335,10 +361,9 @@ describe("unsubscribeFromLight", () => {
     const ID = "Test 123";
 
     // Call The Method
-    const error = await lightController.unsubscribeFromLight(ID);
+    await lightController.unsubscribeFromLight(ID);
 
     // Test
-    expect(error).toBeNull();
     expect(mockClient.unsubscribe).toBeCalledTimes(4);
     expect(mockClient.unsubscribe).toBeCalledWith(
       `${TOPICS.top}/${ID}/${TOPICS.connected}`
@@ -353,7 +378,7 @@ describe("unsubscribeFromLight", () => {
       `${TOPICS.top}/${ID}/${TOPICS.config}`
     );
   });
-  test("returns an null if the client is not connected", async () => {
+  test("does not reject if the client is not connected", async () => {
     // Create the client and lightController
     let mockClient = createMockClient();
     let lightController = new LightController(TOPICS);
@@ -363,12 +388,9 @@ describe("unsubscribeFromLight", () => {
     const ID = "Test A";
 
     // Call The Method
-    const error = await lightController.unsubscribeFromLight(ID);
-
-    // Test
-    expect(error).toBeNull();
+    await lightController.unsubscribeFromLight(ID);
   });
-  test("returns an error if it fails to unsubscribe from at least one topic", async () => {
+  test("rejects if it fails to unsubscribe from at least one topic", async () => {
     // Create the client and lightController
     let mockClient = createMockClient();
     mockClient.unsubscribe = jest.fn(async () => {
@@ -381,13 +403,15 @@ describe("unsubscribeFromLight", () => {
     const ID = "Test A";
 
     // Call The Method
-    const error = await lightController.unsubscribeFromLight(ID);
-
-    // Test
-    expect(error).toBeInstanceOf(Error);
-    expect(mockClient.unsubscribe).toBeCalled();
+    try {
+      await lightController.unsubscribeFromLight(ID);
+    } catch (error) {
+      // Test
+      expect(error).toBeInstanceOf(Error);
+      expect(mockClient.unsubscribe).toBeCalled();
+    }
   });
-  test("returns an error if no id was provided", async () => {
+  test("rejects if no id was provided", async () => {
     // Create the client and lightController
     let mockClient = createMockClient();
     let lightController = new LightController(TOPICS);
@@ -395,10 +419,12 @@ describe("unsubscribeFromLight", () => {
     lightController.connected = true;
 
     // Call The Method
-    const error = await lightController.unsubscribeFromLight();
-
-    // Test
-    expect(error).toBeInstanceOf(Error);
+    try {
+      await lightController.unsubscribeFromLight();
+    } catch (error) {
+      // Test
+      expect(error).toBeInstanceOf(Error);
+    }
   });
 });
 
@@ -671,10 +697,9 @@ describe("startDiscovery", () => {
     lightController.connected = true;
 
     // Call The Method
-    const error = await lightController.startDiscovery();
+    await lightController.startDiscovery();
 
     // Test
-    expect(error).toBeNull();
     expect(mockClient.subscribe).toBeCalledTimes(1);
     expect(mockClient.subscribe).toBeCalledWith(
       `${TOPICS.top}/+/${TOPICS.discoveryResponse}`
@@ -690,10 +715,9 @@ describe("stopDiscovery", () => {
     lightController.connected = true;
 
     // Call The Method
-    const error = await lightController.stopDiscovery();
+    await lightController.stopDiscovery();
 
     // Test
-    expect(error).toBeNull();
     expect(mockClient.unsubscribe).toBeCalledTimes(1);
     expect(mockClient.unsubscribe).toBeCalledWith(
       `${TOPICS.top}/+/${TOPICS.discoveryResponse}`
@@ -709,10 +733,9 @@ describe("publishDiscovery", () => {
     lightController.connected = true;
 
     // Call The Method
-    const error = await lightController.publishDiscovery();
+    await lightController.publishDiscovery();
 
     // Test
-    expect(error).toBeNull();
     expect(mockClient.publish).toBeCalledTimes(1);
     expect(mockClient.publish).toBeCalledWith(
       `${TOPICS.top}/${TOPICS.discovery}`,
