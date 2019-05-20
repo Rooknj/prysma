@@ -7,6 +7,12 @@ const mapToGraphqlLight = (lightData, state) => {
   return { id, name, state, configuration };
 };
 
+let mutationId = 0;
+const getUniqueId = () => {
+  mutationId += 1;
+  return mutationId;
+};
+
 class LightService {
   constructor() {
     this._dao = undefined;
@@ -68,7 +74,67 @@ class LightService {
 
   async getDiscoveredLights() {}
 
-  async setLight(lightId, lightState) {}
+  async setLight(lightId, lightState) {
+    // Check if the light exists already before doing anything else
+    const currentState = await this._cache.getLightState(lightId);
+    if (!currentState) throw new Error(`"${lightId}" was never added`);
+    //if (!currentState.connected) throw new Error(`"${lightId}" is not connected`);
+
+    // Create the command payload
+    const mutationId = getUniqueId();
+    if ("on" in lightState) {
+      lightState.state = lightState.on ? "ON" : "OFF";
+      delete lightState.on;
+    }
+    let payload = { mutationId, name: lightId, ...lightState };
+    console.log(payload);
+
+    // Return a promise which resolves when the light responds to this message or rejects if it takes too long
+    // return new Promise(async (resolve, reject) => {
+    //   const handleMutationResponse = ({ mutationId, changedLight }) => {
+    //     if (mutationId === payload.mutationId) {
+    //       // Remove this mutation's event listener
+    //       mediator.unsubscribe("mutationResponse", handleMutationResponse);
+
+    //       // Resolve with the light's response data
+    //       resolve(changedLight);
+    //     }
+    //   };
+
+    //   // Set the light's name if provided
+    //   if (lightData.name) {
+    //     const error = await db.setLight(id, { name: lightData.name });
+    //     if (error) {
+    //       reject(error);
+    //       return error;
+    //     }
+    //   }
+
+    //   // If only the name was changed or nothing was sent, just return the current state of the light
+    //   if (Object.keys(payload).length <= 2) {
+    //     const { error, light } = await db.getLight(id);
+    //     if (error) {
+    //       reject(error);
+    //       return error;
+    //     }
+    //     resolve(light);
+    //     mediator.publish(LIGHT_CHANGED, { lightChanged: light });
+    //     return null;
+    //   }
+
+    //   // If we need to send data directly to the light, continue here
+    //   // Every time we get a new message from the light, check to see if it has the same mutationId
+    //   mediator.subscribe("mutationResponse", handleMutationResponse);
+    //   // Publish to the light
+    //   const error = await pubsub.publishToLight(id, payload);
+    //   if (error) reject(error);
+
+    //   // if the response takes too long, error out
+    //   await asyncSetTimeout(TIMEOUT_WAIT);
+    //   mediator.unsubscribe("mutationResponse", handleMutationResponse);
+    //   reject(new Error(`Response from ${id} timed out`));
+    // });
+  }
 
   // TODO: Add error handling and cleanup here if something fails
   async addLight(lightId, lightName) {

@@ -65,7 +65,7 @@ const LightConfig = gql`
 const LightStateInput = gql`
   input LightStateInput {
     name: String
-    state: String
+    on: Boolean
     brightness: Int
     color: ColorInput
     effect: String
