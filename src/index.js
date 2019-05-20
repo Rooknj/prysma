@@ -6,6 +6,7 @@ const config = require("./config");
 const Server = require("./server");
 const packageJson = require("../package.json");
 const LightService = require("./services/LightService");
+const MockLight = require("./MockLight");
 
 // Verbose statement of service starting
 const { version } = packageJson;
@@ -52,3 +53,6 @@ const start = async () => {
 };
 
 start();
+
+// Start a new Mock Light
+new MockLight("Default Mock", config.mqtt);
