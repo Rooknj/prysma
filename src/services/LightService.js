@@ -1,11 +1,10 @@
 const LightMessenger = require("../messengers/LightMessenger");
 const LightDao = require("../daos/LightDao");
 const LightCache = require("../caches/LightCache");
-const { promisify } = require("util");
 const mediator = require("./mediator");
 
 const TIMEOUT_WAIT = 5000;
-const asyncSetTimeout = promisify(setTimeout);
+const MUTATION_RESPONSE_EVENT = "mutationResponse";
 
 let mutationId = 0;
 const getUniqueId = () => {
@@ -81,7 +80,11 @@ class LightService {
 
   // TODO: Add error handling and cleanup here if something fails
   async addLight(lightId, lightData) {
-    const { name } = lightData;
+    let name = undefined;
+    if (lightData) {
+      ({ name } = lightData);
+    }
+
     // Add new light to light database
     await this._dao.addLight(lightId, name);
 
@@ -130,40 +133,45 @@ class LightService {
     const mutationId = getUniqueId();
     const payload = { mutationId, name: lightId, ...lightState };
 
-    const fireSetLight = new Promise((resolve, reject) => {
+    //Return a promise which resolves when the light responds to this message or rejects if it takes too long
+    return new Promise((resolve, reject) => {
       // Every time we get a new message from the light, check to see if it has the same mutationId
-      const handleMutationResponse = ({ mutationId, changedLight }) => {
+      const handleMutationResponse = ({ mutationId, newState }) => {
         if (mutationId === payload.mutationId) {
           // Remove this mutation's event listener
-          mediator.removeListener("mutationResponse", handleMutationResponse);
+          mediator.removeListener(
+            MUTATION_RESPONSE_EVENT,
+            handleMutationResponse
+          );
 
           // Resolve with the light's response data
-          resolve(changedLight);
+          resolve(newState);
         }
       };
-      mediator.addListener("mutationResponse", handleMutationResponse);
+      mediator.addListener(MUTATION_RESPONSE_EVENT, handleMutationResponse);
 
       // Publish to the light with a timeout of 5 seconds
       this._messenger
         .publishToLight(lightId, payload)
         .then(() => {
           setTimeout(() => {
+            mediator.removeListener(
+              MUTATION_RESPONSE_EVENT,
+              handleMutationResponse
+            );
             reject(new Error(`Response from ${lightId} timed out`));
-          }, 5000);
+          }, TIMEOUT_WAIT);
         })
         .catch(error => {
+          mediator.removeListener(
+            MUTATION_RESPONSE_EVENT,
+            handleMutationResponse
+          );
           reject(error);
-        })
-        .finally(() => {
-          console.log("Removing Listener");
-          mediator.removeListener("mutationResponse", handleMutationResponse);
         });
 
       // if the response takes too long, error out
     });
-
-    //Return a promise which resolves when the light responds to this message or rejects if it takes too long
-    return fireSetLight();
   }
 
   async _handleMessengerConnect() {
@@ -184,20 +192,43 @@ class LightService {
     const { name, ...state } = message;
     state.connected = state.connection === 2;
     delete state.connection;
-    this._cache.setLightState(name, state);
+    try {
+      await this._cache.setLightState(name, state);
+    } catch (error) {
+      console.log("Error handling Connected Message", error);
+    }
   }
 
   async _handleStateMessage(message) {
-    const { name, ...state } = message;
+    const { name, mutationId, ...state } = message;
     state.on = state.state === "ON";
     delete state.state;
-    delete state.mutationId;
-    this._cache.setLightState(name, state);
+    try {
+      await this._cache.setLightState(name, state);
+      const newState = await this._cache.getLightState(name);
+      mediator.emit(MUTATION_RESPONSE_EVENT, { mutationId, newState });
+    } catch (error) {
+      console.log("Error handling State Message", error);
+    }
   }
 
-  async _handleEffectListMessage(message) {}
+  async _handleEffectListMessage(message) {
+    const { name, effectList } = message;
+    try {
+      await this._dao.setLight(name, { supportedEffects: effectList });
+    } catch (error) {
+      console.log("Error handling Effect List Message", error);
+    }
+  }
 
-  async _handleConfigMessage(message) {}
+  async _handleConfigMessage(message) {
+    const { name, ...config } = message;
+    try {
+      await this._dao.setLight(name, config);
+    } catch (error) {
+      console.log("Error handling Config Message", error);
+    }
+  }
 
   async _handleDiscoveryMessage(message) {}
 }
