@@ -55,4 +55,4 @@ const start = async () => {
 start();
 
 // Start a new Mock Light
-new MockLight("Default Mock", config.mqtt);
+new MockLight("Prysma-Mock", config.mqtt);
