@@ -1,4 +1,5 @@
 const PrysmaDB = require("./LightDao");
+const { toLightModel } = require("../utils/lightUtils");
 const Sequelize = require("sequelize");
 
 jest.mock("sequelize");
@@ -213,7 +214,9 @@ describe("setLight", () => {
     expect(prysmaDB._models.Light.findByPk).toBeCalledTimes(1);
     expect(prysmaDB._models.Light.findByPk).toBeCalledWith(ID);
     expect(mockLightModel.update).toBeCalledTimes(1);
-    expect(mockLightModel.update).toBeCalledWith(expect.objectContaining(DATA));
+    expect(mockLightModel.update).toBeCalledWith(
+      expect.objectContaining(toLightModel(DATA))
+    );
   });
   test("Rejects if no id is given", async () => {
     const prysmaDB = new PrysmaDB();
