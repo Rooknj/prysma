@@ -1,6 +1,6 @@
 module.exports = {
   toLightObject: light => {
-    const plainLight = light.get({ plain: true });
+    const plainLight = Object.assign({}, light.get({ plain: true }));
     plainLight.supportedEffects =
       plainLight.supportedEffects.length > 0
         ? plainLight.supportedEffects.split(",")
@@ -8,8 +8,9 @@ module.exports = {
     return plainLight;
   },
   toLightModel: light => {
-    if (light.supportedEffects)
-      light.supportedEffects = light.supportedEffects.join(",");
-    return light;
+    const lightModel = Object.assign({}, light);
+    if ("supportedEffects" in lightModel)
+      lightModel.supportedEffects = lightModel.supportedEffects.join(",");
+    return lightModel;
   }
 };
