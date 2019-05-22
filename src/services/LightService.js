@@ -4,9 +4,17 @@ const LightCache = require("../caches/LightCache");
 const mediator = require("./mediator");
 const { getSimpleUniqueId } = require("../utils/lightUtils");
 const Debug = require("debug").default;
-const { TIMEOUT_WAIT, MUTATION_RESPONSE_EVENT } = require("./serviceConstants");
+const serviceConstants = require("./serviceConstants");
 
 const debug = Debug("LightService");
+const {
+  TIMEOUT_WAIT,
+  MUTATION_RESPONSE_EVENT,
+  LIGHT_ADDED_EVENT,
+  LIGHT_REMOVED_EVENT,
+  LIGHT_CHANGED_EVENT,
+  LIGHT_STATE_CHANGED_EVENT
+} = serviceConstants;
 
 class LightService {
   constructor() {
@@ -75,7 +83,11 @@ class LightService {
 
   async setLight(lightId, lightData) {
     await this._dao.setLight(lightId, lightData);
-    return this._dao.getLight(lightId);
+
+    // Notify listeners of new light and return it
+    const newLight = await this._dao.getLight(lightId);
+    mediator.emit(LIGHT_CHANGED_EVENT, newLight);
+    return newLight;
   }
 
   // TODO: Add error handling and cleanup here if something fails
@@ -98,8 +110,9 @@ class LightService {
     // Subscribe to new messages from the new light
     await this._messenger.subscribeToLight(lightId);
 
-    // Get the newly added light and return it
+    // Get the newly added light, notify any listeners, and return it
     const lightAdded = await this.getLight(lightId);
+    mediator.emit(LIGHT_ADDED_EVENT, lightAdded);
     return lightAdded;
   }
 
@@ -109,8 +122,9 @@ class LightService {
 
     await this._cache.clearLightState(lightId);
 
+    // Notify any listeners of the removed light and return it
     const lightRemoved = await this._dao.removeLight(lightId);
-
+    mediator.emit(LIGHT_REMOVED_EVENT, lightRemoved);
     return lightRemoved;
   }
 
@@ -141,6 +155,10 @@ class LightService {
     const { name, effectList } = message;
     try {
       await this._dao.setLight(name, { supportedEffects: effectList });
+
+      // Notify listeners of new light
+      const newLight = await this._dao.getLight(name);
+      mediator.emit(LIGHT_CHANGED_EVENT, newLight);
     } catch (error) {
       debug("Error handling Effect List Message", error);
     }
@@ -150,6 +168,10 @@ class LightService {
     const { name, ...config } = message;
     try {
       await this._dao.setLight(name, config);
+
+      // Notify listeners of new light
+      const newLight = await this._dao.getLight(name);
+      mediator.emit(LIGHT_CHANGED_EVENT, newLight);
     } catch (error) {
       debug("Error handling Config Message", error);
     }
@@ -205,7 +227,6 @@ class LightService {
             MUTATION_RESPONSE_EVENT,
             handleMutationResponse
           );
-
           // Resolve with the light's response data
           resolve(newState);
         }
@@ -238,10 +259,18 @@ class LightService {
 
   async _handleConnectedMessage(message) {
     const { name, ...state } = message;
+
+    // Map the "connected" property from [2,0] to [true, false]
     state.connected = state.connection === 2;
     delete state.connection;
+
     try {
+      // Set the new state
       await this._cache.setLightState(name, state);
+
+      // Notify listeners of new state
+      const newState = await this._cache.getLightState(name);
+      mediator.emit(LIGHT_STATE_CHANGED_EVENT, newState);
     } catch (error) {
       debug("Error handling Connected Message", error);
     }
@@ -249,12 +278,19 @@ class LightService {
 
   async _handleStateMessage(message) {
     const { name, mutationId, ...state } = message;
+
+    // Map the "state" property to the "on" property
     state.on = state.state === "ON";
     delete state.state;
+
     try {
+      // Set the new state
       await this._cache.setLightState(name, state);
+
+      // Notify listeners of new state
       const newState = await this._cache.getLightState(name);
       mediator.emit(MUTATION_RESPONSE_EVENT, { mutationId, newState });
+      mediator.emit(LIGHT_STATE_CHANGED_EVENT, newState);
     } catch (error) {
       debug("Error handling State Message", error);
     }
