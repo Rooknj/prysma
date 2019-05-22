@@ -1,7 +1,14 @@
 const LightCache = require("./LightCache");
+const { ValidationError } = require("../errors");
 
 const NO_ID_MESSAGE = "No ID provided";
 const NO_STATE_MESSAGE = "No State provided";
+
+describe("getDiscoveredLights", () => {});
+
+describe("addDiscoveredLight", () => {});
+
+describe("removeDiscoveredLight", () => {});
 
 describe("getLightState", () => {
   test("gets the light's state", async () => {
@@ -72,7 +79,7 @@ describe("getLightState", () => {
     try {
       await lightCache.getLightState(LIGHT_ID);
     } catch (error) {
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(ValidationError);
     }
   });
   test("Rejects if lightState is empty", async () => {
@@ -85,7 +92,7 @@ describe("getLightState", () => {
     try {
       await lightCache.getLightState(LIGHT_ID);
     } catch (error) {
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(ValidationError);
     }
   });
 });
@@ -144,7 +151,7 @@ describe("setLightState", () => {
     try {
       await lightCache.setLightState(LIGHT_ID, LIGHT_STATE);
     } catch (error) {
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(ValidationError);
     }
   });
   test("Rejects if lightState is empty", async () => {
@@ -156,7 +163,7 @@ describe("setLightState", () => {
     try {
       await lightCache.setLightState(LIGHT_ID, LIGHT_STATE);
     } catch (error) {
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(ValidationError);
     }
   });
 });

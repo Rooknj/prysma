@@ -1,6 +1,11 @@
-const { validateLightState } = require("../validators/cacheValidators");
+const {
+  validateLightState,
+  validateDiscoveredLight
+} = require("../validators/cacheValidators");
+const errors = require("../errors");
 const Debug = require("debug").default;
 
+const { ValidationError } = errors;
 const debug = Debug("LightCache");
 
 class LightCache {
@@ -41,8 +46,8 @@ class LightCache {
     */
     if (!discoveredLight) throw new Error("No discoveredLight provided");
 
-    // const validation = validateDiscoveredLight(discoveredLight);
-    // if (validation.error) throw validation.error;
+    const validation = validateDiscoveredLight(discoveredLight);
+    if (validation.error) throw new ValidationError(validation.error);
 
     const alreadyDiscovered = this._discoveredLights.find(
       light => light.id === discoveredLight.id
@@ -65,7 +70,7 @@ class LightCache {
 
     const validation = validateLightState(lightState);
     if (!validation) throw new Error(`Error Validating the state`);
-    if (validation.error) throw validation.error;
+    if (validation.error) throw new ValidationError(validation.error);
 
     return Object.assign({}, lightState, { id: lightId });
   }
@@ -75,7 +80,7 @@ class LightCache {
     if (!lightState) throw new Error("No State provided");
 
     const validation = validateLightState(lightState);
-    if (validation.error) throw validation.error;
+    if (validation.error) throw new ValidationError(validation.error);
 
     this._lightStates[lightId] = Object.assign(
       {},

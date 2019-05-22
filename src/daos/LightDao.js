@@ -2,8 +2,10 @@ const EventEmitter = require("events");
 const Sequelize = require("sequelize");
 const LightModel = require("../models/LightModel");
 const { toLightObject, toLightModel } = require("../utils/lightUtils");
+const errors = require("../errors");
 const Debug = require("debug").default;
 
+const { ValidationError } = errors;
 const debug = Debug("LightDao");
 
 class LightDao extends EventEmitter {
@@ -55,13 +57,25 @@ class LightDao extends EventEmitter {
   async setLight(lightId, lightData) {
     if (!lightId) throw new Error("No ID provided");
     if (!lightData) throw new Error("No Data provided");
+
+    let lightToChange;
     try {
-      const lightToChange = await this._models.Light.findByPk(lightId);
-      if (!lightToChange) throw new Error(`"${lightId}" not found`);
+      lightToChange = await this._models.Light.findByPk(lightId);
+    } catch (error) {
+      throw error;
+    }
+    if (!lightToChange) throw new Error(`"${lightId}" not found`);
+
+    try {
       await lightToChange.update(toLightModel(lightData));
     } catch (error) {
+      if (error.name === "SequelizeValidationError") {
+        throw new ValidationError(error);
+      } else {
+        // TODO: figure out what other errors can be thrown
+        throw error;
+      }
       // TODO: Handle what happens if findOne errors vs if .destroy() fails
-      throw error;
     }
   }
 
@@ -74,7 +88,12 @@ class LightDao extends EventEmitter {
         name: lightName || lightId
       });
     } catch (error) {
-      throw error;
+      if (error.name === "SequelizeValidationError") {
+        throw new ValidationError(error);
+      } else {
+        // TODO: figure out what other errors can be thrown
+        throw error;
+      }
     }
     return toLightObject(addedLight);
   }
@@ -88,8 +107,12 @@ class LightDao extends EventEmitter {
       removedLight = { id: lightToRemove.id, name: lightToRemove.name };
       await lightToRemove.destroy();
     } catch (error) {
+      if (error.name === "SequelizeValidationError") {
+        throw new ValidationError(error);
+      } else {
+        throw error;
+      }
       // TODO: Handle what happens if findOne errors vs if .destroy() fails
-      throw error;
     }
     return removedLight;
   }

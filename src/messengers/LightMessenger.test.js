@@ -1,4 +1,5 @@
 const LightController = require("./LightMessenger");
+const { ValidationError } = require("../errors");
 
 const TOPICS = {
   top: "prysmalight",
@@ -318,7 +319,7 @@ describe("publishToLight", () => {
       await lightController.publishToLight(ID, MESSAGE);
     } catch (error) {
       // Test
-      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(ValidationError);
     }
   });
 });
