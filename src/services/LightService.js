@@ -2,7 +2,9 @@ const LightMessenger = require("../messengers/LightMessenger");
 const LightDao = require("../daos/LightDao");
 const LightCache = require("../caches/LightCache");
 const mediator = require("./mediator");
+const Debug = require("debug").default;
 
+const debug = Debug("LightService");
 const TIMEOUT_WAIT = 5000;
 const MUTATION_RESPONSE_EVENT = "mutationResponse";
 
@@ -71,7 +73,11 @@ class LightService {
     return lights;
   }
 
-  async getDiscoveredLights() {}
+  async getDiscoveredLights() {
+    await this._messenger.publishDiscovery();
+    const discoveredLights = await this._cache.getDiscoveredLights();
+    return discoveredLights;
+  }
 
   async setLight(lightId, lightData) {
     await this._dao.setLight(lightId, lightData);
@@ -85,11 +91,15 @@ class LightService {
       ({ name } = lightData);
     }
 
+    // TODO: Dont await all these and do promise.all
     // Add new light to light database
     await this._dao.addLight(lightId, name);
 
     // Add a default state to the light
     await this._cache.initializeLightState(lightId);
+
+    // Remove the light from the discoveredLights list
+    await this._cache.removeDiscoveredLight(lightId);
 
     // Subscribe to new messages from the new light
     await this._messenger.subscribeToLight(lightId);
@@ -110,6 +120,64 @@ class LightService {
     return lightRemoved;
   }
 
+  async _handleMessengerConnect() {
+    try {
+      const lights = await this._dao.getLights();
+
+      // Subscribe to all the lights
+      const subscriptionPromises = lights.map(({ id }) =>
+        this._messenger.subscribeToLight(id)
+      );
+
+      // Subscribe to discovery topic
+      subscriptionPromises.push(this._messenger.startDiscovery());
+
+      // Wait for all the promises to resolve
+      await Promise.all(subscriptionPromises);
+
+      // Discover any lights
+      await this._messenger.publishDiscovery();
+    } catch (error) {
+      debug("Error handling Messenger connect", error);
+      throw error;
+    }
+  }
+
+  async _handleEffectListMessage(message) {
+    const { name, effectList } = message;
+    try {
+      await this._dao.setLight(name, { supportedEffects: effectList });
+    } catch (error) {
+      debug("Error handling Effect List Message", error);
+    }
+  }
+
+  async _handleConfigMessage(message) {
+    const { name, ...config } = message;
+    try {
+      await this._dao.setLight(name, config);
+    } catch (error) {
+      debug("Error handling Config Message", error);
+    }
+  }
+
+  async _handleDiscoveryMessage(message) {
+    let lightIsAlreadyAdded = true;
+    try {
+      await this._dao.getLight(message.id);
+    } catch (error) {
+      lightIsAlreadyAdded = false;
+    }
+
+    if (lightIsAlreadyAdded) {
+      debug(`${message.id} is already added. Ignoring discovery response.`);
+      return;
+    }
+
+    this._cache.addDiscoveredLight(message);
+  }
+
+  /* Light State Section */
   async getLightState(lightId) {
     const lightState = await this._cache.getLightState(lightId);
     return lightState;
@@ -174,20 +242,6 @@ class LightService {
     });
   }
 
-  async _handleMessengerConnect() {
-    try {
-      const lights = await this._dao.getLights();
-      const subscriptionPromises = lights.map(({ id }) =>
-        this._messenger.subscribeToLight(id)
-      );
-      //subscriptionPromises.push(this._messenger.startDiscovery);
-      await Promise.all(subscriptionPromises);
-    } catch (error) {
-      console.log("Error subscribing to all the lights", error);
-      throw error;
-    }
-  }
-
   async _handleConnectedMessage(message) {
     const { name, ...state } = message;
     state.connected = state.connection === 2;
@@ -195,7 +249,7 @@ class LightService {
     try {
       await this._cache.setLightState(name, state);
     } catch (error) {
-      console.log("Error handling Connected Message", error);
+      debug("Error handling Connected Message", error);
     }
   }
 
@@ -208,29 +262,9 @@ class LightService {
       const newState = await this._cache.getLightState(name);
       mediator.emit(MUTATION_RESPONSE_EVENT, { mutationId, newState });
     } catch (error) {
-      console.log("Error handling State Message", error);
+      debug("Error handling State Message", error);
     }
   }
-
-  async _handleEffectListMessage(message) {
-    const { name, effectList } = message;
-    try {
-      await this._dao.setLight(name, { supportedEffects: effectList });
-    } catch (error) {
-      console.log("Error handling Effect List Message", error);
-    }
-  }
-
-  async _handleConfigMessage(message) {
-    const { name, ...config } = message;
-    try {
-      await this._dao.setLight(name, config);
-    } catch (error) {
-      console.log("Error handling Config Message", error);
-    }
-  }
-
-  async _handleDiscoveryMessage(message) {}
 }
 
 module.exports = LightService;

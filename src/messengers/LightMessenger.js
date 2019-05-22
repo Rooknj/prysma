@@ -170,16 +170,19 @@ class LightMessenger extends EventEmitter {
   async startDiscovery() {
     const { top, discoveryResponse } = this._topics;
     await this._client.subscribe(`${top}/+/${discoveryResponse}`);
+    debug(`Started Light Discovery`);
   }
 
   async stopDiscovery() {
     const { top, discoveryResponse } = this._topics;
     await this._client.unsubscribe(`${top}/+/${discoveryResponse}`);
+    debug(`Stopped Light Discovery`);
   }
 
   async publishDiscovery() {
     const { top, discovery } = this._topics;
     await this._client.publish(`${top}/${discovery}`, "ping");
+    debug(`Successfully published discovery message`);
   }
 
   _handleConnect(data) {
