@@ -2,17 +2,11 @@ const LightMessenger = require("../messengers/LightMessenger");
 const LightDao = require("../daos/LightDao");
 const LightCache = require("../caches/LightCache");
 const mediator = require("./mediator");
+const { getSimpleUniqueId } = require("../utils/lightUtils");
 const Debug = require("debug").default;
+const { TIMEOUT_WAIT, MUTATION_RESPONSE_EVENT } = require("./serviceConstants");
 
 const debug = Debug("LightService");
-const TIMEOUT_WAIT = 5000;
-const MUTATION_RESPONSE_EVENT = "mutationResponse";
-
-let mutationId = 0;
-const getUniqueId = () => {
-  mutationId += 1;
-  return mutationId;
-};
 
 class LightService {
   constructor() {
@@ -198,7 +192,7 @@ class LightService {
     }
 
     // Create the command payload
-    const mutationId = getUniqueId();
+    const mutationId = getSimpleUniqueId();
     const payload = { mutationId, name: lightId, ...lightState };
 
     //Return a promise which resolves when the light responds to this message or rejects if it takes too long
