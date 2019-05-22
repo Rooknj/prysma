@@ -43,6 +43,36 @@ const lightStateSchema = Joi.object()
   .required();
 const validateLightState = msg => Joi.validate(msg, lightStateSchema);
 
+// TODO: Figure out if i need to export these lightId and lightVersion stuff to a common file.
+// DiscoveredLight Validation
+const lightId = Joi.string();
+const lightVersion = Joi.string();
+const lightHardware = Joi.string();
+const lightColorOrder = Joi.string();
+const lightStripType = Joi.string();
+const lightIpAddress = Joi.string().ip();
+const lightMacAddress = Joi.string();
+const lightNumLeds = Joi.number()
+  .integer()
+  .min(1);
+const lightUdpPort = Joi.number();
+const discoveredLightSchema = Joi.object()
+  .keys({
+    id: lightId.required(),
+    name: lightId.required(),
+    version: lightVersion.required(),
+    hardware: lightHardware.required(),
+    colorOrder: lightColorOrder.required(),
+    stripType: lightStripType.required(),
+    ipAddress: lightIpAddress.required(),
+    macAddress: lightMacAddress.required(),
+    numLeds: lightNumLeds.required(),
+    udpPort: lightUdpPort.required()
+  })
+  .required();
+const validateDiscoveredLight = msg => Joi.validate(msg, discoveredLightSchema);
+
 module.exports = {
-  validateLightState
+  validateLightState,
+  validateDiscoveredLight
 };
