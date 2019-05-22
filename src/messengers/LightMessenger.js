@@ -159,12 +159,10 @@ class LightMessenger extends EventEmitter {
     }
 
     const { top, command } = this._topics;
-    await this._client.publish(
-      `${top}/${lightId}/${command}`,
-      Buffer.from(JSON.stringify(message))
-    );
+    const payload = Buffer.from(JSON.stringify(message));
+    await this._client.publish(`${top}/${lightId}/${command}`, payload);
 
-    debug(`Successfully published ${message} to ${lightId}`);
+    debug(`Successfully published ${payload.toString()} to ${lightId}`);
   }
 
   async startDiscovery() {
