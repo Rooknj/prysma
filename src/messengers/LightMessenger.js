@@ -9,10 +9,9 @@ const {
   validateDiscoveryMessage,
   validateCommandMessage
 } = require("../validators/mqttValidators");
-const errors = require("../errors");
+const { ValidationError } = require("../errors");
 const Debug = require("debug").default;
 
-const { ValidationError } = errors;
 const debug = Debug("LightMessenger");
 
 class LightMessenger extends EventEmitter {

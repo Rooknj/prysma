@@ -1,6 +1,8 @@
 const LightController = require("./LightMessenger");
 const { ValidationError } = require("../errors");
 
+jest.mock("async-mqtt");
+
 const TOPICS = {
   top: "prysmalight",
   connected: "connected",
