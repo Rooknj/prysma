@@ -2,10 +2,9 @@ const EventEmitter = require("events");
 const Sequelize = require("sequelize");
 const LightModel = require("../models/LightModel");
 const { toLightObject, toLightModel } = require("../utils/lightUtils");
-const errors = require("../errors");
+const { ValidationError } = require("../errors");
 const Debug = require("debug").default;
 
-const { ValidationError } = errors;
 const debug = Debug("LightDao");
 
 class LightDao extends EventEmitter {
