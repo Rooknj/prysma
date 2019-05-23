@@ -9,7 +9,9 @@ module.exports = (sequelize, type) => {
     name: type.STRING,
     supportedEffects: {
       type: type.TEXT,
-      validate: { is: ["^[\\w]+(,[\\w]+)*$"] }
+      validate: { is: ["^$|^[\\w ]+\\w(,[\\w ]+\\w)*$"] },
+      allowNull: false,
+      defaultValue: ""
     }, // TEXT is unlimited length string
     ipAddress: {
       type: type.STRING,

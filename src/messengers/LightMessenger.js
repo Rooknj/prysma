@@ -6,11 +6,13 @@ const {
   validateStateMessage,
   validateEffectListMessage,
   validateConfigMessage,
-  validateDiscoveryMessage
+  validateDiscoveryMessage,
+  validateCommandMessage
 } = require("../validators/mqttValidators");
+const { ValidationError } = require("../errors");
 const Debug = require("debug").default;
 
-const debug = Debug("mqtt");
+const debug = Debug("LightMessenger");
 
 class LightMessenger extends EventEmitter {
   constructor(topics) {
@@ -27,7 +29,7 @@ class LightMessenger extends EventEmitter {
    * @param {*} options - MQTT connection options
    */
   connect(host, options = {}) {
-    debug(`Connecting to MQTT broker at ${host}`);
+    debug(`Connecting to MQTT broker at ${host}...`);
 
     this._client = mqtt.connect(host, {
       reconnectPeriod: options.reconnectPeriod, // Amount of time between reconnection attempts
@@ -58,42 +60,35 @@ class LightMessenger extends EventEmitter {
     if (!this.connected) {
       const errorMessage = `Can not subscribe to (${lightId}). MQTT client not connected`;
       debug(errorMessage);
-      return new Error(errorMessage);
+      throw new Error(errorMessage);
     }
 
     if (!lightId) {
       const errorMessage = "You must provide a light id";
       debug(errorMessage);
-      return new Error(errorMessage);
+      throw new Error(errorMessage);
     }
 
     const { top, connected, state, effectList, config } = this._topics;
-    try {
-      // Subscribe to all relavent fields
-      const connectedPromise = this._client.subscribe(
-        `${top}/${lightId}/${connected}`
-      );
-      const statePromise = this._client.subscribe(`${top}/${lightId}/${state}`);
-      const effectListPromise = this._client.subscribe(
-        `${top}/${lightId}/${effectList}`
-      );
-      const configPromise = this._client.subscribe(
-        `${top}/${lightId}/${config}`
-      );
 
-      await Promise.all([
-        connectedPromise,
-        statePromise,
-        effectListPromise,
-        configPromise
-      ]);
+    // Subscribe to all relavent fields
+    const connectedPromise = this._client.subscribe(
+      `${top}/${lightId}/${connected}`
+    );
+    const statePromise = this._client.subscribe(`${top}/${lightId}/${state}`);
+    const effectListPromise = this._client.subscribe(
+      `${top}/${lightId}/${effectList}`
+    );
+    const configPromise = this._client.subscribe(`${top}/${lightId}/${config}`);
 
-      debug(`Successfully subscribed to ${lightId}`);
-      return null;
-    } catch (error) {
-      debug(`Error subscribing to ${lightId}`);
-      return error;
-    }
+    await Promise.all([
+      connectedPromise,
+      statePromise,
+      effectListPromise,
+      configPromise
+    ]);
+
+    debug(`Successfully subscribed to ${lightId}`);
   }
 
   /**
@@ -102,44 +97,37 @@ class LightMessenger extends EventEmitter {
    */
   async unsubscribeFromLight(lightId) {
     if (!this.connected) {
-      return null;
+      return;
     }
 
     if (!lightId) {
       const errorMessage = "You must provide a light id";
       debug(errorMessage);
-      return new Error(errorMessage);
+      throw new Error(errorMessage);
     }
 
     const { top, connected, state, effectList, config } = this._topics;
-    try {
-      // Subscribe to all relavent fields
-      const connectedPromise = this._client.unsubscribe(
-        `${top}/${lightId}/${connected}`
-      );
-      const statePromise = this._client.unsubscribe(
-        `${top}/${lightId}/${state}`
-      );
-      const effectListPromise = this._client.unsubscribe(
-        `${top}/${lightId}/${effectList}`
-      );
-      const configPromise = this._client.unsubscribe(
-        `${top}/${lightId}/${config}`
-      );
 
-      await Promise.all([
-        connectedPromise,
-        statePromise,
-        effectListPromise,
-        configPromise
-      ]);
+    // Subscribe to all relavent fields
+    const connectedPromise = this._client.unsubscribe(
+      `${top}/${lightId}/${connected}`
+    );
+    const statePromise = this._client.unsubscribe(`${top}/${lightId}/${state}`);
+    const effectListPromise = this._client.unsubscribe(
+      `${top}/${lightId}/${effectList}`
+    );
+    const configPromise = this._client.unsubscribe(
+      `${top}/${lightId}/${config}`
+    );
 
-      debug(`Successfully unsubscribed from ${lightId}`);
-      return null;
-    } catch (error) {
-      debug(`Error unsubscribing from ${lightId}`);
-      return error;
-    }
+    await Promise.all([
+      connectedPromise,
+      statePromise,
+      effectListPromise,
+      configPromise
+    ]);
+
+    debug(`Successfully unsubscribed from ${lightId}`);
   }
 
   /**
@@ -151,63 +139,48 @@ class LightMessenger extends EventEmitter {
     if (!this.connected) {
       const errorMessage = `Can not publish to (${lightId}). MQTT client not connected`;
       debug(errorMessage);
-      return new Error(errorMessage);
+      throw new Error(errorMessage);
     }
 
     if (!lightId) {
       const errorMessage = "You must provide a light id";
       debug(errorMessage);
-      return new Error(errorMessage);
+      throw new Error(errorMessage);
     }
     if (!message) {
       const errorMessage = "You must provide a message";
       debug(errorMessage);
-      return new Error(errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    const validation = validateCommandMessage(message);
+    if (validation.error) {
+      throw new ValidationError(validation.error);
     }
 
     const { top, command } = this._topics;
-    try {
-      await this._client.publish(
-        `${top}/${lightId}/${command}`,
-        Buffer.from(JSON.stringify(message))
-      );
+    const payload = Buffer.from(JSON.stringify(message));
+    await this._client.publish(`${top}/${lightId}/${command}`, payload);
 
-      debug(`Successfully published ${message} to ${lightId}`);
-      return null;
-    } catch (error) {
-      debug(`Error publishing to ${lightId}`);
-      return error;
-    }
+    debug(`Successfully published ${payload.toString()} to ${lightId}`);
   }
 
   async startDiscovery() {
     const { top, discoveryResponse } = this._topics;
-    try {
-      await this._client.subscribe(`${top}/+/${discoveryResponse}`);
-      return null;
-    } catch (error) {
-      return error;
-    }
+    await this._client.subscribe(`${top}/+/${discoveryResponse}`);
+    debug(`Started Light Discovery`);
   }
 
   async stopDiscovery() {
     const { top, discoveryResponse } = this._topics;
-    try {
-      await this._client.unsubscribe(`${top}/+/${discoveryResponse}`);
-      return null;
-    } catch (error) {
-      return error;
-    }
+    await this._client.unsubscribe(`${top}/+/${discoveryResponse}`);
+    debug(`Stopped Light Discovery`);
   }
 
   async publishDiscovery() {
     const { top, discovery } = this._topics;
-    try {
-      await this._client.publish(`${top}/${discovery}`, "ping");
-      return null;
-    } catch (error) {
-      return error;
-    }
+    await this._client.publish(`${top}/${discovery}`, "ping");
+    debug(`Successfully published discovery message`);
   }
 
   _handleConnect(data) {
@@ -274,7 +247,7 @@ class LightMessenger extends EventEmitter {
     if (!validation.error) {
       this.emit(event, validation.value);
     } else {
-      debug(validation);
+      debug(validation.error);
     }
   }
 }

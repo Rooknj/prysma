@@ -1,6 +1,7 @@
 const Joi = require("@hapi/joi");
 
 // Light Validation Constants
+const lightMutationId = Joi.number();
 const lightId = Joi.string();
 const lightState = Joi.string().valid("OFF", "ON");
 const lightColor = Joi.object().keys({
@@ -44,7 +45,9 @@ const lightUdpPort = Joi.number();
 const connectedMessageSchema = Joi.object()
   .keys({
     name: lightId.required(),
-    connection: Joi.number().valid(0, 2)
+    connection: Joi.number()
+      .valid(0, 2)
+      .required()
   })
   .required();
 
@@ -54,6 +57,7 @@ const validateConnectedMessage = msg =>
 // State Validation
 const stateMessageSchema = Joi.object()
   .keys({
+    mutationId: lightMutationId,
     name: lightId.required(),
     state: lightState.required(),
     color: lightColor.required(),
@@ -111,10 +115,25 @@ const discoveryMessageSchema = Joi.object()
 const validateDiscoveryMessage = msg =>
   Joi.validate(msg, discoveryMessageSchema);
 
+// Command Validation
+const commandMessageSchema = Joi.object()
+  .keys({
+    mutationId: lightMutationId.required(),
+    name: lightId.required(),
+    state: lightState,
+    color: lightColor,
+    brightness: lightBrightness,
+    effect: lightEffect,
+    speed: lightSpeed
+  })
+  .required();
+const validateCommandMessage = msg => Joi.validate(msg, commandMessageSchema);
+
 module.exports = {
   validateConnectedMessage,
   validateStateMessage,
   validateEffectListMessage,
   validateConfigMessage,
-  validateDiscoveryMessage
+  validateDiscoveryMessage,
+  validateCommandMessage
 };

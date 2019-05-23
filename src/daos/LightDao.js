@@ -1,9 +1,11 @@
 const EventEmitter = require("events");
 const Sequelize = require("sequelize");
 const LightModel = require("../models/LightModel");
+const { toLightObject, toLightModel } = require("../utils/lightUtils");
+const { ValidationError } = require("../errors");
 const Debug = require("debug").default;
 
-const debug = Debug("db");
+const debug = Debug("LightDao");
 
 class LightDao extends EventEmitter {
   constructor() {
@@ -16,8 +18,9 @@ class LightDao extends EventEmitter {
     //console.log(Sequelize)
     this._sequelize = new Sequelize({ ...options, logging: false });
     try {
+      debug(`Connecting to Sequelize...`);
       await this._sequelize.authenticate();
-      debug("Connection has been established successfully.");
+      debug("Connected to Sequelize");
       this._models.Light = LightModel(this._sequelize, Sequelize);
       await this._sequelize.sync();
       debug(`Database & tables created!`);
@@ -35,7 +38,7 @@ class LightDao extends EventEmitter {
     } catch (error) {
       throw error;
     }
-    return lights.map(light => light.get({ plain: true }));
+    return lights.map(toLightObject);
   }
 
   async getLight(lightId) {
@@ -47,19 +50,31 @@ class LightDao extends EventEmitter {
       throw error;
     }
     if (!light) throw new Error(`"${lightId}" not found`);
-    return light.get({ plain: true });
+    return toLightObject(light);
   }
 
   async setLight(lightId, lightData) {
     if (!lightId) throw new Error("No ID provided");
     if (!lightData) throw new Error("No Data provided");
+
+    let lightToChange;
     try {
-      const lightToChange = await this._models.Light.findByPk(lightId);
-      if (!lightToChange) throw new Error(`"${lightId}" not found`);
-      await lightToChange.update(lightData);
+      lightToChange = await this._models.Light.findByPk(lightId);
     } catch (error) {
-      // TODO: Handle what happens if findOne errors vs if .destroy() fails
       throw error;
+    }
+    if (!lightToChange) throw new Error(`"${lightId}" not found`);
+
+    try {
+      await lightToChange.update(toLightModel(lightData));
+    } catch (error) {
+      if (error.name === "SequelizeValidationError") {
+        throw new ValidationError(error);
+      } else {
+        // TODO: figure out what other errors can be thrown
+        throw error;
+      }
+      // TODO: Handle what happens if findOne errors vs if .destroy() fails
     }
   }
 
@@ -72,9 +87,14 @@ class LightDao extends EventEmitter {
         name: lightName || lightId
       });
     } catch (error) {
-      throw error;
+      if (error.name === "SequelizeValidationError") {
+        throw new ValidationError(error);
+      } else {
+        // TODO: figure out what other errors can be thrown
+        throw error;
+      }
     }
-    return addedLight.get({ plain: true });
+    return toLightObject(addedLight);
   }
 
   async removeLight(lightId) {
@@ -83,11 +103,15 @@ class LightDao extends EventEmitter {
     try {
       const lightToRemove = await this._models.Light.findByPk(lightId);
       if (!lightToRemove) throw new Error(`"${lightId}" not found`);
+      removedLight = { id: lightToRemove.id, name: lightToRemove.name };
       await lightToRemove.destroy();
-      removedLight = lightId;
     } catch (error) {
+      if (error.name === "SequelizeValidationError") {
+        throw new ValidationError(error);
+      } else {
+        throw error;
+      }
       // TODO: Handle what happens if findOne errors vs if .destroy() fails
-      throw error;
     }
     return removedLight;
   }
