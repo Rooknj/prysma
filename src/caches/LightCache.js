@@ -58,6 +58,8 @@ class LightCache {
   }
 
   async removeDiscoveredLight(lightId) {
+    if (!lightId) throw new Error("No lightId provided");
+
     this._discoveredLights = this._discoveredLights.filter(
       light => light.id !== lightId
     );
