@@ -1,40 +1,19 @@
-const EventEmitter = require("events");
-const Sequelize = require("sequelize");
-const LightModel = require("../models/LightModel");
+const { getDb } = require("../clients/db");
 const { toLightObject, toLightModel } = require("../utils/lightUtils");
 const { ValidationError } = require("../errors");
 const Debug = require("debug").default;
 
 const debug = Debug("LightDao");
 
-class LightDao extends EventEmitter {
+class LightDao {
   constructor() {
-    super();
-    this._sequelize = null;
-    this._models = {};
-  }
-
-  async connect(options) {
-    //console.log(Sequelize)
-    this._sequelize = new Sequelize({ ...options, logging: false });
-    try {
-      debug(`Connecting to Sequelize...`);
-      await this._sequelize.authenticate();
-      debug("Connected to Sequelize");
-      this._models.Light = LightModel(this._sequelize, Sequelize);
-      await this._sequelize.sync();
-      debug(`Database & tables created!`);
-    } catch (error) {
-      // TODO: Handle what happens if authenticate fails vs if sync fails
-      // Note: We are throwing the errors here because the caller will need to handle them
-      throw error;
-    }
+    this._db = getDb();
   }
 
   async getLights() {
     let lights;
     try {
-      lights = await this._models.Light.findAll();
+      lights = await this._db.findAll();
     } catch (error) {
       throw error;
     }
@@ -45,7 +24,7 @@ class LightDao extends EventEmitter {
     if (!lightId) throw new Error("No ID provided");
     let light;
     try {
-      light = await this._models.Light.findByPk(lightId);
+      light = await this._db.findByPk(lightId);
     } catch (error) {
       throw error;
     }
@@ -59,7 +38,7 @@ class LightDao extends EventEmitter {
 
     let lightToChange;
     try {
-      lightToChange = await this._models.Light.findByPk(lightId);
+      lightToChange = await this._db.findByPk(lightId);
     } catch (error) {
       throw error;
     }
@@ -82,7 +61,7 @@ class LightDao extends EventEmitter {
     if (!lightId) throw new Error("No ID provided");
     let addedLight;
     try {
-      addedLight = await this._models.Light.create({
+      addedLight = await this._db.create({
         id: lightId,
         name: lightName || lightId
       });
@@ -101,7 +80,7 @@ class LightDao extends EventEmitter {
     if (!lightId) throw new Error("No ID provided");
     let removedLight;
     try {
-      const lightToRemove = await this._models.Light.findByPk(lightId);
+      const lightToRemove = await this._db.findByPk(lightId);
       if (!lightToRemove) throw new Error(`"${lightId}" not found`);
       removedLight = { id: lightToRemove.id, name: lightToRemove.name };
       await lightToRemove.destroy();

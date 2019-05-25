@@ -24,7 +24,7 @@ class LightService {
   }
 
   async init(config) {
-    const { db, mqtt, cache } = config;
+    const { mqtt, cache } = config;
 
     // Initialize private variables
     this._dao = new LightDao();
@@ -49,10 +49,7 @@ class LightService {
     );
 
     // Connect to db and cache
-    const connectionPromises = [
-      this._dao.connect(db),
-      this._cache.connect(cache)
-    ];
+    const connectionPromises = [this._cache.connect(cache)];
     await Promise.all(connectionPromises);
 
     // Initialize cache

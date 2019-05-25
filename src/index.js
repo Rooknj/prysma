@@ -5,6 +5,7 @@
 const config = require("./config");
 const Server = require("./server");
 const packageJson = require("../package.json");
+const { initDb } = require("./clients/db");
 const LightService = require("./services/LightService");
 const MockLight = require("./MockLight");
 
@@ -32,6 +33,10 @@ const initializeServices = async conf => {
 const start = async () => {
   let services;
   if (!process.env.MOCK) {
+    console.log("Initializing Clients...");
+    await initDb(config.db);
+    console.log("Initialization Complete");
+
     console.log("Initializing Services...");
     services = await initializeServices(config);
     console.log("Initialization Complete");
