@@ -6,6 +6,7 @@ const config = require("./config");
 const Server = require("./server");
 const packageJson = require("../package.json");
 const { initDb } = require("./clients/db");
+const { initMqtt } = require("./clients/mqtt");
 const LightService = require("./services/LightService");
 const MockLight = require("./MockLight");
 
@@ -23,25 +24,23 @@ process.on("unhandledRejection", err => {
   process.exit(1);
 });
 
-const initializeServices = async conf => {
-  // Initialize services
-  const lightService = new LightService();
-  await lightService.init(conf);
-  return { lightService };
-};
-
 const start = async () => {
-  let services;
+  // Initialize all client connections (like database connection)
   if (!process.env.MOCK) {
     console.log("Initializing Clients...");
-    await initDb(config.db);
-    console.log("Initialization Complete");
-
-    console.log("Initializing Services...");
-    services = await initializeServices(config);
+    const clientPromises = [
+      initDb(config.db),
+      initMqtt(config.mqtt.host, config.mqtt.options)
+    ];
+    await Promise.all(clientPromises);
     console.log("Initialization Complete");
   }
 
+  // Initialize our services
+  const lightService = new LightService(config);
+  const services = { lightService };
+
+  // Start the server
   console.log("Starting Server...");
   const server = new Server(services);
   server.start(config.server.port);
