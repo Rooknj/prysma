@@ -25,7 +25,7 @@ const initMqtt = async (host, options = {}) => {
 
 const getMqtt = () => {
   if (!_mqtt)
-    throw new Error("Mqtt has not been initialized. Please called init first.");
+    throw new Error("Mqtt has not been initialized. Please call init first.");
   return _mqtt;
 };
 

@@ -32,7 +32,7 @@ const initDb = async options => {
 
 const getDb = () => {
   if (!_db)
-    throw new Error("Db has not been initialized. Please called init first.");
+    throw new Error("Db has not been initialized. Please call init first.");
   return _db;
 };
 
