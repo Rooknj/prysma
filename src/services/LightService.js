@@ -133,9 +133,6 @@ class LightService {
 
       // Wait for all the promises to resolve
       await Promise.all(subscriptionPromises);
-
-      // Discover any lights
-      await this._messenger.publishDiscovery();
     } catch (error) {
       debug("Error handling Messenger connect", error);
       throw error;
