@@ -3,10 +3,6 @@ const LightDao = require("../daos/LightDao");
 const LightCache = require("../caches/LightCache");
 const mediator = require("./mediator");
 const { getSimpleUniqueId } = require("../utils/lightUtils");
-const serviceConstants = require("./serviceConstants");
-const Debug = require("debug").default;
-
-const debug = Debug("LightService");
 const {
   TIMEOUT_WAIT,
   MUTATION_RESPONSE_EVENT,
@@ -14,7 +10,10 @@ const {
   LIGHT_REMOVED_EVENT,
   LIGHT_CHANGED_EVENT,
   LIGHT_STATE_CHANGED_EVENT
-} = serviceConstants;
+} = require("./serviceConstants");
+const Debug = require("debug").default;
+
+const debug = Debug("LightService");
 
 class LightService {
   constructor(config) {
