@@ -1,7 +1,20 @@
 const LightController = require("./LightMessenger");
 const { ValidationError } = require("../errors");
 
-jest.mock("async-mqtt");
+jest.mock("../clients/mqtt", () => {
+  const getMqtt = jest.fn(() => {
+    return Object.create({
+      on: jest.fn(),
+      subscribe: jest.fn(async topic => [{ topic, qos: 0 }]),
+      publish: jest.fn(async (topic, payload) => {}),
+      unsubscribe: jest.fn(async topic => {}),
+      end: jest.fn(),
+      connected: true
+    });
+  });
+
+  return { getMqtt };
+});
 
 const TOPICS = {
   top: "prysmalight",
@@ -28,55 +41,25 @@ describe("constructor", () => {
   test("properly initializes everything", () => {
     let lightController = new LightController(TOPICS);
 
-    expect(lightController.connected).toBe(false);
+    expect(lightController.connected).toBe(true);
     expect(lightController._topics).toBe(TOPICS);
-    expect(lightController._host).toBe(null);
-    expect(lightController._client).toBe(null);
-  });
-});
-
-describe("connect", () => {
-  test("calls mqtt with the provided arguments", () => {
-    let lightController = new LightController(TOPICS);
-
-    const HOST =
-      `tcp://${process.env.MQTT_HOST}:1883` || "tcp://localhost:1883";
-    const OPTIONS = {
-      reconnectPeriod: 5000, // Amount of time between reconnection attempts
-      username: "pi",
-      password: "MQTTIsBetterThanUDP"
-    };
-    lightController.connect(HOST, OPTIONS);
-    expect(lightController._client.host).toBe(HOST);
-    expect(lightController._client.options).toEqual(OPTIONS);
   });
 
   test("assigns the appropriate listeners to the client", () => {
     let lightController = new LightController(TOPICS);
 
-    const HOST =
-      `tcp://${process.env.MQTT_HOST}:1883` || "tcp://localhost:1883";
-    const OPTIONS = {
-      reconnectPeriod: 5000, // Amount of time between reconnection attempts
-      username: "pi",
-      password: "MQTTIsBetterThanUDP"
-    };
-    lightController.connect(HOST, OPTIONS);
-    expect(lightController._client._events.connect).toBeDefined();
-    expect(lightController._client._events.close).toBeDefined();
-    expect(lightController._client._events.message).toBeDefined();
-  });
-});
-
-describe("end", () => {
-  test("calls _client.end()", () => {
-    let mockClient = createMockClient();
-    let lightController = new LightController(TOPICS);
-    lightController._client = mockClient;
-
-    lightController.end();
-
-    expect(mockClient.end).toBeCalledTimes(1);
+    expect(lightController._client.on).toBeCalledWith(
+      "connect",
+      expect.anything()
+    );
+    expect(lightController._client.on).toBeCalledWith(
+      "close",
+      expect.anything()
+    );
+    expect(lightController._client.on).toBeCalledWith(
+      "message",
+      expect.anything()
+    );
   });
 });
 
