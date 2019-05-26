@@ -85,11 +85,7 @@ class LightDao {
       removedLight = { id: lightToRemove.id, name: lightToRemove.name };
       await lightToRemove.destroy();
     } catch (error) {
-      if (error.name === "SequelizeValidationError") {
-        throw new ValidationError(error);
-      } else {
-        throw error;
-      }
+      throw error;
       // TODO: Handle what happens if findOne errors vs if .destroy() fails
     }
     return removedLight;
