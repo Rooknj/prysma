@@ -68,18 +68,16 @@ class LightCache {
   async getLightState(lightId) {
     if (!lightId) throw new Error("No ID provided");
     const lightState = this._lightStates[lightId];
-    if (!lightState) throw new Error(`${lightId}'s state not found in cache`);
-
-    const validation = validateLightState(lightState);
-    if (!validation) throw new Error(`Error Validating the state`);
-    if (validation.error) throw new ValidationError(validation.error);
+    if (!lightState || Object.entries(lightState).length === 0)
+      throw new Error(`${lightId}'s state not found in cache`);
 
     return Object.assign({}, lightState, { id: lightId });
   }
 
   async setLightState(lightId, lightState) {
     if (!lightId) throw new Error("No ID provided");
-    if (!lightState) throw new Error("No State provided");
+    if (!lightState || Object.entries(lightState).length === 0)
+      throw new Error("No State provided");
 
     const validation = validateLightState(lightState);
     if (validation.error) throw new ValidationError(validation.error);

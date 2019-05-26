@@ -1,6 +1,6 @@
 "use strict";
 const EventEmitter = require("events");
-const mqtt = require("async-mqtt");
+const { getMqtt } = require("../clients/mqtt");
 const {
   validateConnectedMessage,
   validateStateMessage,
@@ -17,38 +17,12 @@ const debug = Debug("LightMessenger");
 class LightMessenger extends EventEmitter {
   constructor(topics) {
     super();
-    this.connected = false;
-    this._client = null;
     this._topics = topics;
-    this._host = null;
-  }
-
-  /**
-   * Connect to the MQTT broker
-   * @param {string} host - MQTT broker host
-   * @param {*} options - MQTT connection options
-   */
-  connect(host, options = {}) {
-    debug(`Connecting to MQTT broker at ${host}...`);
-
-    this._client = mqtt.connect(host, {
-      reconnectPeriod: options.reconnectPeriod, // Amount of time between reconnection attempts
-      username: options.username,
-      password: options.password
-    });
-
-    this._host = host;
-
+    this._client = getMqtt();
+    this.connected = this._client.connected;
     this._client.on("connect", this._handleConnect.bind(this));
     this._client.on("close", this._handleDisconnect.bind(this));
     this._client.on("message", this._handleMessage.bind(this));
-  }
-
-  /**
-   * Disconnects from MQTT broker
-   */
-  end() {
-    return this._client.end();
   }
 
   /**
@@ -185,13 +159,11 @@ class LightMessenger extends EventEmitter {
 
   _handleConnect(data) {
     this.connected = true;
-    debug(`Connected to MQTT broker at ${this._host}`);
     this.emit("connect", data);
   }
 
   _handleDisconnect(data) {
     this.connected = false;
-    debug(`disconnected from MQTT broker at ${this._host}`);
     this.emit("close", data);
   }
 

@@ -3,8 +3,8 @@ const LightDao = require("../daos/LightDao");
 const LightCache = require("../caches/LightCache");
 const mediator = require("./mediator");
 const { getSimpleUniqueId } = require("../utils/lightUtils");
-const Debug = require("debug").default;
 const serviceConstants = require("./serviceConstants");
+const Debug = require("debug").default;
 
 const debug = Debug("LightService");
 const {
@@ -17,14 +17,8 @@ const {
 } = serviceConstants;
 
 class LightService {
-  constructor() {
-    this._dao = undefined;
-    this._messenger = undefined;
-    this._cache = undefined;
-  }
-
-  async init(config) {
-    const { db, mqtt, cache } = config;
+  constructor(config) {
+    const { mqtt } = config;
 
     // Initialize private variables
     this._dao = new LightDao();
@@ -48,21 +42,19 @@ class LightService {
       this._handleDiscoveryMessage.bind(this)
     );
 
-    // Connect to db and cache
-    const connectionPromises = [
-      this._dao.connect(db),
-      this._cache.connect(cache)
-    ];
-    await Promise.all(connectionPromises);
+    this._init();
+  }
 
+  async _init() {
     // Initialize cache
     const lights = await this._dao.getLights();
     lights.forEach(({ id }) => {
       this._cache.initializeLightState(id);
     });
 
-    // Connect to messenger
-    this._messenger.connect(mqtt.host, mqtt.options);
+    if (this._messenger.connected) {
+      this._handleMessengerConnect();
+    }
   }
 
   async getLight(lightId) {

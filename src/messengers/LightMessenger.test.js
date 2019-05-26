@@ -1,7 +1,20 @@
-const LightController = require("./LightMessenger");
+const LightMessenger = require("./LightMessenger");
 const { ValidationError } = require("../errors");
 
-jest.mock("async-mqtt");
+jest.mock("../clients/mqtt", () => {
+  const getMqtt = jest.fn(() => {
+    return Object.create({
+      on: jest.fn(),
+      subscribe: jest.fn(async topic => [{ topic, qos: 0 }]),
+      publish: jest.fn(async (topic, payload) => {}),
+      unsubscribe: jest.fn(async topic => {}),
+      end: jest.fn(),
+      connected: true
+    });
+  });
+
+  return { getMqtt };
+});
 
 const TOPICS = {
   top: "prysmalight",
@@ -26,72 +39,42 @@ const createMockClient = () => {
 
 describe("constructor", () => {
   test("properly initializes everything", () => {
-    let lightController = new LightController(TOPICS);
+    let lightMessenger = new LightMessenger(TOPICS);
 
-    expect(lightController.connected).toBe(false);
-    expect(lightController._topics).toBe(TOPICS);
-    expect(lightController._host).toBe(null);
-    expect(lightController._client).toBe(null);
-  });
-});
-
-describe("connect", () => {
-  test("calls mqtt with the provided arguments", () => {
-    let lightController = new LightController(TOPICS);
-
-    const HOST =
-      `tcp://${process.env.MQTT_HOST}:1883` || "tcp://localhost:1883";
-    const OPTIONS = {
-      reconnectPeriod: 5000, // Amount of time between reconnection attempts
-      username: "pi",
-      password: "MQTTIsBetterThanUDP"
-    };
-    lightController.connect(HOST, OPTIONS);
-    expect(lightController._client.host).toBe(HOST);
-    expect(lightController._client.options).toEqual(OPTIONS);
+    expect(lightMessenger.connected).toBe(true);
+    expect(lightMessenger._topics).toBe(TOPICS);
   });
 
   test("assigns the appropriate listeners to the client", () => {
-    let lightController = new LightController(TOPICS);
+    let lightMessenger = new LightMessenger(TOPICS);
 
-    const HOST =
-      `tcp://${process.env.MQTT_HOST}:1883` || "tcp://localhost:1883";
-    const OPTIONS = {
-      reconnectPeriod: 5000, // Amount of time between reconnection attempts
-      username: "pi",
-      password: "MQTTIsBetterThanUDP"
-    };
-    lightController.connect(HOST, OPTIONS);
-    expect(lightController._client._events.connect).toBeDefined();
-    expect(lightController._client._events.close).toBeDefined();
-    expect(lightController._client._events.message).toBeDefined();
-  });
-});
-
-describe("end", () => {
-  test("calls _client.end()", () => {
-    let mockClient = createMockClient();
-    let lightController = new LightController(TOPICS);
-    lightController._client = mockClient;
-
-    lightController.end();
-
-    expect(mockClient.end).toBeCalledTimes(1);
+    expect(lightMessenger._client.on).toBeCalledWith(
+      "connect",
+      expect.anything()
+    );
+    expect(lightMessenger._client.on).toBeCalledWith(
+      "close",
+      expect.anything()
+    );
+    expect(lightMessenger._client.on).toBeCalledWith(
+      "message",
+      expect.anything()
+    );
   });
 });
 
 describe("subscribeToLight", () => {
   test("Subscribes to all the correct topics (Example 1)", async () => {
-    // Create the client and lightController
+    // Create the client and lightMessenger
     let mockClient = createMockClient();
-    let lightController = new LightController(TOPICS);
-    lightController._client = mockClient;
-    lightController.connected = true;
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger._client = mockClient;
+    lightMessenger.connected = true;
 
     const ID = "Test A";
 
     // Call The Method
-    await lightController.subscribeToLight(ID);
+    await lightMessenger.subscribeToLight(ID);
 
     // Test
     expect(mockClient.subscribe).toBeCalledTimes(4);
@@ -109,16 +92,16 @@ describe("subscribeToLight", () => {
     );
   });
   test("Subscribes to all the correct topics (Example 2)", async () => {
-    // Create the client and lightController
+    // Create the client and lightMessenger
     let mockClient = createMockClient();
-    let lightController = new LightController(TOPICS);
-    lightController._client = mockClient;
-    lightController.connected = true;
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger._client = mockClient;
+    lightMessenger.connected = true;
 
     const ID = "Test 123";
 
     // Call The Method
-    await lightController.subscribeToLight(ID);
+    await lightMessenger.subscribeToLight(ID);
 
     // Test
     expect(mockClient.subscribe).toBeCalledTimes(4);
@@ -136,73 +119,63 @@ describe("subscribeToLight", () => {
     );
   });
   test("rejects if the client is not connected", async () => {
-    // Create the client and lightController
+    // Create the client and lightMessenger
     let mockClient = createMockClient();
-    let lightController = new LightController(TOPICS);
-    lightController._client = mockClient;
-    lightController.connected = false;
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger._client = mockClient;
+    lightMessenger.connected = false;
 
     const ID = "Test A";
 
-    // Call The Method
-    try {
-      await lightController.subscribeToLight(ID);
-    } catch (error) {
-      // Test
-      expect(error).toBeInstanceOf(Error);
-    }
+    const messengerPromise = lightMessenger.subscribeToLight(ID);
+
+    await expect(messengerPromise).rejects.toThrow(Error);
   });
   test("rejects if it fails to subscribe to at least one topic", async () => {
-    // Create the client and lightController
+    // Create the client and lightMessenger
     let mockClient = createMockClient();
     mockClient.subscribe = jest.fn(async () => {
       throw new Error();
     });
-    let lightController = new LightController(TOPICS);
-    lightController._client = mockClient;
-    lightController.connected = true;
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger._client = mockClient;
+    lightMessenger.connected = true;
 
     const ID = "Test A";
 
     // Call The Method
-    try {
-      await lightController.subscribeToLight(ID);
-    } catch (error) {
-      // Test
-      expect(error).toBeInstanceOf(Error);
-      expect(mockClient.subscribe).toBeCalled();
-    }
+    const messengerPromise = lightMessenger.subscribeToLight(ID);
+
+    await expect(messengerPromise).rejects.toThrow(Error);
+    expect(mockClient.subscribe).toBeCalled();
   });
   test("rejects if no id was provided", async () => {
-    // Create the client and lightController
+    // Create the client and lightMessenger
     let mockClient = createMockClient();
-    let lightController = new LightController(TOPICS);
-    lightController._client = mockClient;
-    lightController.connected = true;
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger._client = mockClient;
+    lightMessenger.connected = true;
 
     // Call The Method
-    try {
-      await lightController.subscribeToLight();
-    } catch (error) {
-      // Test
-      expect(error).toBeInstanceOf(Error);
-    }
+    const messengerPromise = lightMessenger.subscribeToLight();
+
+    await expect(messengerPromise).rejects.toThrow(Error);
   });
 });
 
 describe("publishToLight", () => {
   test("Publishes the message to the correct topic as a buffer (Example 1)", async () => {
-    // Create the client and lightController
+    // Create the client and lightMessenger
     let mockClient = createMockClient();
-    let lightController = new LightController(TOPICS);
-    lightController._client = mockClient;
-    lightController.connected = true;
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger._client = mockClient;
+    lightMessenger.connected = true;
 
     const ID = "Test A";
     const MESSAGE = { mutationId: 9, name: ID, brightness: 40 };
 
     // Call The Method
-    await lightController.publishToLight(ID, MESSAGE);
+    await lightMessenger.publishToLight(ID, MESSAGE);
 
     // Test
     expect(mockClient.publish).toBeCalledTimes(1);
@@ -212,17 +185,17 @@ describe("publishToLight", () => {
     );
   });
   test("Publishes the message to the correct topic as a buffer (Example 2)", async () => {
-    // Create the client and lightController
+    // Create the client and lightMessenger
     let mockClient = createMockClient();
-    let lightController = new LightController(TOPICS);
-    lightController._client = mockClient;
-    lightController.connected = true;
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger._client = mockClient;
+    lightMessenger.connected = true;
 
     const ID = "Test A";
     const MESSAGE = { mutationId: 9, name: ID, effect: "Cylon" };
 
     // Call The Method
-    await lightController.publishToLight(ID, MESSAGE);
+    await lightMessenger.publishToLight(ID, MESSAGE);
 
     // Test
     expect(mockClient.publish).toBeCalledTimes(1);
@@ -232,112 +205,101 @@ describe("publishToLight", () => {
     );
   });
   test("rejects if the client is not connected", async () => {
-    // Create the client and lightController
+    // Create the client and lightMessenger
     let mockClient = createMockClient();
-    let lightController = new LightController(TOPICS);
-    lightController._client = mockClient;
-    lightController.connected = false;
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger._client = mockClient;
+    lightMessenger.connected = false;
 
     const ID = "Test A";
     const MESSAGE = { mutationId: 9, name: ID, effect: "Cylon" };
 
     // Call The Method
-    try {
-      await lightController.publishToLight(ID, MESSAGE);
-    } catch (error) {
-      // Test
-      expect(error).toBeInstanceOf(Error);
-    }
+    const messengerPromise = lightMessenger.publishToLight(ID, MESSAGE);
+
+    await expect(messengerPromise).rejects.toThrow(Error);
   });
   test("rejects if the client fails to publish", async () => {
-    // Create the client and lightController
+    // Create the client and lightMessenger
     let mockClient = createMockClient();
     mockClient.publish = jest.fn(() => {
       throw new Error();
     });
-    let lightController = new LightController(TOPICS);
-    lightController._client = mockClient;
-    lightController.connected = true;
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger._client = mockClient;
+    lightMessenger.connected = true;
 
     const ID = "Test A";
     const MESSAGE = { mutationId: 9, name: ID, effect: "Cylon" };
 
     // Call The Method
-    try {
-      await lightController.publishToLight(ID, MESSAGE);
-    } catch (error) {
-      // Test
-      expect(error).toBeInstanceOf(Error);
-      expect(mockClient.publish).toBeCalled();
-    }
+    const messengerPromise = lightMessenger.publishToLight(ID, MESSAGE);
+
+    // Test
+    await expect(messengerPromise).rejects.toThrow(Error);
+    expect(mockClient.publish).toBeCalled();
   });
   test("rejects if no id was provided", async () => {
-    // Create the client and lightController
+    // Create the client and lightMessenger
     let mockClient = createMockClient();
-    let lightController = new LightController(TOPICS);
-    lightController._client = mockClient;
-    lightController.connected = true;
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger._client = mockClient;
+    lightMessenger.connected = true;
 
     const ID = null;
     const MESSAGE = { mutationId: 9, name: ID, effect: "Cylon" };
 
     // Call The Method
-    try {
-      await lightController.publishToLight(ID, MESSAGE);
-    } catch (error) {
-      // Test
-      expect(error).toBeInstanceOf(Error);
-    }
+    const messengerPromise = lightMessenger.publishToLight(ID, MESSAGE);
+
+    // Test
+    await expect(messengerPromise).rejects.toThrow(Error);
   });
   test("rejects if no message was provided", async () => {
-    // Create the client and lightController
+    // Create the client and lightMessenger
     let mockClient = createMockClient();
-    let lightController = new LightController(TOPICS);
-    lightController._client = mockClient;
-    lightController.connected = true;
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger._client = mockClient;
+    lightMessenger.connected = true;
 
     const ID = "Test A";
 
     // Call The Method
-    try {
-      await lightController.publishToLight(ID);
-    } catch (error) {
-      // Test
-      expect(error).toBeInstanceOf(Error);
-    }
+    const messengerPromise = lightMessenger.publishToLight(ID);
+
+    // Test
+    await expect(messengerPromise).rejects.toThrow(Error);
   });
   test("rejects if the message fails verification", async () => {
-    // Create the client and lightController
+    // Create the client and lightMessenger
     let mockClient = createMockClient();
-    let lightController = new LightController(TOPICS);
-    lightController._client = mockClient;
-    lightController.connected = true;
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger._client = mockClient;
+    lightMessenger.connected = true;
 
     const ID = "Test A";
     const MESSAGE = { mutationId: 9, name: ID, effect: 123456 };
 
     // Call The Method
-    try {
-      await lightController.publishToLight(ID, MESSAGE);
-    } catch (error) {
-      // Test
-      expect(error).toBeInstanceOf(ValidationError);
-    }
+    const messengerPromise = lightMessenger.publishToLight(ID, MESSAGE);
+
+    // Test
+    await expect(messengerPromise).rejects.toThrow(ValidationError);
   });
 });
 
 describe("unsubscribeFromLight", () => {
   test("Unsubscribes from all the correct topics (Example 1)", async () => {
-    // Create the client and lightController
+    // Create the client and lightMessenger
     let mockClient = createMockClient();
-    let lightController = new LightController(TOPICS);
-    lightController._client = mockClient;
-    lightController.connected = true;
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger._client = mockClient;
+    lightMessenger.connected = true;
 
     const ID = "Test A";
 
     // Call The Method
-    await lightController.unsubscribeFromLight(ID);
+    await lightMessenger.unsubscribeFromLight(ID);
 
     // Test
     expect(mockClient.unsubscribe).toBeCalledTimes(4);
@@ -355,16 +317,16 @@ describe("unsubscribeFromLight", () => {
     );
   });
   test("Unsubscribes from all the correct topics (Example 2)", async () => {
-    // Create the client and lightController
+    // Create the client and lightMessenger
     let mockClient = createMockClient();
-    let lightController = new LightController(TOPICS);
-    lightController._client = mockClient;
-    lightController.connected = true;
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger._client = mockClient;
+    lightMessenger.connected = true;
 
     const ID = "Test 123";
 
     // Call The Method
-    await lightController.unsubscribeFromLight(ID);
+    await lightMessenger.unsubscribeFromLight(ID);
 
     // Test
     expect(mockClient.unsubscribe).toBeCalledTimes(4);
@@ -382,119 +344,115 @@ describe("unsubscribeFromLight", () => {
     );
   });
   test("does not reject if the client is not connected", async () => {
-    // Create the client and lightController
+    // Create the client and lightMessenger
     let mockClient = createMockClient();
-    let lightController = new LightController(TOPICS);
-    lightController._client = mockClient;
-    lightController.connected = false;
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger._client = mockClient;
+    lightMessenger.connected = false;
 
     const ID = "Test A";
 
     // Call The Method
-    await lightController.unsubscribeFromLight(ID);
+    await lightMessenger.unsubscribeFromLight(ID);
   });
   test("rejects if it fails to unsubscribe from at least one topic", async () => {
-    // Create the client and lightController
+    // Create the client and lightMessenger
     let mockClient = createMockClient();
     mockClient.unsubscribe = jest.fn(async () => {
       throw new Error();
     });
-    let lightController = new LightController(TOPICS);
-    lightController._client = mockClient;
-    lightController.connected = true;
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger._client = mockClient;
+    lightMessenger.connected = true;
 
     const ID = "Test A";
 
     // Call The Method
-    try {
-      await lightController.unsubscribeFromLight(ID);
-    } catch (error) {
-      // Test
-      expect(error).toBeInstanceOf(Error);
-      expect(mockClient.unsubscribe).toBeCalled();
-    }
+    const messengerPromise = lightMessenger.unsubscribeFromLight(ID);
+
+    // Test
+    await expect(messengerPromise).rejects.toThrow(Error);
+    expect(mockClient.unsubscribe).toBeCalled();
   });
   test("rejects if no id was provided", async () => {
-    // Create the client and lightController
+    // Create the client and lightMessenger
     let mockClient = createMockClient();
-    let lightController = new LightController(TOPICS);
-    lightController._client = mockClient;
-    lightController.connected = true;
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger._client = mockClient;
+    lightMessenger.connected = true;
 
     // Call The Method
-    try {
-      await lightController.unsubscribeFromLight();
-    } catch (error) {
-      // Test
-      expect(error).toBeInstanceOf(Error);
-    }
+    const messengerPromise = lightMessenger.unsubscribeFromLight();
+
+    // Test
+    await expect(messengerPromise).rejects.toThrow(Error);
   });
 });
 
 describe("_handleConnect", () => {
   test("sets connected to true", () => {
-    let lightController = new LightController(TOPICS);
+    let lightMessenger = new LightMessenger(TOPICS);
 
-    lightController._handleConnect();
+    lightMessenger._handleConnect();
 
-    expect(lightController.connected).toBe(true);
+    expect(lightMessenger.connected).toBe(true);
   });
 
   test("emits connect", () => {
-    let lightController = new LightController(TOPICS);
-    lightController.__proto__.emit = jest.fn();
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger.__proto__.emit = jest.fn();
 
     const DATA = {
       data: "123"
     };
-    lightController._handleConnect(DATA);
+    lightMessenger._handleConnect(DATA);
 
-    expect(lightController.__proto__.emit).toBeCalledWith("connect", DATA);
+    expect(lightMessenger.__proto__.emit).toBeCalledWith("connect", DATA);
   });
 });
 
 describe("_handleDisconnect", () => {
   test("sets connected to false", () => {
-    let lightController = new LightController(TOPICS);
-    lightController.connected = true;
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger.connected = true;
 
-    lightController._handleDisconnect();
+    lightMessenger._handleDisconnect();
 
-    expect(lightController.connected).toBe(false);
+    expect(lightMessenger.connected).toBe(false);
   });
 
   test("emits close", () => {
-    let lightController = new LightController(TOPICS);
-    lightController.__proto__.emit = jest.fn();
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger.__proto__.emit = jest.fn();
 
     const DATA = {
       data: "123"
     };
-    lightController._handleDisconnect(DATA);
+    lightMessenger._handleDisconnect(DATA);
 
-    expect(lightController.__proto__.emit).toBeCalledWith("close", DATA);
+    expect(lightMessenger.__proto__.emit).toBeCalledWith("close", DATA);
   });
 });
 
 describe("_handleMessage", () => {
   test("emits connectedMessage on a connected message", () => {
-    let lightController = new LightController(TOPICS);
-    lightController.__proto__.emit = jest.fn();
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test/${TOPICS.connected}`;
     const data = { name: "Prysma-807D3A41B465", connection: 2 };
     const message = Buffer.from(JSON.stringify(data));
-    lightController._handleMessage(topic, message);
+    lightMessenger._handleMessage(topic, message);
 
-    expect(lightController.__proto__.emit).toBeCalledWith(
+    expect(lightMessenger.__proto__.emit).toBeCalledWith(
       "connectedMessage",
       data
     );
   });
 
   test("emits stateMessage on a state message", () => {
-    let lightController = new LightController(TOPICS);
-    lightController.__proto__.emit = jest.fn();
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test/${TOPICS.state}`;
     const data = {
@@ -506,14 +464,14 @@ describe("_handleMessage", () => {
       speed: 4
     };
     const message = Buffer.from(JSON.stringify(data));
-    lightController._handleMessage(topic, message);
+    lightMessenger._handleMessage(topic, message);
 
-    expect(lightController.__proto__.emit).toBeCalledWith("stateMessage", data);
+    expect(lightMessenger.__proto__.emit).toBeCalledWith("stateMessage", data);
   });
 
   test("emits effectListMessage on an effect list message", () => {
-    let lightController = new LightController(TOPICS);
-    lightController.__proto__.emit = jest.fn();
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test/${TOPICS.effectList}`;
     const data = {
@@ -535,17 +493,17 @@ describe("_handleMessage", () => {
       ]
     };
     const message = Buffer.from(JSON.stringify(data));
-    lightController._handleMessage(topic, message);
+    lightMessenger._handleMessage(topic, message);
 
-    expect(lightController.__proto__.emit).toBeCalledWith(
+    expect(lightMessenger.__proto__.emit).toBeCalledWith(
       "effectListMessage",
       data
     );
   });
 
   test("emits configMessage on a config message", () => {
-    let lightController = new LightController(TOPICS);
-    lightController.__proto__.emit = jest.fn();
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test/${TOPICS.config}`;
     const data = {
@@ -561,17 +519,14 @@ describe("_handleMessage", () => {
       udpPort: 7778
     };
     const message = Buffer.from(JSON.stringify(data));
-    lightController._handleMessage(topic, message);
+    lightMessenger._handleMessage(topic, message);
 
-    expect(lightController.__proto__.emit).toBeCalledWith(
-      "configMessage",
-      data
-    );
+    expect(lightMessenger.__proto__.emit).toBeCalledWith("configMessage", data);
   });
 
   test("emits discoveryMessage on a discovery message", () => {
-    let lightController = new LightController(TOPICS);
-    lightController.__proto__.emit = jest.fn();
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test/${TOPICS.discoveryResponse}`;
     const data = {
@@ -587,120 +542,120 @@ describe("_handleMessage", () => {
       udpPort: 7778
     };
     const message = Buffer.from(JSON.stringify(data));
-    lightController._handleMessage(topic, message);
+    lightMessenger._handleMessage(topic, message);
 
-    expect(lightController.__proto__.emit).toBeCalledWith(
+    expect(lightMessenger.__proto__.emit).toBeCalledWith(
       "discoveryMessage",
       data
     );
   });
 
   test("does not emit anything on a bad connected message", () => {
-    let lightController = new LightController(TOPICS);
-    lightController.__proto__.emit = jest.fn();
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test/${TOPICS.connected}`;
     const data = {};
     const message = Buffer.from(JSON.stringify(data));
-    lightController._handleMessage(topic, message);
+    lightMessenger._handleMessage(topic, message);
 
-    expect(lightController.__proto__.emit).not.toBeCalled();
+    expect(lightMessenger.__proto__.emit).not.toBeCalled();
   });
 
   test("does not emit anything on a bad state message", () => {
-    let lightController = new LightController(TOPICS);
-    lightController.__proto__.emit = jest.fn();
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test/${TOPICS.state}`;
     const data = {};
     const message = Buffer.from(JSON.stringify(data));
-    lightController._handleMessage(topic, message);
+    lightMessenger._handleMessage(topic, message);
 
-    expect(lightController.__proto__.emit).not.toBeCalled();
+    expect(lightMessenger.__proto__.emit).not.toBeCalled();
   });
 
   test("does not emit anything on a bad effect list message", () => {
-    let lightController = new LightController(TOPICS);
-    lightController.__proto__.emit = jest.fn();
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test/${TOPICS.effectList}`;
     const data = {};
     const message = Buffer.from(JSON.stringify(data));
-    lightController._handleMessage(topic, message);
+    lightMessenger._handleMessage(topic, message);
 
-    expect(lightController.__proto__.emit).not.toBeCalled();
+    expect(lightMessenger.__proto__.emit).not.toBeCalled();
   });
 
   test("does not emit anything on a bad config message", () => {
-    let lightController = new LightController(TOPICS);
-    lightController.__proto__.emit = jest.fn();
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test/${TOPICS.config}`;
     const data = {};
     const message = Buffer.from(JSON.stringify(data));
-    lightController._handleMessage(topic, message);
+    lightMessenger._handleMessage(topic, message);
 
-    expect(lightController.__proto__.emit).not.toBeCalled();
+    expect(lightMessenger.__proto__.emit).not.toBeCalled();
   });
 
   test("does not emit anything on a bad discovery message", () => {
-    let lightController = new LightController(TOPICS);
-    lightController.__proto__.emit = jest.fn();
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test/${TOPICS.discoveryResponse}`;
     const data = {};
     const message = Buffer.from(JSON.stringify(data));
-    lightController._handleMessage(topic, message);
+    lightMessenger._handleMessage(topic, message);
 
-    expect(lightController.__proto__.emit).not.toBeCalled();
+    expect(lightMessenger.__proto__.emit).not.toBeCalled();
   });
 
   test("does not emit anything on an unrelated top level topic", () => {
-    let lightController = new LightController(TOPICS);
-    lightController.__proto__.emit = jest.fn();
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger.__proto__.emit = jest.fn();
 
     const topic = `unrelated/test/${TOPICS.state}`;
     const data = {};
     const message = Buffer.from(JSON.stringify(data));
-    lightController._handleMessage(topic, message);
+    lightMessenger._handleMessage(topic, message);
 
-    expect(lightController.__proto__.emit).not.toBeCalled();
+    expect(lightMessenger.__proto__.emit).not.toBeCalled();
   });
 
   test("does not emit anything on an unrelated bottom level topic", () => {
-    let lightController = new LightController(TOPICS);
-    lightController.__proto__.emit = jest.fn();
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test/unrelated`;
     const data = {};
     const message = Buffer.from(JSON.stringify(data));
-    lightController._handleMessage(topic, message);
+    lightMessenger._handleMessage(topic, message);
 
-    expect(lightController.__proto__.emit).not.toBeCalled();
+    expect(lightMessenger.__proto__.emit).not.toBeCalled();
   });
 
   test("does not emit anything on a too short topic", () => {
-    let lightController = new LightController(TOPICS);
-    lightController.__proto__.emit = jest.fn();
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger.__proto__.emit = jest.fn();
 
     const topic = `${TOPICS.top}/test`;
     const data = {};
     const message = Buffer.from(JSON.stringify(data));
-    lightController._handleMessage(topic, message);
+    lightMessenger._handleMessage(topic, message);
 
-    expect(lightController.__proto__.emit).not.toBeCalled();
+    expect(lightMessenger.__proto__.emit).not.toBeCalled();
   });
 });
 
 describe("startDiscovery", () => {
   test("subscribes to the discovery response topic", async () => {
     let mockClient = createMockClient();
-    let lightController = new LightController(TOPICS);
-    lightController._client = mockClient;
-    lightController.connected = true;
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger._client = mockClient;
+    lightMessenger.connected = true;
 
     // Call The Method
-    await lightController.startDiscovery();
+    await lightMessenger.startDiscovery();
 
     // Test
     expect(mockClient.subscribe).toBeCalledTimes(1);
@@ -713,12 +668,12 @@ describe("startDiscovery", () => {
 describe("stopDiscovery", () => {
   test("unsubscribes from the discovery response topic", async () => {
     let mockClient = createMockClient();
-    let lightController = new LightController(TOPICS);
-    lightController._client = mockClient;
-    lightController.connected = true;
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger._client = mockClient;
+    lightMessenger.connected = true;
 
     // Call The Method
-    await lightController.stopDiscovery();
+    await lightMessenger.stopDiscovery();
 
     // Test
     expect(mockClient.unsubscribe).toBeCalledTimes(1);
@@ -731,12 +686,12 @@ describe("stopDiscovery", () => {
 describe("publishDiscovery", () => {
   test("publishes to the discovery topic", async () => {
     let mockClient = createMockClient();
-    let lightController = new LightController(TOPICS);
-    lightController._client = mockClient;
-    lightController.connected = true;
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger._client = mockClient;
+    lightMessenger.connected = true;
 
     // Call The Method
-    await lightController.publishDiscovery();
+    await lightMessenger.publishDiscovery();
 
     // Test
     expect(mockClient.publish).toBeCalledTimes(1);
