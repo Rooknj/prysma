@@ -16,15 +16,29 @@ const Debug = require("debug").default;
 const debug = Debug("LightService");
 
 class LightService {
-  constructor(config) {
+  constructor(config = { mqtt: {} }) {
     const { mqtt } = config;
 
     // Initialize private variables
     this._dao = new LightDao();
     this._messenger = new LightMessenger(mqtt.topics);
     this._cache = new LightCache();
+  }
 
-    // Add Event Listeners
+  async init() {
+    // Initialize cache
+    const lights = await this._dao.getLights();
+    const cacheInitPromises = lights.map(({ id }) => {
+      this._cache.initializeLightState(id);
+    });
+    await Promise.all(cacheInitPromises);
+
+    // Handle connect if the messenger was already connected
+    if (this._messenger.connected) {
+      this._handleMessengerConnect();
+    }
+
+    // Add Event Listeners (This cant be done until everything is set up)
     this._messenger.on("connect", this._handleMessengerConnect.bind(this));
     this._messenger.on(
       "connectedMessage",
@@ -40,20 +54,6 @@ class LightService {
       "discoveryMessage",
       this._handleDiscoveryMessage.bind(this)
     );
-
-    this._init();
-  }
-
-  async _init() {
-    // Initialize cache
-    const lights = await this._dao.getLights();
-    lights.forEach(({ id }) => {
-      this._cache.initializeLightState(id);
-    });
-
-    if (this._messenger.connected) {
-      this._handleMessengerConnect();
-    }
   }
 
   async getLight(lightId) {

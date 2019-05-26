@@ -38,6 +38,8 @@ const start = async () => {
 
   // Initialize our services
   const lightService = new LightService(config);
+  const serviceInitPromises = [lightService.init()];
+  await Promise.all(serviceInitPromises);
   const services = { lightService };
 
   // Start the server
