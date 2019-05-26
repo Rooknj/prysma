@@ -3,10 +3,10 @@ const {
   validateDiscoveredLight
 } = require("../validators/cacheValidators");
 const errors = require("../errors");
-const Debug = require("debug").default;
+//const Debug = require("debug").default;
 
 const { ValidationError } = errors;
-const debug = Debug("LightCache");
+//const debug = Debug("LightCache");
 
 class LightCache {
   constructor() {
@@ -24,12 +24,6 @@ class LightCache {
       effect: "None",
       speed: 4
     };
-  }
-
-  async connect(options) {
-    debug(`Connecting to Cache with options ${options}...`);
-    debug(`Connected to Cache`);
-    return;
   }
 
   async getDiscoveredLights() {
