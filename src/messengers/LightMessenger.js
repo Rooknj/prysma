@@ -71,6 +71,7 @@ class LightMessenger extends EventEmitter {
    */
   async unsubscribeFromLight(lightId) {
     if (!this.connected) {
+      debug(`Already unsubscribed from ${lightId} due to disconnect`);
       return;
     }
 
