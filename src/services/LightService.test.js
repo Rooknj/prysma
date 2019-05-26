@@ -88,6 +88,11 @@ beforeEach(() => {
   LightMessenger.mockClear();
   LightDao.mockClear();
   LightCache.mockClear();
+  mediator.emit.mockClear();
+  mediator.on.mockClear();
+  mediator.once.mockClear();
+  mediator.addListener.mockClear();
+  mediator.removeListener.mockClear();
 });
 
 describe("constructor", () => {
@@ -249,7 +254,89 @@ describe.skip("getDiscoveredLights", () => {
 });
 
 describe("setLight", () => {
-  test("does a thing", async () => {});
+  test("sets the light to the new data in the database", async () => {
+    const lightService = new LightService();
+    lightService._dao.setLight = jest.fn();
+    const ID = "Prysma-12345";
+    const DATA = { name: "Hello2" };
+
+    await lightService.setLight(ID, DATA);
+
+    expect(lightService._dao.setLight).toBeCalledWith(ID, DATA);
+  });
+  test("returns the set light from the database", async () => {
+    const lightService = new LightService();
+    lightService._dao.getLight = jest.fn(() => MOCK_LIGHT);
+    const ID = "Prysma-12345";
+    const DATA = { name: "Hello2" };
+
+    const changedLight = await lightService.setLight(ID, DATA);
+
+    expect(lightService._dao.getLight).toBeCalledWith(ID);
+    expect(changedLight).toBe(MOCK_LIGHT);
+  });
+  test("notifies listeners about the new light", async () => {
+    const lightService = new LightService();
+    lightService._dao.getLight = jest.fn(() => MOCK_LIGHT);
+    const ID = "Prysma-12345";
+    const DATA = { name: "Hello2" };
+
+    await lightService.setLight(ID, DATA);
+
+    expect(mediator.emit).toBeCalledWith(LIGHT_CHANGED_EVENT, MOCK_LIGHT);
+  });
+  test("does not notify listeners about the new light if it cant set the light", async () => {
+    const lightService = new LightService();
+    lightService._dao.setLight = jest.fn(async () => {
+      throw new Error();
+    });
+    const ID = "Prysma-12345";
+    const DATA = { name: "Hello2" };
+
+    const servicePromise = lightService.setLight(ID, DATA);
+
+    await expect(servicePromise).rejects;
+    expect(mediator.emit).not.toBeCalled();
+  });
+  test("does not notify listeners about the new light if it cant retrieve the set light", async () => {
+    const lightService = new LightService();
+    lightService._dao.getLight = jest.fn(async () => {
+      throw new Error();
+    });
+    const ID = "Prysma-12345";
+    const DATA = { name: "Hello2" };
+
+    const servicePromise = lightService.setLight(ID, DATA);
+
+    await expect(servicePromise).rejects;
+    expect(mediator.emit).not.toBeCalled();
+  });
+  test("rejects if setting the light fails", async () => {
+    const lightService = new LightService();
+    const ERROR_MESSAGE = "Mock Error";
+    lightService._dao.setLight = jest.fn(async () => {
+      throw new Error(ERROR_MESSAGE);
+    });
+    const ID = "Prysma-12345";
+    const DATA = { name: "Hello2" };
+
+    const servicePromise = lightService.setLight(ID, DATA);
+
+    await expect(servicePromise).rejects.toThrow(ERROR_MESSAGE);
+  });
+  test("rejects if retrieving the set light fails", async () => {
+    const lightService = new LightService();
+    const ERROR_MESSAGE = "Mock Error";
+    lightService._dao.getLight = jest.fn(async () => {
+      throw new Error(ERROR_MESSAGE);
+    });
+    const ID = "Prysma-12345";
+    const DATA = { name: "Hello2" };
+
+    const servicePromise = lightService.setLight(ID, DATA);
+
+    await expect(servicePromise).rejects.toThrow(ERROR_MESSAGE);
+  });
 });
 
 describe("addLight", () => {
