@@ -88,18 +88,24 @@ class LightService {
       ({ name } = lightData);
     }
 
-    // TODO: Dont await all these and do promise.all
     // Add new light to light database
     await this._dao.addLight(lightId, name);
 
-    // Add a default state to the light
-    await this._cache.initializeLightState(lightId);
+    const addPromises = [
+      // Add a default state to the light
+      this._cache.initializeLightState(lightId),
+      // Remove the light from the discoveredLights list
+      this._cache.removeDiscoveredLight(lightId),
+      // Subscribe to new messages from the new light
+      this._messenger.subscribeToLight(lightId)
+    ];
 
-    // Remove the light from the discoveredLights list
-    await this._cache.removeDiscoveredLight(lightId);
-
-    // Subscribe to new messages from the new light
-    await this._messenger.subscribeToLight(lightId);
+    try {
+      await Promise.all(addPromises);
+    } catch (error) {
+      // TODO: Figure out what to do if any of these error
+      debug(error);
+    }
 
     // Get the newly added light, notify any listeners, and return it
     const lightAdded = await this.getLight(lightId);

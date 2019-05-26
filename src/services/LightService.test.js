@@ -285,7 +285,7 @@ describe("setLight", () => {
 
     expect(mediator.emit).toBeCalledWith(LIGHT_CHANGED_EVENT, MOCK_LIGHT);
   });
-  test("does not notify listeners about the new light if it cant set the light", async () => {
+  test("does not notify listeners about the changed light if it cant set the light", async () => {
     const lightService = new LightService();
     lightService._dao.setLight = jest.fn(async () => {
       throw new Error();
@@ -295,10 +295,10 @@ describe("setLight", () => {
 
     const servicePromise = lightService.setLight(ID, DATA);
 
-    await expect(servicePromise).rejects;
+    await expect(servicePromise).rejects.toThrow(Error);
     expect(mediator.emit).not.toBeCalled();
   });
-  test("does not notify listeners about the new light if it cant retrieve the set light", async () => {
+  test("does not notify listeners about the changed light if it cant retrieve the set light", async () => {
     const lightService = new LightService();
     lightService._dao.getLight = jest.fn(async () => {
       throw new Error();
@@ -308,7 +308,7 @@ describe("setLight", () => {
 
     const servicePromise = lightService.setLight(ID, DATA);
 
-    await expect(servicePromise).rejects;
+    await expect(servicePromise).rejects.toThrow(Error);
     expect(mediator.emit).not.toBeCalled();
   });
   test("rejects if setting the light fails", async () => {
@@ -340,7 +340,121 @@ describe("setLight", () => {
 });
 
 describe("addLight", () => {
-  test("does a thing", async () => {});
+  test("Adds the light to the database", async () => {
+    const lightService = new LightService();
+    lightService._dao.addLight = jest.fn();
+    const ID = "Prysma-789";
+
+    await lightService.addLight(ID);
+
+    expect(lightService._dao.addLight).toBeCalledWith(ID, undefined);
+  });
+  test("Adds the light to the database with the specified data", async () => {
+    const lightService = new LightService();
+    lightService._dao.addLight = jest.fn();
+    const ID = "Prysma-789";
+    const DATA = { name: "Desk Lamp" };
+
+    await lightService.addLight(ID, DATA);
+
+    expect(lightService._dao.addLight).toBeCalledWith(ID, DATA.name);
+  });
+  test("Initializes the light's state in the cache", async () => {
+    const lightService = new LightService();
+    lightService._cache.initializeLightState = jest.fn();
+    const ID = "Prysma-789";
+
+    await lightService.addLight(ID);
+
+    expect(lightService._cache.initializeLightState).toBeCalledWith(ID);
+  });
+  test("Removes the light from the discoveredLights cache", async () => {
+    const lightService = new LightService();
+    lightService._cache.removeDiscoveredLight = jest.fn();
+    const ID = "Prysma-789";
+
+    await lightService.addLight(ID);
+
+    expect(lightService._cache.removeDiscoveredLight).toBeCalledWith(ID);
+  });
+  test("Subscribes to the new light", async () => {
+    const lightService = new LightService();
+    lightService._messenger.subscribeToLight = jest.fn();
+    const ID = "Prysma-789";
+
+    await lightService.addLight(ID);
+
+    expect(lightService._messenger.subscribeToLight).toBeCalledWith(ID);
+  });
+  test("returns the newly added light", async () => {
+    const lightService = new LightService();
+    lightService._dao.getLight = jest.fn(() => MOCK_LIGHT);
+    const ID = "Prysma-789";
+
+    const lightAdded = await lightService.addLight(ID);
+
+    expect(lightAdded).toBe(MOCK_LIGHT);
+  });
+  test("notifies listeners about the new light", async () => {
+    const lightService = new LightService();
+    lightService._dao.getLight = jest.fn(() => MOCK_LIGHT);
+    const ID = "Prysma-789";
+
+    await lightService.addLight(ID);
+
+    expect(mediator.emit).toBeCalledWith(LIGHT_ADDED_EVENT, MOCK_LIGHT);
+  });
+  test("does not notify listeners about the new light if it fails to add the light to the database", async () => {
+    const lightService = new LightService();
+    lightService._dao.addLight = jest.fn(async () => {
+      throw new Error();
+    });
+    const ID = "Prysma-789";
+
+    const servicePromise = lightService.addLight(ID);
+
+    await expect(servicePromise).rejects.toThrow(Error);
+    expect(mediator.emit).not.toBeCalled();
+  });
+  test("rejects if it fails to add the light to the database", async () => {
+    const lightService = new LightService();
+    const ERROR_MESSAGE = "Mock Error";
+    lightService._dao.addLight = jest.fn(async () => {
+      throw new Error(ERROR_MESSAGE);
+    });
+    const ID = "Prysma-789";
+
+    const servicePromise = lightService.addLight(ID);
+
+    await expect(servicePromise).rejects.toThrow(ERROR_MESSAGE);
+  });
+  test("does not reject if it fails to initialize the cache", async () => {
+    const lightService = new LightService();
+    lightService._cache.initializeLightState = jest.fn(async () => {
+      throw new Error();
+    });
+    const ID = "Prysma-789";
+
+    await lightService.addLight(ID);
+  });
+  test("does not reject if it fails to remove the light from discoveredLights", async () => {
+    const lightService = new LightService();
+    lightService._cache.removeDiscoveredLight = jest.fn(async () => {
+      throw new Error();
+    });
+    const ID = "Prysma-789";
+
+    await lightService.addLight(ID);
+  });
+  test("does not reject if it fails subscribe to the light", async () => {
+    const lightService = new LightService();
+    lightService._messenger.subscribeToLight = jest.fn(async () => {
+      throw new Error();
+    });
+    const ID = "Prysma-789";
+
+    await lightService.addLight(ID);
+  });
 });
 
 describe("removeLight", () => {
