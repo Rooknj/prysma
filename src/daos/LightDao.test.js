@@ -81,7 +81,7 @@ describe("getLight", () => {
   test("Rejects if no id is given", async () => {
     const dbPromise = lightDao.getLight();
 
-    expect(dbPromise).rejects.toThrow(NO_ID_ERROR);
+    await expect(dbPromise).rejects.toThrow(NO_ID_ERROR);
   });
   test("Rejects if the light wasnt found", async () => {
     lightDao._db.findByPk = jest.fn();
@@ -89,7 +89,7 @@ describe("getLight", () => {
 
     const dbPromise = lightDao.getLight(ID);
 
-    expect(dbPromise).rejects.toThrow(`"${ID}" not found`);
+    await expect(dbPromise).rejects.toThrow(`"${ID}" not found`);
   });
   test("Rejects if it cant get the light", async () => {
     const ERROR_MESSAGE = "Mock Error";
@@ -100,7 +100,7 @@ describe("getLight", () => {
 
     const dbPromise = lightDao.getLight(ID);
 
-    expect(dbPromise).rejects.toThrow(ERROR_MESSAGE);
+    await expect(dbPromise).rejects.toThrow(ERROR_MESSAGE);
   });
 });
 
@@ -121,7 +121,7 @@ describe("getLights", () => {
 
     const dbPromise = lightDao.getLights();
 
-    expect(dbPromise).rejects.toThrow(ERROR_MESSAGE);
+    await expect(dbPromise).rejects.toThrow(ERROR_MESSAGE);
   });
 });
 
@@ -155,12 +155,12 @@ describe("setLight", () => {
   test("Rejects if no id is given", async () => {
     const dbPromise = lightDao.setLight();
 
-    expect(dbPromise).rejects.toThrow(NO_ID_ERROR);
+    await expect(dbPromise).rejects.toThrow(NO_ID_ERROR);
   });
   test("Rejects if no data is given", async () => {
     const dbPromise = lightDao.setLight("Mock ID");
 
-    expect(dbPromise).rejects.toThrow(NO_DATA_ERROR);
+    await expect(dbPromise).rejects.toThrow(NO_DATA_ERROR);
   });
   test("Rejects if the light doesnt exist", async () => {
     lightDao._db.findByPk = jest.fn();
@@ -181,7 +181,7 @@ describe("setLight", () => {
 
     const dbPromise = lightDao.setLight(ID, DATA);
 
-    expect(dbPromise).rejects.toThrow(`"${ID}" not found`);
+    await expect(dbPromise).rejects.toThrow(`"${ID}" not found`);
   });
   test("Rejects if it cant set the light", async () => {
     const ID = "Mock 1";
@@ -206,7 +206,7 @@ describe("setLight", () => {
 
     const dbPromise = lightDao.setLight(ID, DATA);
 
-    expect(dbPromise).rejects.toThrow(ERROR_MESSAGE);
+    await expect(dbPromise).rejects.toThrow(ERROR_MESSAGE);
   });
 });
 
@@ -233,12 +233,9 @@ describe("addLight", () => {
     );
   });
   test("Rejects if no id is given", async () => {
-    try {
-      await lightDao.addLight();
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error);
-      expect(error.message).toBe(NO_ID_ERROR);
-    }
+    const dbPromise = lightDao.addLight();
+
+    await expect(dbPromise).rejects.toThrow(NO_ID_ERROR);
   });
   test("Rejects if it cant add the light", async () => {
     const ERROR_MESSAGE = "Mock Error Add";
@@ -247,12 +244,9 @@ describe("addLight", () => {
     });
     const ID = "Prysma-112233445566";
 
-    try {
-      await lightDao.addLight(ID);
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error);
-      expect(error.message).toBe(ERROR_MESSAGE);
-    }
+    const dbPromise = lightDao.addLight(ID);
+
+    await expect(dbPromise).rejects.toThrow(ERROR_MESSAGE);
   });
 });
 
@@ -270,11 +264,11 @@ describe("removeLight", () => {
 
     const dbPromise = lightDao.removeLight(ID);
 
-    expect(dbPromise).rejects.toThrow(`"${ID}" not found`);
+    await expect(dbPromise).rejects.toThrow(`"${ID}" not found`);
   });
   test("Rejects if no id is given", async () => {
     const dbPromise = lightDao.removeLight();
 
-    expect(dbPromise).rejects.toThrow(NO_ID_ERROR);
+    await expect(dbPromise).rejects.toThrow(NO_ID_ERROR);
   });
 });
