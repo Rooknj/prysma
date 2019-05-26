@@ -129,7 +129,7 @@ describe("subscribeToLight", () => {
 
     const messengerPromise = lightMessenger.subscribeToLight(ID);
 
-    await expect(messengerPromise).rejects.toBeInstanceOf(Error);
+    await expect(messengerPromise).rejects.toThrow(Error);
   });
   test("rejects if it fails to subscribe to at least one topic", async () => {
     // Create the client and lightMessenger
@@ -146,7 +146,7 @@ describe("subscribeToLight", () => {
     // Call The Method
     const messengerPromise = lightMessenger.subscribeToLight(ID);
 
-    await expect(messengerPromise).rejects.toBeInstanceOf(Error);
+    await expect(messengerPromise).rejects.toThrow(Error);
     expect(mockClient.subscribe).toBeCalled();
   });
   test("rejects if no id was provided", async () => {
@@ -159,7 +159,7 @@ describe("subscribeToLight", () => {
     // Call The Method
     const messengerPromise = lightMessenger.subscribeToLight();
 
-    await expect(messengerPromise).rejects.toBeInstanceOf(Error);
+    await expect(messengerPromise).rejects.toThrow(Error);
   });
 });
 
@@ -217,7 +217,7 @@ describe("publishToLight", () => {
     // Call The Method
     const messengerPromise = lightMessenger.publishToLight(ID, MESSAGE);
 
-    await expect(messengerPromise).rejects.toBeInstanceOf(Error);
+    await expect(messengerPromise).rejects.toThrow(Error);
   });
   test("rejects if the client fails to publish", async () => {
     // Create the client and lightMessenger
@@ -236,7 +236,7 @@ describe("publishToLight", () => {
     const messengerPromise = lightMessenger.publishToLight(ID, MESSAGE);
 
     // Test
-    await expect(messengerPromise).rejects.toBeInstanceOf(Error);
+    await expect(messengerPromise).rejects.toThrow(Error);
     expect(mockClient.publish).toBeCalled();
   });
   test("rejects if no id was provided", async () => {
@@ -253,7 +253,7 @@ describe("publishToLight", () => {
     const messengerPromise = lightMessenger.publishToLight(ID, MESSAGE);
 
     // Test
-    await expect(messengerPromise).rejects.toBeInstanceOf(Error);
+    await expect(messengerPromise).rejects.toThrow(Error);
   });
   test("rejects if no message was provided", async () => {
     // Create the client and lightMessenger
@@ -268,7 +268,7 @@ describe("publishToLight", () => {
     const messengerPromise = lightMessenger.publishToLight(ID);
 
     // Test
-    await expect(messengerPromise).rejects.toBeInstanceOf(Error);
+    await expect(messengerPromise).rejects.toThrow(Error);
   });
   test("rejects if the message fails verification", async () => {
     // Create the client and lightMessenger
@@ -284,7 +284,7 @@ describe("publishToLight", () => {
     const messengerPromise = lightMessenger.publishToLight(ID, MESSAGE);
 
     // Test
-    await expect(messengerPromise).rejects.toBeInstanceOf(ValidationError);
+    await expect(messengerPromise).rejects.toThrow(ValidationError);
   });
 });
 
@@ -371,7 +371,7 @@ describe("unsubscribeFromLight", () => {
     const messengerPromise = lightMessenger.unsubscribeFromLight(ID);
 
     // Test
-    await expect(messengerPromise).rejects.toBeInstanceOf(Error);
+    await expect(messengerPromise).rejects.toThrow(Error);
     expect(mockClient.unsubscribe).toBeCalled();
   });
   test("rejects if no id was provided", async () => {
@@ -385,7 +385,7 @@ describe("unsubscribeFromLight", () => {
     const messengerPromise = lightMessenger.unsubscribeFromLight();
 
     // Test
-    await expect(messengerPromise).rejects.toBeInstanceOf(Error);
+    await expect(messengerPromise).rejects.toThrow(Error);
   });
 });
 

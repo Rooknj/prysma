@@ -109,12 +109,11 @@ describe("addDiscoveredLight", () => {
   });
   test("Rejects and does not add if no discoveredLight was provided", async () => {
     const addLightSpy = jest.spyOn(lightCache._discoveredLights, "push");
-    try {
-      await lightCache.addDiscoveredLight();
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error);
-      expect(addLightSpy).not.toBeCalled();
-    }
+
+    const messengerPromise = lightCache.addDiscoveredLight();
+
+    await expect(messengerPromise).rejects.toThrow(Error);
+    expect(addLightSpy).not.toBeCalled();
   });
   test("Rejects and does not add if the discoveredLight is invalidly formatted", async () => {
     const discoveredLight = Object.assign({}, discovered_light, {
@@ -126,12 +125,10 @@ describe("addDiscoveredLight", () => {
 
     const addLightSpy = jest.spyOn(lightCache._discoveredLights, "push");
 
-    try {
-      await lightCache.addDiscoveredLight(discoveredLight);
-    } catch (error) {
-      expect(error).toBeInstanceOf(ValidationError);
-      expect(addLightSpy).not.toBeCalled();
-    }
+    const messengerPromise = lightCache.addDiscoveredLight(discoveredLight);
+
+    await expect(messengerPromise).rejects.toThrow(Error);
+    expect(addLightSpy).not.toBeCalled();
   });
   test("Only adds the light once", async () => {
     const addLightSpy = jest.spyOn(lightCache._discoveredLights, "push");
@@ -210,50 +207,29 @@ describe("getLightState", () => {
     };
     lightCache._lightStates[LIGHT_ID] = LIGHT_STATE;
 
-    try {
-      await lightCache.getLightState();
-    } catch (error) {
-      expect(error.message).toBe(NO_ID_MESSAGE);
-      expect(error).toBeInstanceOf(Error);
-    }
+    const cachePromise = lightCache.getLightState();
+
+    await expect(cachePromise).rejects.toThrow(NO_ID_MESSAGE);
   });
   test("Rejects if no light state exists", async () => {
     const LIGHT_ID = "mockLight";
 
-    try {
-      await lightCache.getLightState(LIGHT_ID);
-    } catch (error) {
-      expect(error.message).toBe(`${LIGHT_ID}'s state not found in cache`);
-      expect(error).toBeInstanceOf(Error);
-    }
-  });
-  test("Rejects if lightState fails validation", async () => {
-    const LIGHT_ID = "mockLight";
-    const LIGHT_STATE = {
-      on: 12354,
-      color: { r: 255, g: 43, b: 2 },
-      brightness: 22,
-      effect: "None",
-      speed: 5
-    };
-    lightCache._lightStates[LIGHT_ID] = LIGHT_STATE;
+    const cachePromise = lightCache.getLightState(LIGHT_ID);
 
-    try {
-      await lightCache.getLightState(LIGHT_ID);
-    } catch (error) {
-      expect(error).toBeInstanceOf(ValidationError);
-    }
+    await expect(cachePromise).rejects.toThrow(
+      `${LIGHT_ID}'s state not found in cache`
+    );
   });
   test("Rejects if lightState is empty", async () => {
     const LIGHT_ID = "mockLight";
     const LIGHT_STATE = {};
     lightCache._lightStates[LIGHT_ID] = LIGHT_STATE;
 
-    try {
-      await lightCache.getLightState(LIGHT_ID);
-    } catch (error) {
-      expect(error).toBeInstanceOf(ValidationError);
-    }
+    const cachePromise = lightCache.getLightState(LIGHT_ID);
+
+    await expect(cachePromise).rejects.toThrow(
+      `${LIGHT_ID}'s state not found in cache`
+    );
   });
 });
 
@@ -273,22 +249,16 @@ describe("setLightState", () => {
     expect(lightCache._lightStates[LIGHT_ID]).toEqual(LIGHT_STATE);
   });
   test("Rejects if no id was provided", async () => {
-    try {
-      await lightCache.setLightState();
-    } catch (error) {
-      expect(error.message).toBe(NO_ID_MESSAGE);
-      expect(error).toBeInstanceOf(Error);
-    }
+    const cachePromise = lightCache.setLightState();
+
+    await expect(cachePromise).rejects.toThrow(NO_ID_MESSAGE);
   });
   test("Rejects if no state was provided", async () => {
     const LIGHT_ID = "mockLight";
 
-    try {
-      await lightCache.setLightState(LIGHT_ID);
-    } catch (error) {
-      expect(error.message).toBe(NO_STATE_MESSAGE);
-      expect(error).toBeInstanceOf(Error);
-    }
+    const cachePromise = lightCache.setLightState(LIGHT_ID);
+
+    await expect(cachePromise).rejects.toThrow(NO_STATE_MESSAGE);
   });
   test("Rejects if lightState fails validation", async () => {
     const LIGHT_ID = "mockLight";
@@ -300,21 +270,17 @@ describe("setLightState", () => {
       speed: 5
     };
 
-    try {
-      await lightCache.setLightState(LIGHT_ID, LIGHT_STATE);
-    } catch (error) {
-      expect(error).toBeInstanceOf(ValidationError);
-    }
+    const cachePromise = lightCache.setLightState(LIGHT_ID, LIGHT_STATE);
+
+    await expect(cachePromise).rejects.toThrow(ValidationError);
   });
   test("Rejects if lightState is empty", async () => {
     const LIGHT_ID = "mockLight";
     const LIGHT_STATE = {};
 
-    try {
-      await lightCache.setLightState(LIGHT_ID, LIGHT_STATE);
-    } catch (error) {
-      expect(error).toBeInstanceOf(ValidationError);
-    }
+    const cachePromise = lightCache.setLightState(LIGHT_ID, LIGHT_STATE);
+
+    await expect(cachePromise).rejects.toThrow(NO_STATE_MESSAGE);
   });
 });
 
