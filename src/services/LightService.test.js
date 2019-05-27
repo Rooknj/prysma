@@ -629,7 +629,49 @@ describe("setLightState", () => {
 });
 
 describe("_handleConnectedMessage", () => {
-  test("does a thing", async () => {});
+  test("updates the lightState in the cache with the new connected value", async () => {
+    const lightService = new LightService();
+    lightService._cache.setLightState = jest.fn();
+    const ID = "Prysma-12345";
+    const CONNECTION = 2;
+    const MESSAGE = { name: ID, connection: CONNECTION };
+
+    await lightService._handleConnectedMessage(MESSAGE);
+
+    expect(lightService._cache.setLightState).toBeCalledWith(
+      ID,
+      expect.objectContaining({ connected: expect.anything() })
+    );
+  });
+  test("maps connection: 2 to connected: true", async () => {
+    const lightService = new LightService();
+    lightService._cache.setLightState = jest.fn();
+    const ID = "Prysma-12345";
+    const CONNECTION = 2;
+    const expectedConnected = true;
+    const MESSAGE = { name: ID, connection: CONNECTION };
+
+    await lightService._handleConnectedMessage(MESSAGE);
+
+    expect(lightService._cache.setLightState).toBeCalledWith(ID, {
+      connected: expectedConnected
+    });
+  });
+  test("maps connection: 0 to connected: false", async () => {
+    const lightService = new LightService();
+    lightService._cache.setLightState = jest.fn();
+    const ID = "Prysma-12345";
+    const CONNECTION = 0;
+    const expectedConnected = false;
+    const MESSAGE = { name: ID, connection: CONNECTION };
+
+    await lightService._handleConnectedMessage(MESSAGE);
+
+    expect(lightService._cache.setLightState).toBeCalledWith(ID, {
+      connected: expectedConnected
+    });
+  });
+  test("notifies listeners of the new light state", async () => {});
 });
 
 describe("_handleStateMessage", () => {
