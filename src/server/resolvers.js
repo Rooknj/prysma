@@ -20,29 +20,29 @@ const resolvers = {
     state(parent, _, { lightService }) {
       return lightService.getLightState(parent.id);
     }
+  },
+  Subscription: {
+    lightChanged: {
+      subscribe: (_, args, { subscriptionService }) => {
+        return subscriptionService.subscribeToChangedLights();
+      }
+    },
+    lightAdded: {
+      subscribe: (_, args, { subscriptionService }) => {
+        return subscriptionService.subscribeToAddedLights();
+      }
+    },
+    lightRemoved: {
+      subscribe: (_, args, { subscriptionService }) => {
+        return subscriptionService.subscribeToRemovedLights();
+      }
+    },
+    lightStateChanged: {
+      subscribe: (_, args, { subscriptionService }) => {
+        return subscriptionService.subscribeToChangedLightStates();
+      }
+    }
   }
-  // Subscription: {
-  //   lightChanged: {
-  //     subscribe: (_, { lightId }, { subscriptionService }) => {
-  //       return subscriptionService.subscribeToLight(lightId);
-  //     }
-  //   },
-  //   lightsChanged: {
-  //     subscribe: (_, args, { subscriptionService }) => {
-  //       return subscriptionService.subscribeToAllLights();
-  //     }
-  //   },
-  //   lightAdded: {
-  //     subscribe: (_, args, { subscriptionService }) => {
-  //       return subscriptionService.subscribeToLightsAdded();
-  //     }
-  //   },
-  //   lightRemoved: {
-  //     subscribe: (_, args, { subscriptionService }) => {
-  //       return subscriptionService.subscribeToLightsRemoved();
-  //     }
-  //   }
-  // }
 };
 
 module.exports = resolvers;
