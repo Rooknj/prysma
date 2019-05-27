@@ -24,6 +24,7 @@ const initMqtt = async (host, options = {}) => {
     debug(`Failed to get connection to mqtt broker at ${host}`)
   );
   _mqtt.on("offline", () => debug("Mqtt client now offline."));
+
 };
 
 const getMqtt = () => {
@@ -35,12 +36,16 @@ const getMqtt = () => {
 /**
  * Disconnects from MQTT broker
  */
-const endMqtt = () => {
-  return _mqtt.end();
+const closeMqtt = () => {
+  if (_mqtt) {
+    debug(`Closing connection to mqtt broker`);
+    return _mqtt.end();
+  }
+  debug(`Mqtt has not been initialized.`);
 };
 
 module.exports = {
   initMqtt,
   getMqtt,
-  endMqtt
+  closeMqtt
 };

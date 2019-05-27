@@ -5,8 +5,8 @@
 const config = require("./config");
 const Server = require("./server");
 const packageJson = require("../package.json");
-const { initDb } = require("./clients/db");
-const { initMqtt } = require("./clients/mqtt");
+const { initDb, closeDb } = require("./clients/db");
+const { initMqtt, closeMqtt } = require("./clients/mqtt");
 const LightService = require("./services/LightService");
 const MockLight = require("./MockLight");
 
@@ -16,12 +16,22 @@ console.log(`--- Prysma v${version} ---`);
 
 // Unhandled error logging
 process.on("uncaughtException", err => {
-  console.log("Unhandled Exception", err);
+  console.error("Unhandled Exception", err);
   process.exit(1);
 });
 process.on("unhandledRejection", err => {
   console.error("Unhandled Rejection", err);
   process.exit(1);
+});
+
+// listen for the signal interruption (ctrl-c)
+// Close redis, close sequelize if needed, close MQTT client, log that it is closing
+process.on("SIGINT", async () => {
+  console.log("SIGINT signal received, shutting down gracefully...");
+  const closePromises = [closeDb(), closeMqtt()];
+  await Promise.all(closePromises);
+  console.log("Succesfully shut down. Goodbye");
+  process.exit(0);
 });
 
 const start = async () => {
