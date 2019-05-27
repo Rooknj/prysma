@@ -458,22 +458,134 @@ describe("addLight", () => {
 });
 
 describe("removeLight", () => {
-  test("does a thing", async () => {});
+  test("Removes the light from the database", async () => {
+    const lightService = new LightService();
+    lightService._dao.removeLight = jest.fn(() => MOCK_LIGHT);
+    const ID = "Prysma-12345";
+
+    await lightService.removeLight(ID);
+
+    expect(lightService._dao.removeLight).toBeCalledWith(ID);
+  });
+  test("Returns the removed light", async () => {
+    const lightService = new LightService();
+    lightService._dao.removeLight = jest.fn(() => MOCK_LIGHT);
+    const ID = "Prysma-12345";
+
+    const removedLight = await lightService.removeLight(ID);
+
+    expect(removedLight).toBe(MOCK_LIGHT);
+  });
+  test("Notifies listeners of the removed light", async () => {
+    const lightService = new LightService();
+    lightService._dao.removeLight = jest.fn(() => MOCK_LIGHT);
+    const ID = "Prysma-12345";
+
+    await lightService.removeLight(ID);
+
+    expect(mediator.emit).toBeCalledWith(LIGHT_REMOVED_EVENT, MOCK_LIGHT);
+  });
+  test("clears the light's state", async () => {
+    const lightService = new LightService();
+    lightService._cache.clearLightState = jest.fn();
+    const ID = "Prysma-12345";
+
+    await lightService.removeLight(ID);
+
+    expect(lightService._cache.clearLightState).toBeCalledWith(ID);
+  });
+  test("unsubscribes from the light", async () => {
+    const lightService = new LightService();
+    lightService._messenger.unsubscribeFromLight = jest.fn();
+    const ID = "Prysma-12345";
+
+    await lightService.removeLight(ID);
+
+    expect(lightService._messenger.unsubscribeFromLight).toBeCalledWith(ID);
+  });
+  test("does not notify listeners if it fails to remove the light", async () => {
+    const lightService = new LightService();
+    lightService._dao.removeLight = jest.fn(() => {
+      throw new Error();
+    });
+    const ID = "Prysma-12345";
+
+    const servicePromise = lightService.removeLight(ID);
+
+    await expect(servicePromise).rejects.toThrow(Error);
+    expect(mediator.emit).not.toBeCalled();
+  });
 });
 
 describe("_handleMessengerConnect", () => {
-  test("does a thing", async () => {});
+  test("Subscribes to all the lights stored in the database", async () => {
+    const lightService = new LightService();
+    lightService._dao.getLights = jest.fn(() => MOCK_LIGHTS);
+    lightService._messenger.subscribeToLight = jest.fn();
+
+    await lightService._handleMessengerConnect();
+
+    MOCK_LIGHTS.forEach(({ id }) => {
+      expect(lightService._messenger.subscribeToLight).toBeCalledWith(id);
+    });
+  });
 });
 
 describe("_handleEffectListMessage", () => {
-  test("does a thing", async () => {});
+  test("Updates the effect list of the light in the database", async () => {
+    const lightService = new LightService();
+    lightService._dao.setLight = jest.fn();
+    lightService._dao.getLight = jest.fn(() => MOCK_LIGHT);
+    const ID = "Prysma-12345";
+    const EFFECTS = ["Test 1", "Test 2", "Test 3"];
+    const MESSAGE = { name: ID, effectList: EFFECTS };
+
+    await lightService._handleEffectListMessage(MESSAGE);
+
+    expect(lightService._dao.setLight).toBeCalledWith(ID, {
+      supportedEffects: EFFECTS
+    });
+  });
+  test("Notifies listeners of the light's change", async () => {
+    const lightService = new LightService();
+    lightService._dao.getLight = jest.fn(() => MOCK_LIGHT);
+    const ID = "Prysma-12345";
+    const EFFECTS = ["Test 1", "Test 2", "Test 3"];
+    const MESSAGE = { name: ID, effectList: EFFECTS };
+
+    await lightService._handleEffectListMessage(MESSAGE);
+
+    expect(mediator.emit).toBeCalledWith(LIGHT_CHANGED_EVENT, MOCK_LIGHT);
+  });
 });
 
 describe("_handleConfigMessage", () => {
-  test("does a thing", async () => {});
+  test("Updates the config info of the light in the database", async () => {
+    const lightService = new LightService();
+    lightService._dao.setLight = jest.fn();
+    lightService._dao.getLight = jest.fn(() => MOCK_LIGHT);
+    const ID = "Prysma-12345";
+    const CONFIG = { version: "1.0.0", stripType: "WS2812B" };
+    const MESSAGE = { name: ID, ...CONFIG };
+
+    await lightService._handleConfigMessage(MESSAGE);
+
+    expect(lightService._dao.setLight).toBeCalledWith(ID, CONFIG);
+  });
+  test("Notifies listeners of the light's change", async () => {
+    const lightService = new LightService();
+    lightService._dao.getLight = jest.fn(() => MOCK_LIGHT);
+    const ID = "Prysma-12345";
+    const CONFIG = { version: "1.0.0", stripType: "WS2812B" };
+    const MESSAGE = { name: ID, ...CONFIG };
+
+    await lightService._handleConfigMessage(MESSAGE);
+
+    expect(mediator.emit).toBeCalledWith(LIGHT_CHANGED_EVENT, MOCK_LIGHT);
+  });
 });
 
-describe("_handleDiscoveryMessage", () => {
+describe.skip("_handleDiscoveryMessage", () => {
   test("does a thing", async () => {});
 });
 
