@@ -5,12 +5,16 @@ const mediator = require("./mediator");
 const { getSimpleUniqueId } = require("../utils/lightUtils");
 const {
   TIMEOUT_WAIT,
+  DISCOVERY_DURATION,
   MUTATION_RESPONSE_EVENT,
   LIGHT_ADDED_EVENT,
   LIGHT_REMOVED_EVENT,
   LIGHT_CHANGED_EVENT,
   LIGHT_STATE_CHANGED_EVENT
 } = require("./serviceConstants");
+const { promisify } = require("util");
+const asyncSetTimeout = promisify(setTimeout);
+
 const Debug = require("debug").default;
 
 const debug = Debug("LightService");
@@ -67,7 +71,16 @@ class LightService {
   }
 
   async getDiscoveredLights() {
+    // Initialize the cache
+    await this._cache.clearDiscoveredLights();
+
+    // Publish discovery query
     await this._messenger.publishDiscovery();
+
+    // Wait one second for responses to come in
+    await asyncSetTimeout(DISCOVERY_DURATION);
+
+    // After one second, return the discovered lights
     const discoveredLights = await this._cache.getDiscoveredLights();
     return discoveredLights;
   }
@@ -94,8 +107,6 @@ class LightService {
     const addPromises = [
       // Add a default state to the light
       this._cache.initializeLightState(lightId),
-      // Remove the light from the discoveredLights list
-      this._cache.removeDiscoveredLight(lightId),
       // Subscribe to new messages from the new light
       this._messenger.subscribeToLight(lightId)
     ];

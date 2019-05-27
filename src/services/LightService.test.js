@@ -5,6 +5,7 @@ const mediator = require("./mediator");
 const utils = require("../utils/lightUtils");
 const {
   TIMEOUT_WAIT,
+  DISCOVERY_DURATION,
   MUTATION_RESPONSE_EVENT,
   LIGHT_ADDED_EVENT,
   LIGHT_REMOVED_EVENT,
@@ -18,6 +19,26 @@ jest.mock("../messengers/LightMessenger");
 jest.mock("../daos/LightDao");
 jest.mock("../caches/LightCache");
 jest.mock("../utils/lightUtils");
+// Mock util because a promisified setTimeout doesnt work with jest mock timers
+// https://stackoverflow.com/questions/52727220/jest-doesnt-work-with-util-promisifysettimeout
+jest.mock("util", () => {
+  const util = require.requireActual("util"); // get the real util
+
+  const realPromisify = util.promisify; // capture the real promisify
+
+  util.promisify = (...args) => {
+    if (args[0] === setTimeout) {
+      // return a mock if promisify(setTimeout)
+      return time =>
+        new Promise(resolve => {
+          setTimeout(resolve, time);
+        });
+    }
+    return realPromisify(...args); // ...otherwise call the real promisify
+  };
+
+  return util;
+});
 
 const MOCK_LIGHT_STATE = {
   connected: true,
@@ -259,8 +280,47 @@ describe("getLights", () => {
   });
 });
 
-describe.skip("getDiscoveredLights", () => {
-  test("does a thing", async () => {});
+describe("getDiscoveredLights", () => {
+  test("returns the discovered lights after a timeout", async () => {
+    jest.useFakeTimers();
+
+    const lightService = new LightService();
+    lightService._cache.getDiscoveredLights = jest.fn(() => MOCK_LIGHT);
+
+    const servicePromise = lightService.getDiscoveredLights();
+    await Promise.resolve(); // allow any pending jobs in the PromiseJobs queue to run
+    jest.runAllTimers();
+
+    const discoveredLights = await servicePromise;
+    expect(discoveredLights).toBe(MOCK_LIGHT);
+    expect(setTimeout).toBeCalledWith(expect.any(Function), DISCOVERY_DURATION);
+  });
+  test("sends out a discovery query", async () => {
+    jest.useFakeTimers();
+
+    const lightService = new LightService();
+    lightService._messenger.publishDiscovery = jest.fn();
+
+    const servicePromise = lightService.getDiscoveredLights();
+    await Promise.resolve(); // allow any pending jobs in the PromiseJobs queue to run
+    jest.runAllTimers();
+
+    await servicePromise;
+    expect(lightService._messenger.publishDiscovery).toBeCalled();
+  });
+  test("clears the discoveredLights cache", async () => {
+    jest.useFakeTimers();
+
+    const lightService = new LightService();
+    lightService._cache.clearDiscoveredLights = jest.fn();
+
+    const servicePromise = lightService.getDiscoveredLights();
+    await Promise.resolve(); // allow any pending jobs in the PromiseJobs queue to run
+    jest.runAllTimers();
+
+    await servicePromise;
+    expect(lightService._cache.clearDiscoveredLights).toBeCalled();
+  });
 });
 
 describe("setLight", () => {
@@ -377,15 +437,6 @@ describe("addLight", () => {
     await lightService.addLight(ID);
 
     expect(lightService._cache.initializeLightState).toBeCalledWith(ID);
-  });
-  test("Removes the light from the discoveredLights cache", async () => {
-    const lightService = new LightService();
-    lightService._cache.removeDiscoveredLight = jest.fn();
-    const ID = "Prysma-789";
-
-    await lightService.addLight(ID);
-
-    expect(lightService._cache.removeDiscoveredLight).toBeCalledWith(ID);
   });
   test("Subscribes to the new light", async () => {
     const lightService = new LightService();
@@ -595,8 +646,31 @@ describe("_handleConfigMessage", () => {
   });
 });
 
-describe.skip("_handleDiscoveryMessage", () => {
-  test("does a thing", async () => {});
+describe("_handleDiscoveryMessage", () => {
+  test("adds the discovered light to the cache if it isnt already added", async () => {
+    const lightService = new LightService();
+    lightService._dao.getLight = jest.fn(() => {
+      throw new Error(); // throws an error to simulate no light existing
+    });
+    const ID = "Prysma-12345";
+    const CONFIG = { version: "1.0.0", stripType: "WS2812B" };
+    const MESSAGE = { id: ID, name: ID, ...CONFIG };
+
+    await lightService._handleDiscoveryMessage(MESSAGE);
+
+    expect(lightService._cache.addDiscoveredLight).toBeCalledWith(MESSAGE);
+  });
+  test("doesn't add the discovered light to the cache if it is already added", async () => {
+    const lightService = new LightService();
+    lightService._dao.getLight = jest.fn(() => MOCK_LIGHT);
+    const ID = "Prysma-12345";
+    const CONFIG = { version: "1.0.0", stripType: "WS2812B" };
+    const MESSAGE = { id: ID, name: ID, ...CONFIG };
+
+    await lightService._handleDiscoveryMessage(MESSAGE);
+
+    expect(lightService._cache.addDiscoveredLight).not.toBeCalled();
+  });
 });
 
 describe("getLightState", () => {
