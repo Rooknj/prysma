@@ -8,6 +8,7 @@ const packageJson = require("../package.json");
 const { initDb, closeDb } = require("./clients/db");
 const { initMqtt, closeMqtt } = require("./clients/mqtt");
 const LightService = require("./services/LightService");
+const SubscriptionService = require("./services/SubscriptionService");
 const MockLight = require("./MockLight");
 
 // Verbose statement of service starting
@@ -48,9 +49,10 @@ const start = async () => {
 
   // Initialize our services
   const lightService = new LightService(config);
-  const serviceInitPromises = [lightService.init()];
+  const subscriptionService = new SubscriptionService();
+  const serviceInitPromises = [lightService.init(), subscriptionService.init()];
   await Promise.all(serviceInitPromises);
-  const services = { lightService };
+  const services = { lightService, subscriptionService };
 
   // Start the server
   console.log("Starting Server...");

@@ -13,10 +13,7 @@ class Server {
     if (process.env.MOCK) {
       mocks = require("./mocks");
     } else {
-      const { lightService } = services;
-      context = () => ({
-        lightService
-      });
+      context = () => ({ ...services });
     }
 
     const apolloServer = new ApolloServer({
