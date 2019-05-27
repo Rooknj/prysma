@@ -7,20 +7,21 @@ const Debug = require("debug").default;
 const debug = Debug("Client:Db");
 
 let _db;
+let _models = {};
 
 const initDb = async options => {
   if (_db) {
     throw new Error("Trying to init DB again!");
   }
 
-  const sequelize = new Sequelize({ ...options, logging: false });
+  _db = new Sequelize({ ...options, logging: false });
 
   try {
     debug(`Connecting to Sequelize...`);
-    await sequelize.authenticate();
+    await _db.authenticate();
     debug("Connected to Sequelize");
-    _db = LightModel(sequelize, Sequelize);
-    await sequelize.sync();
+    _models.lightModel = LightModel(_db, Sequelize);
+    await _db.sync();
     debug(`Database & tables created!`);
   } catch (error) {
     // TODO: Handle what happens if authenticate fails vs if sync fails
@@ -31,12 +32,21 @@ const initDb = async options => {
 };
 
 const getDb = () => {
-  if (!_db)
+  if (!_db || !_models.lightModel)
     throw new Error("Db has not been initialized. Please call init first.");
-  return _db;
+  return _models.lightModel;
+};
+
+const closeDb = () => {
+  if (_db) {
+    debug(`Closing connection to db`);
+    return _db.close();
+  }
+  debug(`Db has not been initialized.`);
 };
 
 module.exports = {
   initDb,
-  getDb
+  getDb,
+  closeDb
 };
