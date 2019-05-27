@@ -56,6 +56,35 @@ describe("getDiscoveredLights", () => {
   });
 });
 
+describe("clearDiscoveredLights", () => {
+  let discovered_light;
+  beforeEach(() => {
+    discovered_light = {
+      id: "Prysma-AABBCCDDEEFF",
+      name: "Prysma-AABBCCDDEEFF",
+      version: "1.0.0",
+      hardware: "8266",
+      colorOrder: "GRB",
+      stripType: "WS2812B",
+      ipAddress: "10.0.2.8",
+      macAddress: "80:7D:3A:41:B4:65",
+      numLeds: 120,
+      udpPort: 7778
+    };
+  });
+
+  test("Clears the discovered lights cache", async () => {
+    const discoveredLight = Object.assign({}, discovered_light, {
+      id: "Default Mock"
+    });
+    lightCache._discoveredLights = [discoveredLight];
+
+    await lightCache.clearDiscoveredLights();
+
+    expect(lightCache._discoveredLights).toEqual([]);
+  });
+});
+
 describe("addDiscoveredLight", () => {
   let discovered_light;
   beforeEach(() => {

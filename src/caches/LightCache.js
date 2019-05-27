@@ -30,6 +30,10 @@ class LightCache {
     return this._discoveredLights;
   }
 
+  async clearDiscoveredLights() {
+    this._discoveredLights = [];
+  }
+
   async addDiscoveredLight(discoveredLight) {
     /*
       When switching to redis, check out https://github.com/hughsk/flat, 
