@@ -18,6 +18,16 @@ jest.mock("../daos/LightDao");
 jest.mock("../caches/LightCache");
 jest.mock("./mediator");
 
+const MOCK_LIGHT_STATE = {
+  connected: true,
+  on: false,
+  color: { r: 255, g: 255, b: 255 },
+  brightness: 100,
+  effect: "None",
+  speed: 4,
+  id: "Prysma-84F3EBB45500"
+};
+
 const MOCK_LIGHTS = [
   {
     id: "Prysma-84F3EBB45500",
@@ -590,7 +600,28 @@ describe.skip("_handleDiscoveryMessage", () => {
 });
 
 describe("getLightState", () => {
-  test("does a thing", async () => {});
+  test("Returns the light state from the cache", async () => {
+    const lightService = new LightService();
+    lightService._cache.getLightState = jest.fn(() => MOCK_LIGHT_STATE);
+    const ID = "Prysma-12345";
+
+    const light = await lightService.getLightState(ID);
+
+    expect(lightService._cache.getLightState).toBeCalledWith(ID);
+    expect(light).toBe(MOCK_LIGHT_STATE);
+  });
+  test("Rejects if it cant get the light state", async () => {
+    const lightService = new LightService();
+    const ERROR_MESSAGE = "Mock Error";
+    lightService._cache.getLightState = jest.fn(async () => {
+      throw new Error(ERROR_MESSAGE);
+    });
+    const ID = "Prysma-12345";
+
+    const servicePromise = lightService.getLightState(ID);
+
+    await expect(servicePromise).rejects.toThrow(ERROR_MESSAGE);
+  });
 });
 
 describe("setLightState", () => {
