@@ -21,7 +21,7 @@ class LightMessenger extends EventEmitter {
     this._client = getMqtt();
     this.connected = this._client.connected;
     this._client.on("connect", this._handleConnect.bind(this));
-    this._client.on("close", this._handleDisconnect.bind(this));
+    this._client.on("offline", this._handleDisconnect.bind(this));
     this._client.on("message", this._handleMessage.bind(this));
   }
 
@@ -171,7 +171,7 @@ class LightMessenger extends EventEmitter {
 
   _handleDisconnect(data) {
     this.connected = false;
-    this.emit("close", data);
+    this.emit("disconnect", data);
   }
 
   _handleMessage(topic, message) {

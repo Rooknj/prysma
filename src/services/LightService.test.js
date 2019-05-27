@@ -40,15 +40,36 @@ jest.mock("util", () => {
   return util;
 });
 
-const MOCK_LIGHT_STATE = {
-  connected: true,
-  on: false,
-  color: { r: 255, g: 255, b: 255 },
-  brightness: 100,
-  effect: "None",
-  speed: 4,
-  id: "Prysma-84F3EBB45500"
-};
+const MOCK_LIGHT_STATES = [
+  {
+    connected: true,
+    on: false,
+    color: { r: 255, g: 255, b: 255 },
+    brightness: 100,
+    effect: "None",
+    speed: 4,
+    id: "Prysma-84F3EBB45500"
+  },
+  {
+    connected: false,
+    on: false,
+    color: { r: 255, g: 0, b: 0 },
+    brightness: 100,
+    effect: "None",
+    speed: 4,
+    id: "Prysma-Mock"
+  },
+  {
+    connected: true,
+    on: true,
+    color: { r: 255, g: 0, b: 255 },
+    brightness: 100,
+    effect: "Cylon",
+    speed: 7,
+    id: "Default Mock"
+  }
+];
+const MOCK_LIGHT_STATE = MOCK_LIGHT_STATES[0];
 
 const MOCK_LIGHTS = [
   {
@@ -183,6 +204,17 @@ describe("init", () => {
 
     expect(lightService._messenger.on).toBeCalledWith(
       "connect",
+      expect.any(Function)
+    );
+  });
+  test("Sets a messenger disconnect listener", async () => {
+    const lightService = new LightService();
+    lightService._messenger.on = jest.fn();
+
+    await lightService.init();
+
+    expect(lightService._messenger.on).toBeCalledWith(
+      "disconnect",
       expect.any(Function)
     );
   });
@@ -589,6 +621,36 @@ describe("_handleMessengerConnect", () => {
     MOCK_LIGHTS.forEach(({ id }) => {
       expect(lightService._messenger.subscribeToLight).toBeCalledWith(id);
     });
+  });
+});
+
+describe("_handleMessengerDisconnect", () => {
+  test("Sets all lights state to disconnected", async () => {
+    const lightService = new LightService();
+    lightService._dao.getLights = jest.fn(async () => MOCK_LIGHTS);
+    lightService._cache.setLightState = jest.fn(async () => {});
+
+    await lightService._handleMessengerDisconnect();
+
+    MOCK_LIGHTS.forEach(({ id }) => {
+      expect(lightService._cache.setLightState).toBeCalledWith(id, {
+        connected: false
+      });
+    });
+  });
+  test("Notifies all listeners of the new states", async () => {
+    const lightService = new LightService();
+    lightService._dao.getLights = jest.fn(async () => MOCK_LIGHTS);
+    lightService._cache.setLightState = jest.fn(async () => {});
+    lightService._cache.getLightState = jest.fn(async () => MOCK_LIGHT_STATE);
+
+    await lightService._handleMessengerDisconnect();
+
+    expect(mediatorEmitSpy).toBeCalledWith(
+      LIGHT_STATE_CHANGED_EVENT,
+      MOCK_LIGHT_STATE
+    );
+    expect(mediatorEmitSpy).toBeCalledTimes(MOCK_LIGHTS.length);
   });
 });
 

@@ -45,6 +45,10 @@ class LightService {
     // Add Event Listeners (This cant be done until everything is set up)
     this._messenger.on("connect", this._handleMessengerConnect.bind(this));
     this._messenger.on(
+      "disconnect",
+      this._handleMessengerDisconnect.bind(this)
+    );
+    this._messenger.on(
       "connectedMessage",
       this._handleConnectedMessage.bind(this)
     );
@@ -151,7 +155,35 @@ class LightService {
       // Wait for all the promises to resolve
       await Promise.all(subscriptionPromises);
     } catch (error) {
-      debug("Error handling Messenger connect", error);
+      debug("Error handling messenger connect", error);
+      throw error;
+    }
+  }
+
+  async _handleMessengerDisconnect() {
+    try {
+      const lights = await this._dao.getLights();
+
+      // Set all light's connected status to false, then return the new state
+      const setStatePromises = lights.map(
+        ({ id }) =>
+          new Promise(resolve => {
+            this._cache
+              .setLightState(id, { connected: false })
+              .then(() => this._cache.getLightState(id))
+              .then(resolve);
+          })
+      );
+
+      // Wait for all the promises to resolve
+      const setStateResults = await Promise.all(setStatePromises);
+
+      // Notify listeners of the new state
+      setStateResults.forEach(newState =>
+        mediator.emit(LIGHT_STATE_CHANGED_EVENT, newState)
+      );
+    } catch (error) {
+      debug("Error handling messenger disconnect", error);
       throw error;
     }
   }

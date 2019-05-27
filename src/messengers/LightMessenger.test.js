@@ -45,17 +45,25 @@ describe("constructor", () => {
     expect(lightMessenger._topics).toBe(TOPICS);
   });
 
-  test("assigns the appropriate listeners to the client", () => {
+  test("starts listening for connect events", () => {
     let lightMessenger = new LightMessenger(TOPICS);
 
     expect(lightMessenger._client.on).toBeCalledWith(
       "connect",
       expect.any(Function)
     );
+  });
+  test("starts listening for offline events", () => {
+    let lightMessenger = new LightMessenger(TOPICS);
+
     expect(lightMessenger._client.on).toBeCalledWith(
-      "close",
+      "offline",
       expect.any(Function)
     );
+  });
+  test("starts listening for messange events", () => {
+    let lightMessenger = new LightMessenger(TOPICS);
+
     expect(lightMessenger._client.on).toBeCalledWith(
       "message",
       expect.any(Function)
@@ -421,7 +429,7 @@ describe("_handleDisconnect", () => {
     expect(lightMessenger.connected).toBe(false);
   });
 
-  test("emits close", () => {
+  test("emits disconnect event", () => {
     let lightMessenger = new LightMessenger(TOPICS);
     lightMessenger.__proto__.emit = jest.fn();
 
@@ -430,7 +438,7 @@ describe("_handleDisconnect", () => {
     };
     lightMessenger._handleDisconnect(DATA);
 
-    expect(lightMessenger.__proto__.emit).toBeCalledWith("close", DATA);
+    expect(lightMessenger.__proto__.emit).toBeCalledWith("disconnect", DATA);
   });
 });
 
