@@ -834,23 +834,27 @@ describe("setLightState", () => {
     expect(changedLightState).toBe(connectedLightState);
   });
   test("times out after a set amount of time with no response", async () => {
-    // // Use fake timers for this test
-    // jest.useFakeTimers();
-    // const lightService = new LightService();
-    // // Make sure the cache returns a connected light so no errors are thrown
-    // const connectedLightState = Object.assign({}, MOCK_LIGHT_STATE, {
-    //   connected: true
-    // });
-    // lightService._cache.getLightState = jest.fn(() => connectedLightState);
-    // // Dont emit a response as soon as it is called to that the promise wont resolve
-    // lightService._messenger.publishToLight = jest.fn(async () => {});
-    // const ID = "Prysma-12345";
-    // const STATE = { brightness: 40, speed: 7, effect: "Juggle" };
-    // const servicePromise = lightService.setLightState(ID, STATE);
-    // jest.advanceTimersByTime(TIMEOUT_WAIT);
-    // await expect(servicePromise).rejects.toThrow(
-    //   `Response from ${ID} timed out`
-    // );
+    // Use fake timers for this test
+    jest.useFakeTimers();
+    const lightService = new LightService();
+    // Make sure the cache returns a connected light so no errors are thrown
+    const connectedLightState = Object.assign({}, MOCK_LIGHT_STATE, {
+      connected: true
+    });
+    lightService._cache.getLightState = jest.fn(() => connectedLightState);
+    // Dont emit a response as soon as it is called to that the promise wont resolve
+    lightService._messenger.publishToLight = jest.fn(async () => {});
+    const ID = "Prysma-12345";
+    const STATE = { brightness: 40, speed: 7, effect: "Juggle" };
+
+    const servicePromise = lightService.setLightState(ID, STATE);
+    await Promise.resolve(); // allow any pending jobs in the PromiseJobs queue to run
+    jest.runAllTimers(); // Run all timers so we dont have to wait
+
+    await expect(servicePromise).rejects.toThrow(
+      `Response from ${ID} timed out`
+    );
+    expect(setTimeout).toBeCalledWith(expect.any(Function), TIMEOUT_WAIT);
   });
 });
 
