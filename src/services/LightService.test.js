@@ -671,9 +671,145 @@ describe("_handleConnectedMessage", () => {
       connected: expectedConnected
     });
   });
-  test("notifies listeners of the new light state", async () => {});
+  test("notifies listeners of the new light state", async () => {
+    const lightService = new LightService();
+    lightService._cache.getLightState = jest.fn(() => MOCK_LIGHT_STATE);
+    const ID = "Prysma-12345";
+    const CONNECTION = 0;
+    const MESSAGE = { name: ID, connection: CONNECTION };
+
+    await lightService._handleConnectedMessage(MESSAGE);
+
+    expect(mediator.emit).toBeCalledWith(
+      LIGHT_STATE_CHANGED_EVENT,
+      MOCK_LIGHT_STATE
+    );
+  });
 });
 
 describe("_handleStateMessage", () => {
-  test("does a thing", async () => {});
+  test("updates the light state in the cache with the new state values", async () => {
+    const lightService = new LightService();
+    lightService._cache.setLightState = jest.fn();
+    const ID = "Prysma-12345";
+    const STATE = "OFF";
+    const MUTATION_ID = 1024;
+    const MESSAGE = {
+      name: ID,
+      mutationId: MUTATION_ID,
+      state: STATE,
+      color: { r: 255, g: 100, b: 0 },
+      brightness: 100,
+      effect: "None",
+      speed: 4
+    };
+
+    await lightService._handleStateMessage(MESSAGE);
+
+    expect(lightService._cache.setLightState).toBeCalledWith(ID, {
+      on: expect.anything(),
+      color: MESSAGE.color,
+      brightness: MESSAGE.brightness,
+      effect: MESSAGE.effect,
+      speed: MESSAGE.speed
+    });
+  });
+  test("maps state: ON to on: true", async () => {
+    const lightService = new LightService();
+    lightService._cache.setLightState = jest.fn();
+    const ID = "Prysma-12345";
+    const STATE = "ON";
+    const expectedOn = true;
+    const MUTATION_ID = 1024;
+    const MESSAGE = {
+      name: ID,
+      mutationId: MUTATION_ID,
+      state: STATE,
+      color: { r: 255, g: 100, b: 0 },
+      brightness: 100,
+      effect: "None",
+      speed: 4
+    };
+
+    await lightService._handleStateMessage(MESSAGE);
+
+    expect(lightService._cache.setLightState).toBeCalledWith(
+      ID,
+      expect.objectContaining({
+        on: expectedOn
+      })
+    );
+  });
+  test("maps state: OFF to on: false", async () => {
+    const lightService = new LightService();
+    lightService._cache.setLightState = jest.fn();
+    const ID = "Prysma-12345";
+    const STATE = "OFF";
+    const expectedOn = false;
+    const MUTATION_ID = 1024;
+    const MESSAGE = {
+      name: ID,
+      mutationId: MUTATION_ID,
+      state: STATE,
+      color: { r: 255, g: 100, b: 0 },
+      brightness: 100,
+      effect: "None",
+      speed: 4
+    };
+
+    await lightService._handleStateMessage(MESSAGE);
+
+    expect(lightService._cache.setLightState).toBeCalledWith(
+      ID,
+      expect.objectContaining({
+        on: expectedOn
+      })
+    );
+  });
+  test("notifies listeners of the new state", async () => {
+    const lightService = new LightService();
+    lightService._cache.getLightState = jest.fn(() => MOCK_LIGHT_STATE);
+    const ID = "Prysma-12345";
+    const STATE = "OFF";
+    const MUTATION_ID = 1024;
+    const MESSAGE = {
+      name: ID,
+      mutationId: MUTATION_ID,
+      state: STATE,
+      color: { r: 255, g: 100, b: 0 },
+      brightness: 100,
+      effect: "None",
+      speed: 4
+    };
+
+    await lightService._handleStateMessage(MESSAGE);
+
+    expect(mediator.emit).toBeCalledWith(
+      LIGHT_STATE_CHANGED_EVENT,
+      MOCK_LIGHT_STATE
+    );
+  });
+  test("notifies the mutation response listener", async () => {
+    const lightService = new LightService();
+    lightService._cache.getLightState = jest.fn(() => MOCK_LIGHT_STATE);
+    const ID = "Prysma-12345";
+    const STATE = "OFF";
+    const MUTATION_ID = 1024;
+    const MESSAGE = {
+      name: ID,
+      mutationId: MUTATION_ID,
+      state: STATE,
+      color: { r: 255, g: 100, b: 0 },
+      brightness: 100,
+      effect: "None",
+      speed: 4
+    };
+
+    await lightService._handleStateMessage(MESSAGE);
+
+    expect(mediator.emit).toBeCalledWith(MUTATION_RESPONSE_EVENT, {
+      mutationId: MUTATION_ID,
+      newState: MOCK_LIGHT_STATE
+    });
+  });
 });
