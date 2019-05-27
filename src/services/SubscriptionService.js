@@ -9,7 +9,7 @@ const { PubSub } = require("graphql-subscriptions");
 
 class SubscriptionService {
   constructor() {
-    this.gqlPubSub = new PubSub();
+    this._gqlPubSub = new PubSub();
   }
 
   init() {
@@ -23,37 +23,39 @@ class SubscriptionService {
   }
 
   subscribeToChangedLights() {
-    return this.gqlPubSub.asyncIterator(LIGHT_CHANGED_EVENT);
+    return this._gqlPubSub.asyncIterator(LIGHT_CHANGED_EVENT);
   }
 
   subscribeToAddedLights() {
-    return this.gqlPubSub.asyncIterator(LIGHT_ADDED_EVENT);
+    return this._gqlPubSub.asyncIterator(LIGHT_ADDED_EVENT);
   }
 
   subscribeToRemovedLights() {
-    return this.gqlPubSub.asyncIterator(LIGHT_REMOVED_EVENT);
+    return this._gqlPubSub.asyncIterator(LIGHT_REMOVED_EVENT);
   }
 
   subscribeToChangedLightStates() {
-    return this.gqlPubSub.asyncIterator(LIGHT_STATE_CHANGED_EVENT);
+    return this._gqlPubSub.asyncIterator(LIGHT_STATE_CHANGED_EVENT);
   }
 
   _onLightChanged(changedLight) {
-    this.gqlPubSub.publish(LIGHT_CHANGED_EVENT, {
+    this._gqlPubSub.publish(LIGHT_CHANGED_EVENT, {
       lightChanged: changedLight
     });
   }
 
   _onLightAdded(addedLight) {
-    this.gqlPubSub.publish(LIGHT_ADDED_EVENT, { lightAdded: addedLight });
+    this._gqlPubSub.publish(LIGHT_ADDED_EVENT, { lightAdded: addedLight });
   }
 
   _onLightRemoved(removedLight) {
-    this.gqlPubSub.publish(LIGHT_REMOVED_EVENT, { lightRemoved: removedLight });
+    this._gqlPubSub.publish(LIGHT_REMOVED_EVENT, {
+      lightRemoved: removedLight
+    });
   }
 
   _onLightStateChanged(changedState) {
-    this.gqlPubSub.publish(LIGHT_STATE_CHANGED_EVENT, {
+    this._gqlPubSub.publish(LIGHT_STATE_CHANGED_EVENT, {
       lightStateChanged: changedState
     });
   }
