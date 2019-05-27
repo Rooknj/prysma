@@ -1,9 +1,9 @@
 const { getDb } = require("../clients/db");
 const { toLightObject, toLightModel } = require("../utils/lightUtils");
 const { ValidationError } = require("../errors");
-const Debug = require("debug").default;
+//const Debug = require("debug").default;
 
-const debug = Debug("LightDao");
+//const debug = Debug("LightDao");
 
 class LightDao {
   constructor() {
@@ -17,7 +17,7 @@ class LightDao {
     } catch (error) {
       throw error;
     }
-    return lights.map(toLightObject);
+    return lights.map(light => toLightObject(light.get({ plain: true })));
   }
 
   async getLight(lightId) {
@@ -29,7 +29,7 @@ class LightDao {
       throw error;
     }
     if (!light) throw new Error(`"${lightId}" not found`);
-    return toLightObject(light);
+    return toLightObject(light.get({ plain: true }));
   }
 
   async setLight(lightId, lightData) {
@@ -73,7 +73,7 @@ class LightDao {
         throw error;
       }
     }
-    return toLightObject(addedLight);
+    return toLightObject(addedLight.get({ plain: true }));
   }
 
   async removeLight(lightId) {

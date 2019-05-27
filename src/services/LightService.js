@@ -3,10 +3,6 @@ const LightDao = require("../daos/LightDao");
 const LightCache = require("../caches/LightCache");
 const mediator = require("./mediator");
 const { getSimpleUniqueId } = require("../utils/lightUtils");
-const serviceConstants = require("./serviceConstants");
-const Debug = require("debug").default;
-
-const debug = Debug("LightService");
 const {
   TIMEOUT_WAIT,
   MUTATION_RESPONSE_EVENT,
@@ -14,18 +10,35 @@ const {
   LIGHT_REMOVED_EVENT,
   LIGHT_CHANGED_EVENT,
   LIGHT_STATE_CHANGED_EVENT
-} = serviceConstants;
+} = require("./serviceConstants");
+const Debug = require("debug").default;
+
+const debug = Debug("LightService");
 
 class LightService {
-  constructor(config) {
+  constructor(config = { mqtt: {} }) {
     const { mqtt } = config;
 
     // Initialize private variables
     this._dao = new LightDao();
     this._messenger = new LightMessenger(mqtt.topics);
     this._cache = new LightCache();
+  }
 
-    // Add Event Listeners
+  async init() {
+    // Initialize cache
+    const lights = await this._dao.getLights();
+    const cacheInitPromises = lights.map(({ id }) => {
+      this._cache.initializeLightState(id);
+    });
+    await Promise.all(cacheInitPromises);
+
+    // Handle connect if the messenger was already connected
+    if (this._messenger.connected) {
+      this._handleMessengerConnect();
+    }
+
+    // Add Event Listeners (This cant be done until everything is set up)
     this._messenger.on("connect", this._handleMessengerConnect.bind(this));
     this._messenger.on(
       "connectedMessage",
@@ -41,20 +54,6 @@ class LightService {
       "discoveryMessage",
       this._handleDiscoveryMessage.bind(this)
     );
-
-    this._init();
-  }
-
-  async _init() {
-    // Initialize cache
-    const lights = await this._dao.getLights();
-    lights.forEach(({ id }) => {
-      this._cache.initializeLightState(id);
-    });
-
-    if (this._messenger.connected) {
-      this._handleMessengerConnect();
-    }
   }
 
   async getLight(lightId) {
@@ -89,18 +88,24 @@ class LightService {
       ({ name } = lightData);
     }
 
-    // TODO: Dont await all these and do promise.all
     // Add new light to light database
     await this._dao.addLight(lightId, name);
 
-    // Add a default state to the light
-    await this._cache.initializeLightState(lightId);
+    const addPromises = [
+      // Add a default state to the light
+      this._cache.initializeLightState(lightId),
+      // Remove the light from the discoveredLights list
+      this._cache.removeDiscoveredLight(lightId),
+      // Subscribe to new messages from the new light
+      this._messenger.subscribeToLight(lightId)
+    ];
 
-    // Remove the light from the discoveredLights list
-    await this._cache.removeDiscoveredLight(lightId);
-
-    // Subscribe to new messages from the new light
-    await this._messenger.subscribeToLight(lightId);
+    try {
+      await Promise.all(addPromises);
+    } catch (error) {
+      // TODO: Figure out what to do if any of these error
+      debug(error);
+    }
 
     // Get the newly added light, notify any listeners, and return it
     const lightAdded = await this.getLight(lightId);
@@ -134,9 +139,6 @@ class LightService {
 
       // Wait for all the promises to resolve
       await Promise.all(subscriptionPromises);
-
-      // Discover any lights
-      await this._messenger.publishDiscovery();
     } catch (error) {
       debug("Error handling Messenger connect", error);
       throw error;
