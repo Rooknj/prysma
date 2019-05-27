@@ -700,4 +700,16 @@ describe("publishDiscovery", () => {
       "ping"
     );
   });
+  test("rejects if the client is not connected", async () => {
+    // Create the client and lightMessenger
+    let mockClient = createMockClient();
+    let lightMessenger = new LightMessenger(TOPICS);
+    lightMessenger._client = mockClient;
+    lightMessenger.connected = false;
+
+    // Call The Method
+    const messengerPromise = lightMessenger.publishDiscovery();
+
+    await expect(messengerPromise).rejects.toThrow(Error);
+  });
 });

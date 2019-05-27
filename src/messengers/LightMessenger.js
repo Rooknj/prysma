@@ -153,6 +153,12 @@ class LightMessenger extends EventEmitter {
   }
 
   async publishDiscovery() {
+    if (!this.connected) {
+      const errorMessage = `Can not publish discovery message. MQTT client not connected`;
+      debug(errorMessage);
+      throw new Error(errorMessage);
+    }
+
     const { top, discovery } = this._topics;
     await this._client.publish(`${top}/${discovery}`, "ping");
     debug(`Successfully published discovery message`);
