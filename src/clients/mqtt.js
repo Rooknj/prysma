@@ -11,7 +11,7 @@ const initMqtt = async (host, options = {}) => {
     throw new Error("Trying to init Mqtt again!");
   }
 
-  debug(`Connecting to MQTT broker at ${host}...`);
+  debug(`Connecting to mqtt broker at ${host}...`);
 
   _mqtt = Mqtt.connect(host, {
     reconnectPeriod: options.reconnectPeriod, // Amount of time between reconnection attempts
@@ -19,8 +19,8 @@ const initMqtt = async (host, options = {}) => {
     password: options.password
   });
 
-  _mqtt.on("connect", () => debug(`Connected to MQTT broker at ${host}`));
-  _mqtt.on("close", () => debug(`disconnected from MQTT broker at ${host}`));
+  _mqtt.on("connect", () => debug(`Connected to mqtt broker at ${host}`));
+  _mqtt.on("close", () => debug(`disconnected from mqtt broker at ${host}`));
 };
 
 const getMqtt = () => {
@@ -32,12 +32,16 @@ const getMqtt = () => {
 /**
  * Disconnects from MQTT broker
  */
-const endMqtt = () => {
-  return _mqtt.end();
+const closeMqtt = () => {
+  if (_mqtt) {
+    debug(`Closing connection to mqtt broker`);
+    return _mqtt.end();
+  }
+  debug(`Mqtt has not been initialized.`);
 };
 
 module.exports = {
   initMqtt,
   getMqtt,
-  endMqtt
+  closeMqtt
 };
