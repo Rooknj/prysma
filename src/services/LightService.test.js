@@ -17,7 +17,6 @@ const LightService = require("./LightService");
 jest.mock("../messengers/LightMessenger");
 jest.mock("../daos/LightDao");
 jest.mock("../caches/LightCache");
-jest.mock("./mediator");
 jest.mock("../utils/lightUtils");
 
 const MOCK_LIGHT_STATE = {
@@ -90,6 +89,8 @@ const MOCK_LIGHTS = [
 ];
 const MOCK_LIGHT = MOCK_LIGHTS[0];
 
+const mediatorEmitSpy = jest.spyOn(mediator, "emit");
+const mediatorRemoveListenerSpy = jest.spyOn(mediator, "removeListener");
 beforeAll(() => {
   // Override getLights automock value
   LightDao.prototype.getLights = jest.fn(() => MOCK_LIGHTS);
@@ -100,11 +101,8 @@ beforeEach(() => {
   LightMessenger.mockClear();
   LightDao.mockClear();
   LightCache.mockClear();
-  mediator.emit.mockClear();
-  mediator.on.mockClear();
-  mediator.once.mockClear();
-  mediator.addListener.mockClear();
-  mediator.removeListener.mockClear();
+  mediatorEmitSpy.mockClear();
+  mediatorRemoveListenerSpy.mockClear();
 });
 
 describe("constructor", () => {
@@ -164,7 +162,7 @@ describe("init", () => {
 
     expect(lightService._messenger.on).toBeCalledWith(
       "connect",
-      expect.anything()
+      expect.any(Function)
     );
   });
   test("Sets a messenger connectedMessage listener", async () => {
@@ -175,7 +173,7 @@ describe("init", () => {
 
     expect(lightService._messenger.on).toBeCalledWith(
       "connectedMessage",
-      expect.anything()
+      expect.any(Function)
     );
   });
   test("Sets a messenger stateMessage listener", async () => {
@@ -186,7 +184,7 @@ describe("init", () => {
 
     expect(lightService._messenger.on).toBeCalledWith(
       "stateMessage",
-      expect.anything()
+      expect.any(Function)
     );
   });
   test("Sets a messenger effectListMessage listener", async () => {
@@ -197,7 +195,7 @@ describe("init", () => {
 
     expect(lightService._messenger.on).toBeCalledWith(
       "effectListMessage",
-      expect.anything()
+      expect.any(Function)
     );
   });
   test("Sets a messenger discoveryMessage listener", async () => {
@@ -208,7 +206,7 @@ describe("init", () => {
 
     expect(lightService._messenger.on).toBeCalledWith(
       "discoveryMessage",
-      expect.anything()
+      expect.any(Function)
     );
   });
 });
@@ -295,7 +293,7 @@ describe("setLight", () => {
 
     await lightService.setLight(ID, DATA);
 
-    expect(mediator.emit).toBeCalledWith(LIGHT_CHANGED_EVENT, MOCK_LIGHT);
+    expect(mediatorEmitSpy).toBeCalledWith(LIGHT_CHANGED_EVENT, MOCK_LIGHT);
   });
   test("does not notify listeners about the changed light if it cant set the light", async () => {
     const lightService = new LightService();
@@ -308,7 +306,7 @@ describe("setLight", () => {
     const servicePromise = lightService.setLight(ID, DATA);
 
     await expect(servicePromise).rejects.toThrow(Error);
-    expect(mediator.emit).not.toBeCalled();
+    expect(mediatorEmitSpy).not.toBeCalled();
   });
   test("does not notify listeners about the changed light if it cant retrieve the set light", async () => {
     const lightService = new LightService();
@@ -321,7 +319,7 @@ describe("setLight", () => {
     const servicePromise = lightService.setLight(ID, DATA);
 
     await expect(servicePromise).rejects.toThrow(Error);
-    expect(mediator.emit).not.toBeCalled();
+    expect(mediatorEmitSpy).not.toBeCalled();
   });
   test("rejects if setting the light fails", async () => {
     const lightService = new LightService();
@@ -414,7 +412,7 @@ describe("addLight", () => {
 
     await lightService.addLight(ID);
 
-    expect(mediator.emit).toBeCalledWith(LIGHT_ADDED_EVENT, MOCK_LIGHT);
+    expect(mediatorEmitSpy).toBeCalledWith(LIGHT_ADDED_EVENT, MOCK_LIGHT);
   });
   test("does not notify listeners about the new light if it fails to add the light to the database", async () => {
     const lightService = new LightService();
@@ -426,7 +424,7 @@ describe("addLight", () => {
     const servicePromise = lightService.addLight(ID);
 
     await expect(servicePromise).rejects.toThrow(Error);
-    expect(mediator.emit).not.toBeCalled();
+    expect(mediatorEmitSpy).not.toBeCalled();
   });
   test("rejects if it fails to add the light to the database", async () => {
     const lightService = new LightService();
@@ -495,7 +493,7 @@ describe("removeLight", () => {
 
     await lightService.removeLight(ID);
 
-    expect(mediator.emit).toBeCalledWith(LIGHT_REMOVED_EVENT, MOCK_LIGHT);
+    expect(mediatorEmitSpy).toBeCalledWith(LIGHT_REMOVED_EVENT, MOCK_LIGHT);
   });
   test("clears the light's state", async () => {
     const lightService = new LightService();
@@ -525,7 +523,7 @@ describe("removeLight", () => {
     const servicePromise = lightService.removeLight(ID);
 
     await expect(servicePromise).rejects.toThrow(Error);
-    expect(mediator.emit).not.toBeCalled();
+    expect(mediatorEmitSpy).not.toBeCalled();
   });
 });
 
@@ -567,7 +565,7 @@ describe("_handleEffectListMessage", () => {
 
     await lightService._handleEffectListMessage(MESSAGE);
 
-    expect(mediator.emit).toBeCalledWith(LIGHT_CHANGED_EVENT, MOCK_LIGHT);
+    expect(mediatorEmitSpy).toBeCalledWith(LIGHT_CHANGED_EVENT, MOCK_LIGHT);
   });
 });
 
@@ -593,7 +591,7 @@ describe("_handleConfigMessage", () => {
 
     await lightService._handleConfigMessage(MESSAGE);
 
-    expect(mediator.emit).toBeCalledWith(LIGHT_CHANGED_EVENT, MOCK_LIGHT);
+    expect(mediatorEmitSpy).toBeCalledWith(LIGHT_CHANGED_EVENT, MOCK_LIGHT);
   });
 });
 
@@ -651,31 +649,209 @@ describe("setLightState", () => {
     await expect(servicePromise).rejects.toThrow(`"${ID}" is not connected`);
   });
   test("maps on: true to state: ON", async () => {
-    // const MUTATION_ID = 77;
-    // utils.getSimpleUniqueId.mockImplementationOnce(() => {
-    //   return 77;
-    // })
+    // Mock getSimpleUniqueId to return a given value instead of a random one
+    const MUTATION_ID = 77;
+    utils.getSimpleUniqueId.mockImplementationOnce(() => {
+      return 77;
+    });
+
+    const lightService = new LightService();
+    // Make sure the cache returns a connected light so no errors are thrown
+    const connectedLightState = Object.assign({}, MOCK_LIGHT_STATE, {
+      connected: true
+    });
+    lightService._cache.getLightState = jest.fn(() => connectedLightState);
+
+    // Mock publishToLight to emit a response as soon as it is called to that the promise can resolve
+    lightService._messenger.publishToLight = jest.fn(async () => {
+      mediator.emit(MUTATION_RESPONSE_EVENT, {
+        mutationId: MUTATION_ID,
+        newState: connectedLightState
+      });
+    });
+    const ID = "Prysma-12345";
+    const STATE = { on: true };
+    const expectedState = "ON";
+
+    await lightService.setLightState(ID, STATE);
+
+    expect(lightService._messenger.publishToLight).toBeCalledWith(
+      ID,
+      expect.objectContaining({ state: expectedState })
+    );
+  });
+  test("maps on: false to state: OFF", async () => {
+    // Mock getSimpleUniqueId to return a given value instead of a random one
+    const MUTATION_ID = 77;
+    utils.getSimpleUniqueId.mockImplementationOnce(() => {
+      return 77;
+    });
+
+    const lightService = new LightService();
+    // Make sure the cache returns a connected light so no errors are thrown
+    const connectedLightState = Object.assign({}, MOCK_LIGHT_STATE, {
+      connected: true
+    });
+    lightService._cache.getLightState = jest.fn(() => connectedLightState);
+
+    // Mock publishToLight to emit a response as soon as it is called to that the promise can resolve
+    lightService._messenger.publishToLight = jest.fn(async () => {
+      mediator.emit(MUTATION_RESPONSE_EVENT, {
+        mutationId: MUTATION_ID,
+        newState: connectedLightState
+      });
+    });
+    const ID = "Prysma-12345";
+    const STATE = { on: false };
+    const expectedState = "OFF";
+
+    await lightService.setLightState(ID, STATE);
+
+    expect(lightService._messenger.publishToLight).toBeCalledWith(
+      ID,
+      expect.objectContaining({ state: expectedState })
+    );
+  });
+  test("appends on a mutationId", async () => {
+    // Mock getSimpleUniqueId to return a given value instead of a random one
+    const MUTATION_ID = 77;
+    utils.getSimpleUniqueId.mockImplementationOnce(() => {
+      return 77;
+    });
+
+    const lightService = new LightService();
+    // Make sure the cache returns a connected light so no errors are thrown
+    const connectedLightState = Object.assign({}, MOCK_LIGHT_STATE, {
+      connected: true
+    });
+    lightService._cache.getLightState = jest.fn(() => connectedLightState);
+
+    // Mock publishToLight to emit a response as soon as it is called to that the promise can resolve
+    lightService._messenger.publishToLight = jest.fn(async () => {
+      mediator.emit(MUTATION_RESPONSE_EVENT, {
+        mutationId: MUTATION_ID,
+        newState: connectedLightState
+      });
+    });
+    const ID = "Prysma-12345";
+    const STATE = { effect: "Juggle" };
+
+    await lightService.setLightState(ID, STATE);
+
+    expect(lightService._messenger.publishToLight).toBeCalledWith(
+      ID,
+      expect.objectContaining({ mutationId: MUTATION_ID })
+    );
+  });
+  test("publishes the desired state to the light", async () => {
+    // Mock getSimpleUniqueId to return a given value instead of a random one
+    const MUTATION_ID = 77;
+    utils.getSimpleUniqueId.mockImplementationOnce(() => {
+      return 77;
+    });
+
+    const lightService = new LightService();
+    // Make sure the cache returns a connected light so no errors are thrown
+    const connectedLightState = Object.assign({}, MOCK_LIGHT_STATE, {
+      connected: true
+    });
+    lightService._cache.getLightState = jest.fn(() => connectedLightState);
+
+    // Mock publishToLight to emit a response as soon as it is called to that the promise can resolve
+    lightService._messenger.publishToLight = jest.fn(async () => {
+      mediator.emit(MUTATION_RESPONSE_EVENT, {
+        mutationId: MUTATION_ID,
+        newState: connectedLightState
+      });
+    });
+    const ID = "Prysma-12345";
+    const STATE = { brightness: 40, speed: 7, effect: "Juggle" };
+
+    await lightService.setLightState(ID, STATE);
+
+    expect(lightService._messenger.publishToLight).toBeCalledWith(
+      ID,
+      expect.objectContaining(STATE)
+    );
+  });
+  test("removes the mutationResponse listener on success", async () => {
+    // Mock getSimpleUniqueId to return a given value instead of a random one
+    const MUTATION_ID = 77;
+    utils.getSimpleUniqueId.mockImplementationOnce(() => {
+      return 77;
+    });
+
+    const lightService = new LightService();
+    // Make sure the cache returns a connected light so no errors are thrown
+    const connectedLightState = Object.assign({}, MOCK_LIGHT_STATE, {
+      connected: true
+    });
+    lightService._cache.getLightState = jest.fn(() => connectedLightState);
+
+    // Mock publishToLight to emit a response as soon as it is called to that the promise can resolve
+    lightService._messenger.publishToLight = jest.fn(async () => {
+      mediator.emit(MUTATION_RESPONSE_EVENT, {
+        mutationId: MUTATION_ID,
+        newState: connectedLightState
+      });
+    });
+    const ID = "Prysma-12345";
+    const STATE = { brightness: 40, speed: 7, effect: "Juggle" };
+
+    await lightService.setLightState(ID, STATE);
+
+    expect(mediatorRemoveListenerSpy).toBeCalledWith(
+      MUTATION_RESPONSE_EVENT,
+      expect.any(Function)
+    );
+  });
+  test("returns the changed light", async () => {
+    // Mock getSimpleUniqueId to return a given value instead of a random one
+    const MUTATION_ID = 77;
+    utils.getSimpleUniqueId.mockImplementationOnce(() => {
+      return 77;
+    });
+
+    const lightService = new LightService();
+    // Make sure the cache returns a connected light so no errors are thrown
+    const connectedLightState = Object.assign({}, MOCK_LIGHT_STATE, {
+      connected: true
+    });
+    lightService._cache.getLightState = jest.fn(() => connectedLightState);
+
+    // Mock publishToLight to emit a response as soon as it is called to that the promise can resolve
+    lightService._messenger.publishToLight = jest.fn(async () => {
+      mediator.emit(MUTATION_RESPONSE_EVENT, {
+        mutationId: MUTATION_ID,
+        newState: connectedLightState
+      });
+    });
+    const ID = "Prysma-12345";
+    const STATE = { brightness: 40, speed: 7, effect: "Juggle" };
+
+    const changedLightState = await lightService.setLightState(ID, STATE);
+
+    expect(changedLightState).toBe(connectedLightState);
+  });
+  test("times out after a set amount of time with no response", async () => {
+    // // Use fake timers for this test
+    // jest.useFakeTimers();
     // const lightService = new LightService();
+    // // Make sure the cache returns a connected light so no errors are thrown
     // const connectedLightState = Object.assign({}, MOCK_LIGHT_STATE, {
     //   connected: true
     // });
     // lightService._cache.getLightState = jest.fn(() => connectedLightState);
-    // lightService._messenger.publishToLight = jest.fn(async () => {
-    //   mediator.emit(MUTATION_RESPONSE_EVENT, {mutationId: MUTATION_ID, connectedLightState})
-    // });
+    // // Dont emit a response as soon as it is called to that the promise wont resolve
+    // lightService._messenger.publishToLight = jest.fn(async () => {});
     // const ID = "Prysma-12345";
-    // const STATE = { on: true };
-    // const expectedState = "ON";
-    // await lightService.setLightState(ID, STATE);
-    // expect(lightService._messenger.publishToLight).toBeCalledWith(
-    //   ID,
-    //   expect.objectContaining({ state: expectedState })
+    // const STATE = { brightness: 40, speed: 7, effect: "Juggle" };
+    // const servicePromise = lightService.setLightState(ID, STATE);
+    // jest.advanceTimersByTime(TIMEOUT_WAIT);
+    // await expect(servicePromise).rejects.toThrow(
+    //   `Response from ${ID} timed out`
     // );
   });
-  test("maps on: false to state: OFF", async () => {});
-  test("appends on a mutationId", async () => {});
-  test("publishes the desired state to the light", async () => {});
-  test("times out after a set amount of time with no response", async () => {});
 });
 
 describe("_handleConnectedMessage", () => {
@@ -730,7 +906,7 @@ describe("_handleConnectedMessage", () => {
 
     await lightService._handleConnectedMessage(MESSAGE);
 
-    expect(mediator.emit).toBeCalledWith(
+    expect(mediatorEmitSpy).toBeCalledWith(
       LIGHT_STATE_CHANGED_EVENT,
       MOCK_LIGHT_STATE
     );
@@ -834,7 +1010,7 @@ describe("_handleStateMessage", () => {
 
     await lightService._handleStateMessage(MESSAGE);
 
-    expect(mediator.emit).toBeCalledWith(
+    expect(mediatorEmitSpy).toBeCalledWith(
       LIGHT_STATE_CHANGED_EVENT,
       MOCK_LIGHT_STATE
     );
@@ -857,7 +1033,7 @@ describe("_handleStateMessage", () => {
 
     await lightService._handleStateMessage(MESSAGE);
 
-    expect(mediator.emit).toBeCalledWith(MUTATION_RESPONSE_EVENT, {
+    expect(mediatorEmitSpy).toBeCalledWith(MUTATION_RESPONSE_EVENT, {
       mutationId: MUTATION_ID,
       newState: MOCK_LIGHT_STATE
     });

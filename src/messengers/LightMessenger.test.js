@@ -50,15 +50,15 @@ describe("constructor", () => {
 
     expect(lightMessenger._client.on).toBeCalledWith(
       "connect",
-      expect.anything()
+      expect.any(Function)
     );
     expect(lightMessenger._client.on).toBeCalledWith(
       "close",
-      expect.anything()
+      expect.any(Function)
     );
     expect(lightMessenger._client.on).toBeCalledWith(
       "message",
-      expect.anything()
+      expect.any(Function)
     );
   });
 });
