@@ -2,6 +2,7 @@ const LightMessenger = require("../messengers/LightMessenger");
 const LightDao = require("../daos/LightDao");
 const LightCache = require("../caches/LightCache");
 const mediator = require("./mediator");
+const utils = require("../utils/lightUtils");
 const {
   TIMEOUT_WAIT,
   MUTATION_RESPONSE_EVENT,
@@ -17,6 +18,7 @@ jest.mock("../messengers/LightMessenger");
 jest.mock("../daos/LightDao");
 jest.mock("../caches/LightCache");
 jest.mock("./mediator");
+jest.mock("../utils/lightUtils");
 
 const MOCK_LIGHT_STATE = {
   connected: true,
@@ -625,7 +627,55 @@ describe("getLightState", () => {
 });
 
 describe("setLightState", () => {
-  test("does a thing", async () => {});
+  test("rejects if the light isnt in the cache", async () => {
+    const lightService = new LightService();
+    lightService._cache.getLightState = jest.fn(() => undefined);
+    const ID = "Prysma-12345";
+    const STATE = { effect: "Cylon" };
+
+    const servicePromise = lightService.setLightState(ID, STATE);
+
+    await expect(servicePromise).rejects.toThrow(`"${ID}" was never added`);
+  });
+  test("rejects if the light isnt connected", async () => {
+    const lightService = new LightService();
+    const disconnectedLightState = Object.assign({}, MOCK_LIGHT_STATE, {
+      connected: false
+    });
+    lightService._cache.getLightState = jest.fn(() => disconnectedLightState);
+    const ID = "Prysma-12345";
+    const STATE = { effect: "Cylon" };
+
+    const servicePromise = lightService.setLightState(ID, STATE);
+
+    await expect(servicePromise).rejects.toThrow(`"${ID}" is not connected`);
+  });
+  test("maps on: true to state: ON", async () => {
+    // const MUTATION_ID = 77;
+    // utils.getSimpleUniqueId.mockImplementationOnce(() => {
+    //   return 77;
+    // })
+    // const lightService = new LightService();
+    // const connectedLightState = Object.assign({}, MOCK_LIGHT_STATE, {
+    //   connected: true
+    // });
+    // lightService._cache.getLightState = jest.fn(() => connectedLightState);
+    // lightService._messenger.publishToLight = jest.fn(async () => {
+    //   mediator.emit(MUTATION_RESPONSE_EVENT, {mutationId: MUTATION_ID, connectedLightState})
+    // });
+    // const ID = "Prysma-12345";
+    // const STATE = { on: true };
+    // const expectedState = "ON";
+    // await lightService.setLightState(ID, STATE);
+    // expect(lightService._messenger.publishToLight).toBeCalledWith(
+    //   ID,
+    //   expect.objectContaining({ state: expectedState })
+    // );
+  });
+  test("maps on: false to state: OFF", async () => {});
+  test("appends on a mutationId", async () => {});
+  test("publishes the desired state to the light", async () => {});
+  test("times out after a set amount of time with no response", async () => {});
 });
 
 describe("_handleConnectedMessage", () => {
