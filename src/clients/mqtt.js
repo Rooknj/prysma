@@ -16,7 +16,7 @@ const initMqtt = async (host, options = {}) => {
   _mqtt = Mqtt.connect(host, {
     reconnectPeriod: options.reconnectPeriod, // Amount of time between reconnection attempts
     username: options.username,
-    password: options.password
+    password: options.password,
   });
 
   _mqtt.on("connect", () => debug(`Connected to mqtt broker at ${host}`));
@@ -46,5 +46,5 @@ const closeMqtt = () => {
 module.exports = {
   initMqtt,
   getMqtt,
-  closeMqtt
+  closeMqtt,
 };

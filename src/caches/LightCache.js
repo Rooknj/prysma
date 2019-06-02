@@ -1,6 +1,6 @@
 const {
   validateLightState,
-  validateDiscoveredLight
+  validateDiscoveredLight,
 } = require("../validators/cacheValidators");
 const errors = require("../errors");
 //const Debug = require("debug").default;
@@ -18,11 +18,11 @@ class LightCache {
       color: {
         r: 255,
         g: 255,
-        b: 255
+        b: 255,
       },
       brightness: 100,
       effect: "None",
-      speed: 4
+      speed: 4,
     };
   }
 

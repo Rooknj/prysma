@@ -1,4 +1,4 @@
 module.exports = {
   dialect: "sqlite",
-  storage: "./data/prysma.sqlite"
+  storage: "./data/prysma.sqlite",
 };

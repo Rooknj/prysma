@@ -19,7 +19,7 @@ const lightColor = Joi.object().keys({
     .integer()
     .min(0)
     .max(255)
-    .required()
+    .required(),
 });
 const lightBrightness = Joi.number()
   .integer()
@@ -47,7 +47,7 @@ const connectedMessageSchema = Joi.object()
     name: lightId.required(),
     connection: Joi.number()
       .valid(0, 2)
-      .required()
+      .required(),
   })
   .required();
 
@@ -63,7 +63,7 @@ const stateMessageSchema = Joi.object()
     color: lightColor.required(),
     brightness: lightBrightness.required(),
     effect: lightEffect.required(),
-    speed: lightSpeed.required()
+    speed: lightSpeed.required(),
   })
   .required();
 const validateStateMessage = msg => Joi.validate(msg, stateMessageSchema);
@@ -74,7 +74,7 @@ const effectListMessageSchema = Joi.object()
     name: lightId.required(),
     effectList: Joi.array()
       .items(Joi.string())
-      .required()
+      .required(),
   })
   .required();
 const validateEffectListMessage = msg =>
@@ -92,7 +92,7 @@ const configMessageSchema = Joi.object()
     ipAddress: lightIpAddress.required(),
     macAddress: lightMacAddress.required(),
     numLeds: lightNumLeds.required(),
-    udpPort: lightUdpPort.required()
+    udpPort: lightUdpPort.required(),
   })
   .required();
 const validateConfigMessage = msg => Joi.validate(msg, configMessageSchema);
@@ -109,7 +109,7 @@ const discoveryMessageSchema = Joi.object()
     ipAddress: lightIpAddress.required(),
     macAddress: lightMacAddress.required(),
     numLeds: lightNumLeds.required(),
-    udpPort: lightUdpPort.required()
+    udpPort: lightUdpPort.required(),
   })
   .required();
 const validateDiscoveryMessage = msg =>
@@ -124,7 +124,7 @@ const commandMessageSchema = Joi.object()
     color: lightColor,
     brightness: lightBrightness,
     effect: lightEffect,
-    speed: lightSpeed
+    speed: lightSpeed,
   })
   .required();
 const validateCommandMessage = msg => Joi.validate(msg, commandMessageSchema);
@@ -135,5 +135,5 @@ module.exports = {
   validateEffectListMessage,
   validateConfigMessage,
   validateDiscoveryMessage,
-  validateCommandMessage
+  validateCommandMessage,
 };

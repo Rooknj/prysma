@@ -3,7 +3,7 @@ const {
   LIGHT_ADDED_EVENT,
   LIGHT_REMOVED_EVENT,
   LIGHT_CHANGED_EVENT,
-  LIGHT_STATE_CHANGED_EVENT
+  LIGHT_STATE_CHANGED_EVENT,
 } = require("./serviceConstants");
 const { PubSub } = require("graphql-subscriptions");
 const mediator = require("./mediator");
@@ -73,7 +73,7 @@ describe("subscribeToChangedLights", () => {
   test("returns an async iterator", () => {
     const asyncIteratorMock = jest.fn(() => "asyncIterator");
     PubSub.mockImplementationOnce(() => ({
-      asyncIterator: asyncIteratorMock
+      asyncIterator: asyncIteratorMock,
     }));
     const subscriptionService = new SubscriptionService();
 
@@ -88,7 +88,7 @@ describe("subscribeToAddedLights", () => {
   test("returns an async iterator", () => {
     const asyncIteratorMock = jest.fn(() => "asyncIterator");
     PubSub.mockImplementationOnce(() => ({
-      asyncIterator: asyncIteratorMock
+      asyncIterator: asyncIteratorMock,
     }));
     const subscriptionService = new SubscriptionService();
 
@@ -103,7 +103,7 @@ describe("subscribeToRemovedLights", () => {
   test("returns an async iterator", () => {
     const asyncIteratorMock = jest.fn(() => "asyncIterator");
     PubSub.mockImplementationOnce(() => ({
-      asyncIterator: asyncIteratorMock
+      asyncIterator: asyncIteratorMock,
     }));
     const subscriptionService = new SubscriptionService();
 
@@ -118,7 +118,7 @@ describe("subscribeToChangedLightStates", () => {
   test("returns an async iterator", () => {
     const asyncIteratorMock = jest.fn(() => "asyncIterator");
     PubSub.mockImplementationOnce(() => ({
-      asyncIterator: asyncIteratorMock
+      asyncIterator: asyncIteratorMock,
     }));
     const subscriptionService = new SubscriptionService();
 
@@ -133,14 +133,14 @@ describe("_onLightChanged", () => {
   test("publishes the changed light", () => {
     const publishMock = jest.fn();
     PubSub.mockImplementationOnce(() => ({
-      publish: publishMock
+      publish: publishMock,
     }));
     const subscriptionService = new SubscriptionService();
 
     subscriptionService._onLightChanged("changedLight");
 
     expect(publishMock).toBeCalledWith(LIGHT_CHANGED_EVENT, {
-      lightChanged: "changedLight"
+      lightChanged: "changedLight",
     });
   });
 });
@@ -149,14 +149,14 @@ describe("_onLightAdded", () => {
   test("publishes the changed light", () => {
     const publishMock = jest.fn();
     PubSub.mockImplementationOnce(() => ({
-      publish: publishMock
+      publish: publishMock,
     }));
     const subscriptionService = new SubscriptionService();
 
     subscriptionService._onLightAdded("addedLight");
 
     expect(publishMock).toBeCalledWith(LIGHT_ADDED_EVENT, {
-      lightAdded: "addedLight"
+      lightAdded: "addedLight",
     });
   });
 });
@@ -165,14 +165,14 @@ describe("_onLightRemoved", () => {
   test("publishes the changed light", () => {
     const publishMock = jest.fn();
     PubSub.mockImplementationOnce(() => ({
-      publish: publishMock
+      publish: publishMock,
     }));
     const subscriptionService = new SubscriptionService();
 
     subscriptionService._onLightRemoved("removedLight");
 
     expect(publishMock).toBeCalledWith(LIGHT_REMOVED_EVENT, {
-      lightRemoved: "removedLight"
+      lightRemoved: "removedLight",
     });
   });
 });
@@ -181,14 +181,14 @@ describe("_onLightStateChanged", () => {
   test("publishes the changed light", () => {
     const publishMock = jest.fn();
     PubSub.mockImplementationOnce(() => ({
-      publish: publishMock
+      publish: publishMock,
     }));
     const subscriptionService = new SubscriptionService();
 
     subscriptionService._onLightStateChanged("changedLightState");
 
     expect(publishMock).toBeCalledWith(LIGHT_STATE_CHANGED_EVENT, {
-      lightStateChanged: "changedLightState"
+      lightStateChanged: "changedLightState",
     });
   });
 });

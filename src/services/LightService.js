@@ -10,7 +10,7 @@ const {
   LIGHT_ADDED_EVENT,
   LIGHT_REMOVED_EVENT,
   LIGHT_CHANGED_EVENT,
-  LIGHT_STATE_CHANGED_EVENT
+  LIGHT_STATE_CHANGED_EVENT,
 } = require("./serviceConstants");
 const { promisify } = require("util");
 const asyncSetTimeout = promisify(setTimeout);
@@ -112,7 +112,7 @@ class LightService {
       // Add a default state to the light
       this._cache.initializeLightState(lightId),
       // Subscribe to new messages from the new light
-      this._messenger.subscribeToLight(lightId)
+      this._messenger.subscribeToLight(lightId),
     ];
 
     try {

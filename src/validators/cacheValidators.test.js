@@ -1,6 +1,6 @@
 const {
   validateLightState,
-  validateDiscoveredLight
+  validateDiscoveredLight,
 } = require("./cacheValidators");
 
 describe("validateLightState", () => {
@@ -12,7 +12,7 @@ describe("validateLightState", () => {
       color: { r: 255, g: 0, b: 0 },
       brightness: 100,
       effect: "None",
-      speed: 4
+      speed: 4,
     };
   });
   test("validates a correct message", () => {
@@ -34,7 +34,7 @@ describe("validateLightState", () => {
 
   test("does not validate an incorrect on", () => {
     const INCORRECT_MESSAGE = Object.assign(correct_message, {
-      on: "ON"
+      on: "ON",
     });
     const result = validateLightState(INCORRECT_MESSAGE);
     expect(result.error).not.toBeNull();
@@ -42,7 +42,7 @@ describe("validateLightState", () => {
 
   test("does not validate an incorrect color", () => {
     const INCORRECT_MESSAGE = Object.assign(correct_message, {
-      color: { r: 256, g: -3, b: "Hello" }
+      color: { r: 256, g: -3, b: "Hello" },
     });
     const result = validateLightState(INCORRECT_MESSAGE);
     expect(result.error).not.toBeNull();
@@ -50,7 +50,7 @@ describe("validateLightState", () => {
 
   test("does not validate an incorrect brightness", () => {
     const INCORRECT_MESSAGE = Object.assign(correct_message, {
-      brightness: 101
+      brightness: 101,
     });
     const result = validateLightState(INCORRECT_MESSAGE);
     expect(result.error).not.toBeNull();
@@ -58,7 +58,7 @@ describe("validateLightState", () => {
 
   test("does not validate an incorrect effect", () => {
     const INCORRECT_MESSAGE = Object.assign(correct_message, {
-      effect: 4
+      effect: 4,
     });
     const result = validateLightState(INCORRECT_MESSAGE);
     expect(result.error).not.toBeNull();
@@ -66,7 +66,7 @@ describe("validateLightState", () => {
 
   test("does not validate an incorrect speed", () => {
     const INCORRECT_MESSAGE = Object.assign(correct_message, {
-      speed: "abc"
+      speed: "abc",
     });
     const result = validateLightState(INCORRECT_MESSAGE);
     expect(result.error).not.toBeNull();
@@ -87,7 +87,7 @@ describe("validateDiscoveredLight", () => {
       ipAddress: "10.0.2.8",
       macAddress: "80:7D:3A:41:B4:65",
       numLeds: 120,
-      udpPort: 7778
+      udpPort: 7778,
     };
   });
 
@@ -104,7 +104,7 @@ describe("validateDiscoveredLight", () => {
 
   test("does not validate an incorrect id", () => {
     const INCORRECT_MESSAGE = Object.assign(correct_message, {
-      id: 123
+      id: 123,
     });
     const result = validateDiscoveredLight(INCORRECT_MESSAGE);
     expect(result.error).not.toBeNull();
@@ -112,7 +112,7 @@ describe("validateDiscoveredLight", () => {
 
   test("does not validate an incorrect name", () => {
     const INCORRECT_MESSAGE = Object.assign(correct_message, {
-      name: 123
+      name: 123,
     });
     const result = validateDiscoveredLight(INCORRECT_MESSAGE);
     expect(result.error).not.toBeNull();
@@ -120,7 +120,7 @@ describe("validateDiscoveredLight", () => {
 
   test("does not validate an incorrect version", () => {
     const INCORRECT_MESSAGE = Object.assign(correct_message, {
-      version: 1
+      version: 1,
     });
     const result = validateDiscoveredLight(INCORRECT_MESSAGE);
     expect(result.error).not.toBeNull();
@@ -128,7 +128,7 @@ describe("validateDiscoveredLight", () => {
 
   test("does not validate an incorrect hardware", () => {
     const INCORRECT_MESSAGE = Object.assign(correct_message, {
-      hardware: 8266
+      hardware: 8266,
     });
     const result = validateDiscoveredLight(INCORRECT_MESSAGE);
     expect(result.error).not.toBeNull();
@@ -136,7 +136,7 @@ describe("validateDiscoveredLight", () => {
 
   test("does not validate an incorrect color order", () => {
     const INCORRECT_MESSAGE = Object.assign(correct_message, {
-      colorOrder: 202
+      colorOrder: 202,
     });
     const result = validateDiscoveredLight(INCORRECT_MESSAGE);
     expect(result.error).not.toBeNull();
@@ -144,7 +144,7 @@ describe("validateDiscoveredLight", () => {
 
   test("does not validate an incorrect stripType", () => {
     const INCORRECT_MESSAGE = Object.assign(correct_message, {
-      stripType: 2812
+      stripType: 2812,
     });
     const result = validateDiscoveredLight(INCORRECT_MESSAGE);
     expect(result.error).not.toBeNull();
@@ -152,7 +152,7 @@ describe("validateDiscoveredLight", () => {
 
   test("does not validate an incorrect ipAddress", () => {
     const INCORRECT_MESSAGE = Object.assign(correct_message, {
-      ipAddress: "10.0.2.855"
+      ipAddress: "10.0.2.855",
     });
     const result = validateDiscoveredLight(INCORRECT_MESSAGE);
     expect(result.error).not.toBeNull();
@@ -160,7 +160,7 @@ describe("validateDiscoveredLight", () => {
 
   test("does not validate an incorrect mac Address", () => {
     const INCORRECT_MESSAGE = Object.assign(correct_message, {
-      macAddress: 802340384392
+      macAddress: 802340384392,
     });
     const result = validateDiscoveredLight(INCORRECT_MESSAGE);
     expect(result.error).not.toBeNull();
@@ -168,7 +168,7 @@ describe("validateDiscoveredLight", () => {
 
   test("does not validate an incorrect numLeds", () => {
     const INCORRECT_MESSAGE = Object.assign(correct_message, {
-      numLeds: "abcd"
+      numLeds: "abcd",
     });
     const result = validateDiscoveredLight(INCORRECT_MESSAGE);
     expect(result.error).not.toBeNull();
@@ -176,7 +176,7 @@ describe("validateDiscoveredLight", () => {
 
   test("does not validate an incorrect udp port", () => {
     const INCORRECT_MESSAGE = Object.assign(correct_message, {
-      udpPort: "abcde"
+      udpPort: "abcde",
     });
     const result = validateDiscoveredLight(INCORRECT_MESSAGE);
     expect(result.error).not.toBeNull();

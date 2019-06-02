@@ -41,7 +41,7 @@ const start = async () => {
     console.log("Initializing Clients...");
     const clientPromises = [
       initDb(config.db),
-      initMqtt(config.mqtt.host, config.mqtt.options)
+      initMqtt(config.mqtt.host, config.mqtt.options),
     ];
     await Promise.all(clientPromises);
     console.log("Initialization Complete");

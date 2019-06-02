@@ -18,7 +18,7 @@ const lightColor = Joi.object().keys({
     .integer()
     .min(0)
     .max(255)
-    .required()
+    .required(),
 });
 const lightBrightness = Joi.number()
   .integer()
@@ -38,7 +38,7 @@ const lightStateSchema = Joi.object()
     color: lightColor,
     brightness: lightBrightness,
     effect: lightEffect,
-    speed: lightSpeed
+    speed: lightSpeed,
   })
   .required();
 const validateLightState = msg => Joi.validate(msg, lightStateSchema);
@@ -67,12 +67,12 @@ const discoveredLightSchema = Joi.object()
     ipAddress: lightIpAddress.required(),
     macAddress: lightMacAddress.required(),
     numLeds: lightNumLeds.required(),
-    udpPort: lightUdpPort.required()
+    udpPort: lightUdpPort.required(),
   })
   .required();
 const validateDiscoveredLight = msg => Joi.validate(msg, discoveredLightSchema);
 
 module.exports = {
   validateLightState,
-  validateDiscoveredLight
+  validateDiscoveredLight,
 };

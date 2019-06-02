@@ -17,7 +17,7 @@ jest.mock("../clients/db", () => {
     hardware: "8266",
     colorOrder: "GRB",
     stripType: "WS2812B",
-    rank: 1
+    rank: 1,
   });
   LightModelMock.findByPk = jest.fn(LightModelMock.findById);
   LightModelMock.update = jest.fn(LightModelMock.update);
@@ -49,7 +49,7 @@ beforeEach(() => {
     hardware: "8266",
     colorOrder: "GRB",
     stripType: "WS2812B",
-    rank: 1
+    rank: 1,
   };
 });
 
@@ -139,7 +139,7 @@ describe("setLight", () => {
       hardware: "D1MINI",
       colorOrder: "RGB",
       stripType: "WS2811",
-      rank: 2
+      rank: 2,
     };
     mockLightModel.update = jest.fn();
     lightDao._db.findByPk = jest.fn(() => mockLightModel);
@@ -176,7 +176,7 @@ describe("setLight", () => {
       hardware: "D1MINI",
       colorOrder: "RGB",
       stripType: "WS2811",
-      rank: 2
+      rank: 2,
     };
 
     const dbPromise = lightDao.setLight(ID, DATA);
@@ -196,7 +196,7 @@ describe("setLight", () => {
       hardware: "D1MINI",
       colorOrder: "RGB",
       stripType: "WS2811",
-      rank: 2
+      rank: 2,
     };
     const ERROR_MESSAGE = "Mock Error Update";
     mockLightModel.update = jest.fn(async () => {

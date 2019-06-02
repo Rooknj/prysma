@@ -48,5 +48,5 @@ const closeDb = () => {
 module.exports = {
   initDb,
   getDb,
-  closeDb
+  closeDb,
 };

@@ -10,7 +10,7 @@ const {
   LIGHT_ADDED_EVENT,
   LIGHT_REMOVED_EVENT,
   LIGHT_CHANGED_EVENT,
-  LIGHT_STATE_CHANGED_EVENT
+  LIGHT_STATE_CHANGED_EVENT,
 } = require("./serviceConstants");
 const LightService = require("./LightService");
 
@@ -48,7 +48,7 @@ const MOCK_LIGHT_STATES = [
     brightness: 100,
     effect: "None",
     speed: 4,
-    id: "Prysma-84F3EBB45500"
+    id: "Prysma-84F3EBB45500",
   },
   {
     connected: false,
@@ -57,7 +57,7 @@ const MOCK_LIGHT_STATES = [
     brightness: 100,
     effect: "None",
     speed: 4,
-    id: "Prysma-Mock"
+    id: "Prysma-Mock",
   },
   {
     connected: true,
@@ -66,8 +66,8 @@ const MOCK_LIGHT_STATES = [
     brightness: 100,
     effect: "Cylon",
     speed: 7,
-    id: "Default Mock"
-  }
+    id: "Default Mock",
+  },
 ];
 const MOCK_LIGHT_STATE = MOCK_LIGHT_STATES[0];
 
@@ -88,7 +88,7 @@ const MOCK_LIGHTS = [
       "Dots",
       "Fire",
       "Lightning",
-      "Noise"
+      "Noise",
     ],
     ipAddress: "10.0.0.114",
     macAddress: "84:F3:EB:B4:55:00",
@@ -98,7 +98,7 @@ const MOCK_LIGHTS = [
     hardware: "8266",
     colorOrder: "GRB",
     stripType: "WS2812B",
-    rank: null
+    rank: null,
   },
   {
     id: "Prysma-Mock",
@@ -112,7 +112,7 @@ const MOCK_LIGHTS = [
     hardware: "MockHardware",
     colorOrder: "RGB",
     stripType: "MockStrip",
-    rank: null
+    rank: null,
   },
   {
     id: "Default Mock",
@@ -126,8 +126,8 @@ const MOCK_LIGHTS = [
     hardware: null,
     colorOrder: null,
     stripType: null,
-    rank: null
-  }
+    rank: null,
+  },
 ];
 const MOCK_LIGHT = MOCK_LIGHTS[0];
 
@@ -634,7 +634,7 @@ describe("_handleMessengerDisconnect", () => {
 
     MOCK_LIGHTS.forEach(({ id }) => {
       expect(lightService._cache.setLightState).toBeCalledWith(id, {
-        connected: false
+        connected: false,
       });
     });
   });
@@ -666,7 +666,7 @@ describe("_handleEffectListMessage", () => {
     await lightService._handleEffectListMessage(MESSAGE);
 
     expect(lightService._dao.setLight).toBeCalledWith(ID, {
-      supportedEffects: EFFECTS
+      supportedEffects: EFFECTS,
     });
   });
   test("Notifies listeners of the light's change", async () => {
@@ -774,7 +774,7 @@ describe("setLightState", () => {
   test("rejects if the light isnt connected", async () => {
     const lightService = new LightService();
     const disconnectedLightState = Object.assign({}, MOCK_LIGHT_STATE, {
-      connected: false
+      connected: false,
     });
     lightService._cache.getLightState = jest.fn(() => disconnectedLightState);
     const ID = "Prysma-12345";
@@ -794,7 +794,7 @@ describe("setLightState", () => {
     const lightService = new LightService();
     // Make sure the cache returns a connected light so no errors are thrown
     const connectedLightState = Object.assign({}, MOCK_LIGHT_STATE, {
-      connected: true
+      connected: true,
     });
     lightService._cache.getLightState = jest.fn(() => connectedLightState);
 
@@ -802,7 +802,7 @@ describe("setLightState", () => {
     lightService._messenger.publishToLight = jest.fn(async () => {
       mediator.emit(MUTATION_RESPONSE_EVENT, {
         mutationId: MUTATION_ID,
-        newState: connectedLightState
+        newState: connectedLightState,
       });
     });
     const ID = "Prysma-12345";
@@ -826,7 +826,7 @@ describe("setLightState", () => {
     const lightService = new LightService();
     // Make sure the cache returns a connected light so no errors are thrown
     const connectedLightState = Object.assign({}, MOCK_LIGHT_STATE, {
-      connected: true
+      connected: true,
     });
     lightService._cache.getLightState = jest.fn(() => connectedLightState);
 
@@ -834,7 +834,7 @@ describe("setLightState", () => {
     lightService._messenger.publishToLight = jest.fn(async () => {
       mediator.emit(MUTATION_RESPONSE_EVENT, {
         mutationId: MUTATION_ID,
-        newState: connectedLightState
+        newState: connectedLightState,
       });
     });
     const ID = "Prysma-12345";
@@ -858,7 +858,7 @@ describe("setLightState", () => {
     const lightService = new LightService();
     // Make sure the cache returns a connected light so no errors are thrown
     const connectedLightState = Object.assign({}, MOCK_LIGHT_STATE, {
-      connected: true
+      connected: true,
     });
     lightService._cache.getLightState = jest.fn(() => connectedLightState);
 
@@ -866,7 +866,7 @@ describe("setLightState", () => {
     lightService._messenger.publishToLight = jest.fn(async () => {
       mediator.emit(MUTATION_RESPONSE_EVENT, {
         mutationId: MUTATION_ID,
-        newState: connectedLightState
+        newState: connectedLightState,
       });
     });
     const ID = "Prysma-12345";
@@ -889,7 +889,7 @@ describe("setLightState", () => {
     const lightService = new LightService();
     // Make sure the cache returns a connected light so no errors are thrown
     const connectedLightState = Object.assign({}, MOCK_LIGHT_STATE, {
-      connected: true
+      connected: true,
     });
     lightService._cache.getLightState = jest.fn(() => connectedLightState);
 
@@ -897,7 +897,7 @@ describe("setLightState", () => {
     lightService._messenger.publishToLight = jest.fn(async () => {
       mediator.emit(MUTATION_RESPONSE_EVENT, {
         mutationId: MUTATION_ID,
-        newState: connectedLightState
+        newState: connectedLightState,
       });
     });
     const ID = "Prysma-12345";
@@ -920,7 +920,7 @@ describe("setLightState", () => {
     const lightService = new LightService();
     // Make sure the cache returns a connected light so no errors are thrown
     const connectedLightState = Object.assign({}, MOCK_LIGHT_STATE, {
-      connected: true
+      connected: true,
     });
     lightService._cache.getLightState = jest.fn(() => connectedLightState);
 
@@ -928,7 +928,7 @@ describe("setLightState", () => {
     lightService._messenger.publishToLight = jest.fn(async () => {
       mediator.emit(MUTATION_RESPONSE_EVENT, {
         mutationId: MUTATION_ID,
-        newState: connectedLightState
+        newState: connectedLightState,
       });
     });
     const ID = "Prysma-12345";
@@ -951,7 +951,7 @@ describe("setLightState", () => {
     const lightService = new LightService();
     // Make sure the cache returns a connected light so no errors are thrown
     const connectedLightState = Object.assign({}, MOCK_LIGHT_STATE, {
-      connected: true
+      connected: true,
     });
     lightService._cache.getLightState = jest.fn(() => connectedLightState);
 
@@ -959,7 +959,7 @@ describe("setLightState", () => {
     lightService._messenger.publishToLight = jest.fn(async () => {
       mediator.emit(MUTATION_RESPONSE_EVENT, {
         mutationId: MUTATION_ID,
-        newState: connectedLightState
+        newState: connectedLightState,
       });
     });
     const ID = "Prysma-12345";
@@ -975,7 +975,7 @@ describe("setLightState", () => {
     const lightService = new LightService();
     // Make sure the cache returns a connected light so no errors are thrown
     const connectedLightState = Object.assign({}, MOCK_LIGHT_STATE, {
-      connected: true
+      connected: true,
     });
     lightService._cache.getLightState = jest.fn(() => connectedLightState);
     // Dont emit a response as soon as it is called to that the promise wont resolve
@@ -1020,7 +1020,7 @@ describe("_handleConnectedMessage", () => {
     await lightService._handleConnectedMessage(MESSAGE);
 
     expect(lightService._cache.setLightState).toBeCalledWith(ID, {
-      connected: expectedConnected
+      connected: expectedConnected,
     });
   });
   test("maps connection: 0 to connected: false", async () => {
@@ -1034,7 +1034,7 @@ describe("_handleConnectedMessage", () => {
     await lightService._handleConnectedMessage(MESSAGE);
 
     expect(lightService._cache.setLightState).toBeCalledWith(ID, {
-      connected: expectedConnected
+      connected: expectedConnected,
     });
   });
   test("notifies listeners of the new light state", async () => {
@@ -1067,7 +1067,7 @@ describe("_handleStateMessage", () => {
       color: { r: 255, g: 100, b: 0 },
       brightness: 100,
       effect: "None",
-      speed: 4
+      speed: 4,
     };
 
     await lightService._handleStateMessage(MESSAGE);
@@ -1077,7 +1077,7 @@ describe("_handleStateMessage", () => {
       color: MESSAGE.color,
       brightness: MESSAGE.brightness,
       effect: MESSAGE.effect,
-      speed: MESSAGE.speed
+      speed: MESSAGE.speed,
     });
   });
   test("maps state: ON to on: true", async () => {
@@ -1094,7 +1094,7 @@ describe("_handleStateMessage", () => {
       color: { r: 255, g: 100, b: 0 },
       brightness: 100,
       effect: "None",
-      speed: 4
+      speed: 4,
     };
 
     await lightService._handleStateMessage(MESSAGE);
@@ -1102,7 +1102,7 @@ describe("_handleStateMessage", () => {
     expect(lightService._cache.setLightState).toBeCalledWith(
       ID,
       expect.objectContaining({
-        on: expectedOn
+        on: expectedOn,
       })
     );
   });
@@ -1120,7 +1120,7 @@ describe("_handleStateMessage", () => {
       color: { r: 255, g: 100, b: 0 },
       brightness: 100,
       effect: "None",
-      speed: 4
+      speed: 4,
     };
 
     await lightService._handleStateMessage(MESSAGE);
@@ -1128,7 +1128,7 @@ describe("_handleStateMessage", () => {
     expect(lightService._cache.setLightState).toBeCalledWith(
       ID,
       expect.objectContaining({
-        on: expectedOn
+        on: expectedOn,
       })
     );
   });
@@ -1145,7 +1145,7 @@ describe("_handleStateMessage", () => {
       color: { r: 255, g: 100, b: 0 },
       brightness: 100,
       effect: "None",
-      speed: 4
+      speed: 4,
     };
 
     await lightService._handleStateMessage(MESSAGE);
@@ -1168,14 +1168,14 @@ describe("_handleStateMessage", () => {
       color: { r: 255, g: 100, b: 0 },
       brightness: 100,
       effect: "None",
-      speed: 4
+      speed: 4,
     };
 
     await lightService._handleStateMessage(MESSAGE);
 
     expect(mediatorEmitSpy).toBeCalledWith(MUTATION_RESPONSE_EVENT, {
       mutationId: MUTATION_ID,
-      newState: MOCK_LIGHT_STATE
+      newState: MOCK_LIGHT_STATE,
     });
   });
 });

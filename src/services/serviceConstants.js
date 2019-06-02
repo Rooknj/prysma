@@ -5,5 +5,5 @@ module.exports = {
   LIGHT_ADDED_EVENT: "lightAdded",
   LIGHT_REMOVED_EVENT: "lightRemoved",
   LIGHT_CHANGED_EVENT: "lightChanged",
-  LIGHT_STATE_CHANGED_EVENT: "lightStateChanged"
+  LIGHT_STATE_CHANGED_EVENT: "lightStateChanged",
 };

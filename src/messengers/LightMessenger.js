@@ -7,7 +7,7 @@ const {
   validateEffectListMessage,
   validateConfigMessage,
   validateDiscoveryMessage,
-  validateCommandMessage
+  validateCommandMessage,
 } = require("../validators/mqttValidators");
 const { ValidationError } = require("../errors");
 const Debug = require("debug").default;
@@ -59,7 +59,7 @@ class LightMessenger extends EventEmitter {
       connectedPromise,
       statePromise,
       effectListPromise,
-      configPromise
+      configPromise,
     ]);
 
     debug(`Successfully subscribed to ${lightId}`);
@@ -99,7 +99,7 @@ class LightMessenger extends EventEmitter {
       connectedPromise,
       statePromise,
       effectListPromise,
-      configPromise
+      configPromise,
     ]);
 
     debug(`Successfully unsubscribed from ${lightId}`);
@@ -181,7 +181,7 @@ class LightMessenger extends EventEmitter {
       state,
       effectList,
       config,
-      discoveryResponse
+      discoveryResponse,
     } = this._topics;
     const topicTokens = topic.split("/");
     if (topicTokens.length < 2) {

@@ -22,15 +22,15 @@ describe("getDiscoveredLights", () => {
       ipAddress: "10.0.2.8",
       macAddress: "80:7D:3A:41:B4:65",
       numLeds: 120,
-      udpPort: 7778
+      udpPort: 7778,
     };
   });
   test("Gets the discovered lights as an array (Example 1)", async () => {
     const discovered_light1 = Object.assign({}, discovered_light, {
-      id: "Prysma-Test"
+      id: "Prysma-Test",
     });
     const discovered_light2 = Object.assign({}, discovered_light, {
-      id: "Prysma-Test2"
+      id: "Prysma-Test2",
     });
     const DISCOVERED_LIGHTS = [discovered_light1, discovered_light2];
     lightCache._discoveredLights = DISCOVERED_LIGHTS;
@@ -42,10 +42,10 @@ describe("getDiscoveredLights", () => {
   });
   test("Gets the discovered lights as an array (Example 2)", async () => {
     const discovered_light1 = Object.assign({}, discovered_light, {
-      id: "Default Mock"
+      id: "Default Mock",
     });
     const discovered_light2 = Object.assign({}, discovered_light, {
-      id: "Hello World Window"
+      id: "Hello World Window",
     });
     const DISCOVERED_LIGHTS = [discovered_light1, discovered_light2];
     lightCache._discoveredLights = DISCOVERED_LIGHTS;
@@ -69,13 +69,13 @@ describe("clearDiscoveredLights", () => {
       ipAddress: "10.0.2.8",
       macAddress: "80:7D:3A:41:B4:65",
       numLeds: 120,
-      udpPort: 7778
+      udpPort: 7778,
     };
   });
 
   test("Clears the discovered lights cache", async () => {
     const discoveredLight = Object.assign({}, discovered_light, {
-      id: "Default Mock"
+      id: "Default Mock",
     });
     lightCache._discoveredLights = [discoveredLight];
 
@@ -98,13 +98,13 @@ describe("addDiscoveredLight", () => {
       ipAddress: "10.0.2.8",
       macAddress: "80:7D:3A:41:B4:65",
       numLeds: 120,
-      udpPort: 7778
+      udpPort: 7778,
     };
   });
 
   test("Correctly adds the discovered light (Example 1)", async () => {
     const discoveredLight = Object.assign({}, discovered_light, {
-      id: "Default Mock"
+      id: "Default Mock",
     });
 
     const addLightSpy = jest.spyOn(lightCache._discoveredLights, "push");
@@ -122,7 +122,7 @@ describe("addDiscoveredLight", () => {
     const discoveredLight = Object.assign({}, discovered_light, {
       id: "Hello Mock Test WOrld",
       name: "Tester",
-      udpPort: 7777
+      udpPort: 7777,
     });
 
     const addLightSpy = jest.spyOn(lightCache._discoveredLights, "push");
@@ -149,7 +149,7 @@ describe("addDiscoveredLight", () => {
       id: "Hello Mock Test WOrld",
       name: 123456,
       udpPort: "Im a port!",
-      macAddress: "AAVVCCDD"
+      macAddress: "AAVVCCDD",
     });
 
     const addLightSpy = jest.spyOn(lightCache._discoveredLights, "push");
@@ -181,7 +181,7 @@ describe("removeDiscoveredLight", () => {
       ipAddress: "10.0.2.8",
       macAddress: "80:7D:3A:41:B4:65",
       numLeds: 120,
-      udpPort: 7778
+      udpPort: 7778,
     };
   });
 
@@ -214,7 +214,7 @@ describe("getLightState", () => {
       color: { r: 255, g: 43, b: 2 },
       brightness: 22,
       effect: "None",
-      speed: 5
+      speed: 5,
     };
     lightCache._lightStates[LIGHT_ID] = LIGHT_STATE;
 
@@ -232,7 +232,7 @@ describe("getLightState", () => {
       color: { r: 255, g: 43, b: 2 },
       brightness: 22,
       effect: "None",
-      speed: 5
+      speed: 5,
     };
     lightCache._lightStates[LIGHT_ID] = LIGHT_STATE;
 
@@ -270,7 +270,7 @@ describe("setLightState", () => {
       color: { r: 255, g: 43, b: 2 },
       brightness: 22,
       effect: "None",
-      speed: 5
+      speed: 5,
     };
 
     await lightCache.setLightState(LIGHT_ID, LIGHT_STATE);
@@ -296,7 +296,7 @@ describe("setLightState", () => {
       color: { r: 255, g: 43, b: 2 },
       brightness: 22,
       effect: "None",
-      speed: 5
+      speed: 5,
     };
 
     const cachePromise = lightCache.setLightState(LIGHT_ID, LIGHT_STATE);
@@ -333,7 +333,7 @@ describe("clearLightState", () => {
       color: { r: 255, g: 43, b: 2 },
       brightness: 22,
       effect: "None",
-      speed: 5
+      speed: 5,
     };
     lightCache._lightStates[LIGHT_ID] = LIGHT_STATE;
 

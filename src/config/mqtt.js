@@ -3,7 +3,7 @@ module.exports = {
   options: {
     reconnectPeriod: 5000, // Amount of time between reconnection attempts
     username: "pi",
-    password: "MQTTIsBetterThanUDP"
+    password: "MQTTIsBetterThanUDP",
   },
   topics: {
     top: "prysmalight",
@@ -13,6 +13,6 @@ module.exports = {
     effectList: "effects",
     config: "config",
     discovery: "discovery",
-    discoveryResponse: "hello"
-  }
+    discoveryResponse: "hello",
+  },
 };

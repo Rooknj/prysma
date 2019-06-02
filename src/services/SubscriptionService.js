@@ -3,7 +3,7 @@ const {
   LIGHT_ADDED_EVENT,
   LIGHT_REMOVED_EVENT,
   LIGHT_CHANGED_EVENT,
-  LIGHT_STATE_CHANGED_EVENT
+  LIGHT_STATE_CHANGED_EVENT,
 } = require("./serviceConstants");
 const { PubSub } = require("graphql-subscriptions");
 
@@ -40,7 +40,7 @@ class SubscriptionService {
 
   _onLightChanged(changedLight) {
     this._gqlPubSub.publish(LIGHT_CHANGED_EVENT, {
-      lightChanged: changedLight
+      lightChanged: changedLight,
     });
   }
 
@@ -50,13 +50,13 @@ class SubscriptionService {
 
   _onLightRemoved(removedLight) {
     this._gqlPubSub.publish(LIGHT_REMOVED_EVENT, {
-      lightRemoved: removedLight
+      lightRemoved: removedLight,
     });
   }
 
   _onLightStateChanged(changedState) {
     this._gqlPubSub.publish(LIGHT_STATE_CHANGED_EVENT, {
-      lightStateChanged: changedState
+      lightStateChanged: changedState,
     });
   }
 }

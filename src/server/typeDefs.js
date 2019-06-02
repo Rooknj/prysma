@@ -100,7 +100,7 @@ const typeDefs = [
   LightState,
   LightStateInput,
   Color,
-  ColorInput
+  ColorInput,
 ];
 
 module.exports = typeDefs;

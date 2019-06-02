@@ -63,7 +63,7 @@ class LightDao {
     try {
       addedLight = await this._db.create({
         id: lightId,
-        name: lightName || lightId
+        name: lightName || lightId,
       });
     } catch (error) {
       if (error.name === "SequelizeValidationError") {

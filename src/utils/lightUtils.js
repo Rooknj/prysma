@@ -16,5 +16,5 @@ module.exports = {
   getSimpleUniqueId: () => {
     // This is the max number supported by the esp8266 lights (it's 2^32 because its a 32 bit int)
     return Math.floor(Math.random() * 4294967296);
-  }
+  },
 };

@@ -9,7 +9,7 @@ jest.mock("../clients/mqtt", () => {
       publish: jest.fn(async (topic, payload) => {}),
       unsubscribe: jest.fn(async topic => {}),
       end: jest.fn(),
-      connected: true
+      connected: true,
     });
   });
 
@@ -24,7 +24,7 @@ const TOPICS = {
   effectList: "effects",
   config: "config",
   discovery: "discovery",
-  discoveryResponse: "hello"
+  discoveryResponse: "hello",
 };
 
 const createMockClient = () => {
@@ -33,7 +33,7 @@ const createMockClient = () => {
     subscribe: jest.fn(async topic => [{ topic, qos: 0 }]),
     publish: jest.fn(async (topic, payload) => {}),
     unsubscribe: jest.fn(async topic => {}),
-    end: jest.fn()
+    end: jest.fn(),
   };
 };
 
@@ -411,7 +411,7 @@ describe("_handleConnect", () => {
     lightMessenger.__proto__.emit = jest.fn();
 
     const DATA = {
-      data: "123"
+      data: "123",
     };
     lightMessenger._handleConnect(DATA);
 
@@ -434,7 +434,7 @@ describe("_handleDisconnect", () => {
     lightMessenger.__proto__.emit = jest.fn();
 
     const DATA = {
-      data: "123"
+      data: "123",
     };
     lightMessenger._handleDisconnect(DATA);
 
@@ -469,7 +469,7 @@ describe("_handleMessage", () => {
       color: { r: 255, g: 0, b: 0 },
       brightness: 100,
       effect: "None",
-      speed: 4
+      speed: 4,
     };
     const message = Buffer.from(JSON.stringify(data));
     lightMessenger._handleMessage(topic, message);
@@ -497,8 +497,8 @@ describe("_handleMessage", () => {
         "Dots",
         "Fire",
         "Lightning",
-        "Noise"
-      ]
+        "Noise",
+      ],
     };
     const message = Buffer.from(JSON.stringify(data));
     lightMessenger._handleMessage(topic, message);
@@ -524,7 +524,7 @@ describe("_handleMessage", () => {
       ipAddress: "10.0.2.8",
       macAddress: "80:7D:3A:41:B4:65",
       numLeds: 120,
-      udpPort: 7778
+      udpPort: 7778,
     };
     const message = Buffer.from(JSON.stringify(data));
     lightMessenger._handleMessage(topic, message);
@@ -547,7 +547,7 @@ describe("_handleMessage", () => {
       ipAddress: "10.0.2.8",
       macAddress: "80:7D:3A:41:B4:65",
       numLeds: 120,
-      udpPort: 7778
+      udpPort: 7778,
     };
     const message = Buffer.from(JSON.stringify(data));
     lightMessenger._handleMessage(topic, message);

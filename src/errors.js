@@ -19,5 +19,5 @@ class ValidationError extends Error {
 // TODO: Add InputError
 
 module.exports = {
-  ValidationError
+  ValidationError,
 };

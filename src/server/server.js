@@ -20,7 +20,7 @@ class Server {
       typeDefs,
       resolvers,
       context,
-      mocks
+      mocks,
     });
     this.graphqlPath = apolloServer.graphqlPath;
     this.subscriptionsPath = apolloServer.subscriptionsPath;
