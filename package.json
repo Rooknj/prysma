@@ -32,17 +32,6 @@
     "sequelize-mock": "^0.10.2",
     "spawn-args": "^0.2.0"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "src/**/*.{js,json,md}": [
-      "prettier --write",
-      "git add"
-    ]
-  },
   "bin": {
     "prod-server": "src/index.js"
   },
