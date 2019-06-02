@@ -24,7 +24,6 @@ const initMqtt = async (host, options = {}) => {
     debug(`Failed to get connection to mqtt broker at ${host}`)
   );
   _mqtt.on("offline", () => debug("Mqtt client now offline."));
-
 };
 
 const getMqtt = () => {
