@@ -5,7 +5,11 @@ module.exports = {
     node: true,
     jest: true,
   },
-  extends: ["eslint:recommended"],
+  extends: [
+    // Shared Configs
+    "eslint:recommended"
+    // Project Specific Configs
+  ],
   globals: {
     Atomics: "readonly",
     SharedArrayBuffer: "readonly",
@@ -13,8 +17,14 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 2018,
   },
+  plugins: [
+    // Shared Plugins
+    // Project Specific Plugins
+  ],
   rules: {
+    // Shared Rules
     "no-console": "warn",
     "no-unused-vars": "warn",
+    // Project Specific Rules
   },
 };
