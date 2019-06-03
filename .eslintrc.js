@@ -8,6 +8,7 @@ module.exports = {
   extends: [
     // Shared Configs
     "eslint:recommended",
+    "plugin:eslint-comments/recommended",
     // Project Specific Configs
     "airbnb-base",
     // Make sure this is last
