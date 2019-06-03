@@ -30,10 +30,10 @@ module.exports = {
     // Shared Rules
     "no-console": "warn",
     "no-unused-vars": "warn",
-    "object-curly-newline": "off",
     "prefer-destructuring": "warn",
     radix: "off",
     "no-underscore-dangle": "off",
+    "prettier/prettier": "error",
     // Project Specific Rules
   },
 };
