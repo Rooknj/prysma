@@ -1,7 +1,4 @@
-const {
-  validateLightState,
-  validateDiscoveredLight,
-} = require("./cacheValidators");
+const { validateLightState, validateDiscoveredLight } = require("./cacheValidators");
 
 describe("validateLightState", () => {
   let correct_message;

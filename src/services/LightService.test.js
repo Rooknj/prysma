@@ -202,10 +202,7 @@ describe("init", () => {
 
     await lightService.init();
 
-    expect(lightService._messenger.on).toBeCalledWith(
-      "connect",
-      expect.any(Function)
-    );
+    expect(lightService._messenger.on).toBeCalledWith("connect", expect.any(Function));
   });
   test("Sets a messenger disconnect listener", async () => {
     const lightService = new LightService();
@@ -213,10 +210,7 @@ describe("init", () => {
 
     await lightService.init();
 
-    expect(lightService._messenger.on).toBeCalledWith(
-      "disconnect",
-      expect.any(Function)
-    );
+    expect(lightService._messenger.on).toBeCalledWith("disconnect", expect.any(Function));
   });
   test("Sets a messenger connectedMessage listener", async () => {
     const lightService = new LightService();
@@ -224,10 +218,7 @@ describe("init", () => {
 
     await lightService.init();
 
-    expect(lightService._messenger.on).toBeCalledWith(
-      "connectedMessage",
-      expect.any(Function)
-    );
+    expect(lightService._messenger.on).toBeCalledWith("connectedMessage", expect.any(Function));
   });
   test("Sets a messenger stateMessage listener", async () => {
     const lightService = new LightService();
@@ -235,10 +226,7 @@ describe("init", () => {
 
     await lightService.init();
 
-    expect(lightService._messenger.on).toBeCalledWith(
-      "stateMessage",
-      expect.any(Function)
-    );
+    expect(lightService._messenger.on).toBeCalledWith("stateMessage", expect.any(Function));
   });
   test("Sets a messenger effectListMessage listener", async () => {
     const lightService = new LightService();
@@ -246,10 +234,7 @@ describe("init", () => {
 
     await lightService.init();
 
-    expect(lightService._messenger.on).toBeCalledWith(
-      "effectListMessage",
-      expect.any(Function)
-    );
+    expect(lightService._messenger.on).toBeCalledWith("effectListMessage", expect.any(Function));
   });
   test("Sets a messenger discoveryMessage listener", async () => {
     const lightService = new LightService();
@@ -257,10 +242,7 @@ describe("init", () => {
 
     await lightService.init();
 
-    expect(lightService._messenger.on).toBeCalledWith(
-      "discoveryMessage",
-      expect.any(Function)
-    );
+    expect(lightService._messenger.on).toBeCalledWith("discoveryMessage", expect.any(Function));
   });
 });
 
@@ -646,10 +628,7 @@ describe("_handleMessengerDisconnect", () => {
 
     await lightService._handleMessengerDisconnect();
 
-    expect(mediatorEmitSpy).toBeCalledWith(
-      LIGHT_STATE_CHANGED_EVENT,
-      MOCK_LIGHT_STATE
-    );
+    expect(mediatorEmitSpy).toBeCalledWith(LIGHT_STATE_CHANGED_EVENT, MOCK_LIGHT_STATE);
     expect(mediatorEmitSpy).toBeCalledTimes(MOCK_LIGHTS.length);
   });
 });
@@ -936,10 +915,7 @@ describe("setLightState", () => {
 
     await lightService.setLightState(ID, STATE);
 
-    expect(mediatorRemoveListenerSpy).toBeCalledWith(
-      MUTATION_RESPONSE_EVENT,
-      expect.any(Function)
-    );
+    expect(mediatorRemoveListenerSpy).toBeCalledWith(MUTATION_RESPONSE_EVENT, expect.any(Function));
   });
   test("returns the changed light", async () => {
     // Mock getSimpleUniqueId to return a given value instead of a random one
@@ -987,9 +963,7 @@ describe("setLightState", () => {
     await Promise.resolve(); // allow any pending jobs in the PromiseJobs queue to run
     jest.runAllTimers(); // Run all timers so we dont have to wait
 
-    await expect(servicePromise).rejects.toThrow(
-      `Response from ${ID} timed out`
-    );
+    await expect(servicePromise).rejects.toThrow(`Response from ${ID} timed out`);
     expect(setTimeout).toBeCalledWith(expect.any(Function), TIMEOUT_WAIT);
   });
 });
@@ -1046,10 +1020,7 @@ describe("_handleConnectedMessage", () => {
 
     await lightService._handleConnectedMessage(MESSAGE);
 
-    expect(mediatorEmitSpy).toBeCalledWith(
-      LIGHT_STATE_CHANGED_EVENT,
-      MOCK_LIGHT_STATE
-    );
+    expect(mediatorEmitSpy).toBeCalledWith(LIGHT_STATE_CHANGED_EVENT, MOCK_LIGHT_STATE);
   });
 });
 
@@ -1150,10 +1121,7 @@ describe("_handleStateMessage", () => {
 
     await lightService._handleStateMessage(MESSAGE);
 
-    expect(mediatorEmitSpy).toBeCalledWith(
-      LIGHT_STATE_CHANGED_EVENT,
-      MOCK_LIGHT_STATE
-    );
+    expect(mediatorEmitSpy).toBeCalledWith(LIGHT_STATE_CHANGED_EVENT, MOCK_LIGHT_STATE);
   });
   test("notifies the mutation response listener", async () => {
     const lightService = new LightService();

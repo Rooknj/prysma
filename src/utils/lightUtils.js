@@ -2,9 +2,7 @@ module.exports = {
   toLightObject: lightModel => {
     const plainLight = Object.assign({}, lightModel);
     plainLight.supportedEffects =
-      plainLight.supportedEffects.length > 0
-        ? plainLight.supportedEffects.split(",")
-        : [];
+      plainLight.supportedEffects.length > 0 ? plainLight.supportedEffects.split(",") : [];
     return plainLight;
   },
   toLightModel: lightObject => {

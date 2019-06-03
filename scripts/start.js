@@ -1,8 +1,7 @@
 "use strict";
 
 process.env.NODE_ENV = "development";
-process.env.DEBUG =
-  "LightMessenger,LightDao,LightCache,LightService,MockLight:*,Client:*";
+process.env.DEBUG = "LightMessenger,LightDao,LightCache,LightService,MockLight:*,Client:*";
 
 const spawn = require("cross-spawn");
 const spawnArgs = require("spawn-args");
@@ -44,9 +43,6 @@ spawn.sync(args.shift(), args, {
   stdio: ["inherit", "inherit", "inherit"],
   cwd: process.cwd(),
   env: Object.assign({}, process.env, {
-    PATH:
-      process.env.PATH +
-      delimiter +
-      pathResolve(process.cwd(), "node_modules", ".bin"),
+    PATH: process.env.PATH + delimiter + pathResolve(process.cwd(), "node_modules", ".bin"),
   }),
 });

@@ -20,15 +20,12 @@ const initMqtt = async (host, options = {}) => {
   });
 
   _mqtt.on("connect", () => debug(`Connected to mqtt broker at ${host}`));
-  _mqtt.on("close", () =>
-    debug(`Failed to get connection to mqtt broker at ${host}`)
-  );
+  _mqtt.on("close", () => debug(`Failed to get connection to mqtt broker at ${host}`));
   _mqtt.on("offline", () => debug("Mqtt client now offline."));
 };
 
 const getMqtt = () => {
-  if (!_mqtt)
-    throw new Error("Mqtt has not been initialized. Please call init first.");
+  if (!_mqtt) throw new Error("Mqtt has not been initialized. Please call init first.");
   return _mqtt;
 };
 

@@ -32,40 +32,28 @@ describe("init", () => {
 
     subscriptionService.init();
 
-    expect(mediatorOnSpy).toBeCalledWith(
-      LIGHT_ADDED_EVENT,
-      expect.any(Function)
-    );
+    expect(mediatorOnSpy).toBeCalledWith(LIGHT_ADDED_EVENT, expect.any(Function));
   });
   test("sets a mediator lightRemoved listener", () => {
     const subscriptionService = new SubscriptionService();
 
     subscriptionService.init();
 
-    expect(mediatorOnSpy).toBeCalledWith(
-      LIGHT_REMOVED_EVENT,
-      expect.any(Function)
-    );
+    expect(mediatorOnSpy).toBeCalledWith(LIGHT_REMOVED_EVENT, expect.any(Function));
   });
   test("sets a mediator lightChanged listener", () => {
     const subscriptionService = new SubscriptionService();
 
     subscriptionService.init();
 
-    expect(mediatorOnSpy).toBeCalledWith(
-      LIGHT_CHANGED_EVENT,
-      expect.any(Function)
-    );
+    expect(mediatorOnSpy).toBeCalledWith(LIGHT_CHANGED_EVENT, expect.any(Function));
   });
   test("sets a mediator lightStateChanged listener", () => {
     const subscriptionService = new SubscriptionService();
 
     subscriptionService.init();
 
-    expect(mediatorOnSpy).toBeCalledWith(
-      LIGHT_STATE_CHANGED_EVENT,
-      expect.any(Function)
-    );
+    expect(mediatorOnSpy).toBeCalledWith(LIGHT_STATE_CHANGED_EVENT, expect.any(Function));
   });
 });
 

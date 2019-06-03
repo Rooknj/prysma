@@ -51,8 +51,7 @@ const connectedMessageSchema = Joi.object()
   })
   .required();
 
-const validateConnectedMessage = msg =>
-  Joi.validate(msg, connectedMessageSchema);
+const validateConnectedMessage = msg => Joi.validate(msg, connectedMessageSchema);
 
 // State Validation
 const stateMessageSchema = Joi.object()
@@ -77,8 +76,7 @@ const effectListMessageSchema = Joi.object()
       .required(),
   })
   .required();
-const validateEffectListMessage = msg =>
-  Joi.validate(msg, effectListMessageSchema);
+const validateEffectListMessage = msg => Joi.validate(msg, effectListMessageSchema);
 
 // Config Validation
 const configMessageSchema = Joi.object()
@@ -112,8 +110,7 @@ const discoveryMessageSchema = Joi.object()
     udpPort: lightUdpPort.required(),
   })
   .required();
-const validateDiscoveryMessage = msg =>
-  Joi.validate(msg, discoveryMessageSchema);
+const validateDiscoveryMessage = msg => Joi.validate(msg, discoveryMessageSchema);
 
 // Command Validation
 const commandMessageSchema = Joi.object()

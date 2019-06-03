@@ -46,21 +46,12 @@ class LightMessenger extends EventEmitter {
     const { top, connected, state, effectList, config } = this._topics;
 
     // Subscribe to all relavent fields
-    const connectedPromise = this._client.subscribe(
-      `${top}/${lightId}/${connected}`
-    );
+    const connectedPromise = this._client.subscribe(`${top}/${lightId}/${connected}`);
     const statePromise = this._client.subscribe(`${top}/${lightId}/${state}`);
-    const effectListPromise = this._client.subscribe(
-      `${top}/${lightId}/${effectList}`
-    );
+    const effectListPromise = this._client.subscribe(`${top}/${lightId}/${effectList}`);
     const configPromise = this._client.subscribe(`${top}/${lightId}/${config}`);
 
-    await Promise.all([
-      connectedPromise,
-      statePromise,
-      effectListPromise,
-      configPromise,
-    ]);
+    await Promise.all([connectedPromise, statePromise, effectListPromise, configPromise]);
 
     debug(`Successfully subscribed to ${lightId}`);
   }
@@ -84,23 +75,12 @@ class LightMessenger extends EventEmitter {
     const { top, connected, state, effectList, config } = this._topics;
 
     // Subscribe to all relavent fields
-    const connectedPromise = this._client.unsubscribe(
-      `${top}/${lightId}/${connected}`
-    );
+    const connectedPromise = this._client.unsubscribe(`${top}/${lightId}/${connected}`);
     const statePromise = this._client.unsubscribe(`${top}/${lightId}/${state}`);
-    const effectListPromise = this._client.unsubscribe(
-      `${top}/${lightId}/${effectList}`
-    );
-    const configPromise = this._client.unsubscribe(
-      `${top}/${lightId}/${config}`
-    );
+    const effectListPromise = this._client.unsubscribe(`${top}/${lightId}/${effectList}`);
+    const configPromise = this._client.unsubscribe(`${top}/${lightId}/${config}`);
 
-    await Promise.all([
-      connectedPromise,
-      statePromise,
-      effectListPromise,
-      configPromise,
-    ]);
+    await Promise.all([connectedPromise, statePromise, effectListPromise, configPromise]);
 
     debug(`Successfully unsubscribed from ${lightId}`);
   }
@@ -175,14 +155,7 @@ class LightMessenger extends EventEmitter {
   }
 
   _handleMessage(topic, message) {
-    const {
-      top,
-      connected,
-      state,
-      effectList,
-      config,
-      discoveryResponse,
-    } = this._topics;
+    const { top, connected, state, effectList, config, discoveryResponse } = this._topics;
     const topicTokens = topic.split("/");
     if (topicTokens.length < 2) {
       debug(`Ignoring Message on ${topic}: topic too short`);

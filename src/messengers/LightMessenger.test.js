@@ -48,26 +48,17 @@ describe("constructor", () => {
   test("starts listening for connect events", () => {
     let lightMessenger = new LightMessenger(TOPICS);
 
-    expect(lightMessenger._client.on).toBeCalledWith(
-      "connect",
-      expect.any(Function)
-    );
+    expect(lightMessenger._client.on).toBeCalledWith("connect", expect.any(Function));
   });
   test("starts listening for offline events", () => {
     let lightMessenger = new LightMessenger(TOPICS);
 
-    expect(lightMessenger._client.on).toBeCalledWith(
-      "offline",
-      expect.any(Function)
-    );
+    expect(lightMessenger._client.on).toBeCalledWith("offline", expect.any(Function));
   });
   test("starts listening for messange events", () => {
     let lightMessenger = new LightMessenger(TOPICS);
 
-    expect(lightMessenger._client.on).toBeCalledWith(
-      "message",
-      expect.any(Function)
-    );
+    expect(lightMessenger._client.on).toBeCalledWith("message", expect.any(Function));
   });
 });
 
@@ -86,18 +77,10 @@ describe("subscribeToLight", () => {
 
     // Test
     expect(mockClient.subscribe).toBeCalledTimes(4);
-    expect(mockClient.subscribe).toBeCalledWith(
-      `${TOPICS.top}/${ID}/${TOPICS.connected}`
-    );
-    expect(mockClient.subscribe).toBeCalledWith(
-      `${TOPICS.top}/${ID}/${TOPICS.state}`
-    );
-    expect(mockClient.subscribe).toBeCalledWith(
-      `${TOPICS.top}/${ID}/${TOPICS.effectList}`
-    );
-    expect(mockClient.subscribe).toBeCalledWith(
-      `${TOPICS.top}/${ID}/${TOPICS.config}`
-    );
+    expect(mockClient.subscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.connected}`);
+    expect(mockClient.subscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.state}`);
+    expect(mockClient.subscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.effectList}`);
+    expect(mockClient.subscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.config}`);
   });
   test("Subscribes to all the correct topics (Example 2)", async () => {
     // Create the client and lightMessenger
@@ -113,18 +96,10 @@ describe("subscribeToLight", () => {
 
     // Test
     expect(mockClient.subscribe).toBeCalledTimes(4);
-    expect(mockClient.subscribe).toBeCalledWith(
-      `${TOPICS.top}/${ID}/${TOPICS.connected}`
-    );
-    expect(mockClient.subscribe).toBeCalledWith(
-      `${TOPICS.top}/${ID}/${TOPICS.state}`
-    );
-    expect(mockClient.subscribe).toBeCalledWith(
-      `${TOPICS.top}/${ID}/${TOPICS.effectList}`
-    );
-    expect(mockClient.subscribe).toBeCalledWith(
-      `${TOPICS.top}/${ID}/${TOPICS.config}`
-    );
+    expect(mockClient.subscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.connected}`);
+    expect(mockClient.subscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.state}`);
+    expect(mockClient.subscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.effectList}`);
+    expect(mockClient.subscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.config}`);
   });
   test("rejects if the client is not connected", async () => {
     // Create the client and lightMessenger
@@ -311,18 +286,10 @@ describe("unsubscribeFromLight", () => {
 
     // Test
     expect(mockClient.unsubscribe).toBeCalledTimes(4);
-    expect(mockClient.unsubscribe).toBeCalledWith(
-      `${TOPICS.top}/${ID}/${TOPICS.connected}`
-    );
-    expect(mockClient.unsubscribe).toBeCalledWith(
-      `${TOPICS.top}/${ID}/${TOPICS.state}`
-    );
-    expect(mockClient.unsubscribe).toBeCalledWith(
-      `${TOPICS.top}/${ID}/${TOPICS.effectList}`
-    );
-    expect(mockClient.unsubscribe).toBeCalledWith(
-      `${TOPICS.top}/${ID}/${TOPICS.config}`
-    );
+    expect(mockClient.unsubscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.connected}`);
+    expect(mockClient.unsubscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.state}`);
+    expect(mockClient.unsubscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.effectList}`);
+    expect(mockClient.unsubscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.config}`);
   });
   test("Unsubscribes from all the correct topics (Example 2)", async () => {
     // Create the client and lightMessenger
@@ -338,18 +305,10 @@ describe("unsubscribeFromLight", () => {
 
     // Test
     expect(mockClient.unsubscribe).toBeCalledTimes(4);
-    expect(mockClient.unsubscribe).toBeCalledWith(
-      `${TOPICS.top}/${ID}/${TOPICS.connected}`
-    );
-    expect(mockClient.unsubscribe).toBeCalledWith(
-      `${TOPICS.top}/${ID}/${TOPICS.state}`
-    );
-    expect(mockClient.unsubscribe).toBeCalledWith(
-      `${TOPICS.top}/${ID}/${TOPICS.effectList}`
-    );
-    expect(mockClient.unsubscribe).toBeCalledWith(
-      `${TOPICS.top}/${ID}/${TOPICS.config}`
-    );
+    expect(mockClient.unsubscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.connected}`);
+    expect(mockClient.unsubscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.state}`);
+    expect(mockClient.unsubscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.effectList}`);
+    expect(mockClient.unsubscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.config}`);
   });
   test("does not reject if the client is not connected", async () => {
     // Create the client and lightMessenger
@@ -452,10 +411,7 @@ describe("_handleMessage", () => {
     const message = Buffer.from(JSON.stringify(data));
     lightMessenger._handleMessage(topic, message);
 
-    expect(lightMessenger.__proto__.emit).toBeCalledWith(
-      "connectedMessage",
-      data
-    );
+    expect(lightMessenger.__proto__.emit).toBeCalledWith("connectedMessage", data);
   });
 
   test("emits stateMessage on a state message", () => {
@@ -503,10 +459,7 @@ describe("_handleMessage", () => {
     const message = Buffer.from(JSON.stringify(data));
     lightMessenger._handleMessage(topic, message);
 
-    expect(lightMessenger.__proto__.emit).toBeCalledWith(
-      "effectListMessage",
-      data
-    );
+    expect(lightMessenger.__proto__.emit).toBeCalledWith("effectListMessage", data);
   });
 
   test("emits configMessage on a config message", () => {
@@ -552,10 +505,7 @@ describe("_handleMessage", () => {
     const message = Buffer.from(JSON.stringify(data));
     lightMessenger._handleMessage(topic, message);
 
-    expect(lightMessenger.__proto__.emit).toBeCalledWith(
-      "discoveryMessage",
-      data
-    );
+    expect(lightMessenger.__proto__.emit).toBeCalledWith("discoveryMessage", data);
   });
 
   test("does not emit anything on a bad connected message", () => {
@@ -667,9 +617,7 @@ describe("startDiscovery", () => {
 
     // Test
     expect(mockClient.subscribe).toBeCalledTimes(1);
-    expect(mockClient.subscribe).toBeCalledWith(
-      `${TOPICS.top}/+/${TOPICS.discoveryResponse}`
-    );
+    expect(mockClient.subscribe).toBeCalledWith(`${TOPICS.top}/+/${TOPICS.discoveryResponse}`);
   });
 });
 
@@ -685,9 +633,7 @@ describe("stopDiscovery", () => {
 
     // Test
     expect(mockClient.unsubscribe).toBeCalledTimes(1);
-    expect(mockClient.unsubscribe).toBeCalledWith(
-      `${TOPICS.top}/+/${TOPICS.discoveryResponse}`
-    );
+    expect(mockClient.unsubscribe).toBeCalledWith(`${TOPICS.top}/+/${TOPICS.discoveryResponse}`);
   });
 });
 
@@ -703,10 +649,7 @@ describe("publishDiscovery", () => {
 
     // Test
     expect(mockClient.publish).toBeCalledTimes(1);
-    expect(mockClient.publish).toBeCalledWith(
-      `${TOPICS.top}/${TOPICS.discovery}`,
-      "ping"
-    );
+    expect(mockClient.publish).toBeCalledWith(`${TOPICS.top}/${TOPICS.discovery}`, "ping");
   });
   test("rejects if the client is not connected", async () => {
     // Create the client and lightMessenger

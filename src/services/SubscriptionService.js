@@ -16,10 +16,7 @@ class SubscriptionService {
     mediator.on(LIGHT_CHANGED_EVENT, this._onLightChanged.bind(this));
     mediator.on(LIGHT_ADDED_EVENT, this._onLightAdded.bind(this));
     mediator.on(LIGHT_REMOVED_EVENT, this._onLightRemoved.bind(this));
-    mediator.on(
-      LIGHT_STATE_CHANGED_EVENT,
-      this._onLightStateChanged.bind(this)
-    );
+    mediator.on(LIGHT_STATE_CHANGED_EVENT, this._onLightStateChanged.bind(this));
   }
 
   subscribeToChangedLights() {

@@ -65,18 +65,14 @@ describe("getLight", () => {
     const testLight = await lightDao.getLight(ID);
 
     expect(testLight.id).toBe(ID);
-    expect(Object.keys(testLight)).toEqual(
-      expect.arrayContaining(Object.keys(mockLightModel))
-    );
+    expect(Object.keys(testLight)).toEqual(expect.arrayContaining(Object.keys(mockLightModel)));
   });
   test("Returns the light with the specified id (2)", async () => {
     const ID = "Prysma-AABBCCDD1144";
     const testLight = await lightDao.getLight(ID);
 
     expect(testLight.id).toBe(ID);
-    expect(Object.keys(testLight)).toEqual(
-      expect.arrayContaining(Object.keys(mockLightModel))
-    );
+    expect(Object.keys(testLight)).toEqual(expect.arrayContaining(Object.keys(mockLightModel)));
   });
   test("Rejects if no id is given", async () => {
     const dbPromise = lightDao.getLight();
@@ -109,9 +105,7 @@ describe("getLights", () => {
     const testLights = await lightDao.getLights();
 
     expect(Array.isArray(testLights));
-    expect(Object.keys(testLights[0])).toEqual(
-      expect.arrayContaining(Object.keys(mockLightModel))
-    );
+    expect(Object.keys(testLights[0])).toEqual(expect.arrayContaining(Object.keys(mockLightModel)));
   });
   test("Rejects if it cant get the lights", async () => {
     const ERROR_MESSAGE = "Mock Error";
@@ -148,9 +142,7 @@ describe("setLight", () => {
     expect(lightDao._db.findByPk).toBeCalledTimes(1);
     expect(lightDao._db.findByPk).toBeCalledWith(ID);
     expect(mockLightModel.update).toBeCalledTimes(1);
-    expect(mockLightModel.update).toBeCalledWith(
-      expect.objectContaining(toLightModel(DATA))
-    );
+    expect(mockLightModel.update).toBeCalledWith(expect.objectContaining(toLightModel(DATA)));
   });
   test("Rejects if no id is given", async () => {
     const dbPromise = lightDao.setLight();
@@ -218,9 +210,7 @@ describe("addLight", () => {
 
     expect(testLight.id).toBe(ID);
     expect(testLight.name).toBe(NAME);
-    expect(Object.keys(testLight)).toEqual(
-      expect.arrayContaining(Object.keys(mockLightModel))
-    );
+    expect(Object.keys(testLight)).toEqual(expect.arrayContaining(Object.keys(mockLightModel)));
   });
   test("Adds the light with name = ID if no name was given", async () => {
     const ID = "Prysma-334455667788";
@@ -228,9 +218,7 @@ describe("addLight", () => {
 
     expect(testLight.id).toBe(ID);
     expect(testLight.name).toBe(ID);
-    expect(Object.keys(testLight)).toEqual(
-      expect.arrayContaining(Object.keys(mockLightModel))
-    );
+    expect(Object.keys(testLight)).toEqual(expect.arrayContaining(Object.keys(mockLightModel)));
   });
   test("Rejects if no id is given", async () => {
     const dbPromise = lightDao.addLight();

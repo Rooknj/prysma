@@ -3,16 +3,14 @@ const resolvers = {
   Query: {
     light: (_, { lightId }, { lightService }) => lightService.getLight(lightId),
     lights: (_, args, { lightService }) => lightService.getLights(),
-    discoveredLights: (_, args, { lightService }) =>
-      lightService.getDiscoveredLights(),
+    discoveredLights: (_, args, { lightService }) => lightService.getDiscoveredLights(),
   },
   Mutation: {
     setLight: (_, { lightId, lightData }, { lightService }) =>
       lightService.setLight(lightId, lightData),
     addLight: (_, { lightId, lightData }, { lightService }) =>
       lightService.addLight(lightId, lightData),
-    removeLight: (_, { lightId }, { lightService }) =>
-      lightService.removeLight(lightId),
+    removeLight: (_, { lightId }, { lightService }) => lightService.removeLight(lightId),
     setLightState: (_, { lightId, lightState }, { lightService }) =>
       lightService.setLightState(lightId, lightState),
   },

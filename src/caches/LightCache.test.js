@@ -110,13 +110,11 @@ describe("addDiscoveredLight", () => {
     const addLightSpy = jest.spyOn(lightCache._discoveredLights, "push");
 
     await lightCache.addDiscoveredLight(discoveredLight);
-    expect(
-      lightCache._discoveredLights.find(({ id }) => id === discoveredLight.id)
-    ).toEqual(discoveredLight);
-    expect(addLightSpy).toBeCalledTimes(1);
-    expect(addLightSpy).toBeCalledWith(
-      expect.objectContaining(discoveredLight)
+    expect(lightCache._discoveredLights.find(({ id }) => id === discoveredLight.id)).toEqual(
+      discoveredLight
     );
+    expect(addLightSpy).toBeCalledTimes(1);
+    expect(addLightSpy).toBeCalledWith(expect.objectContaining(discoveredLight));
   });
   test("Correctly adds the discovered light (Example 2)", async () => {
     const discoveredLight = Object.assign({}, discovered_light, {
@@ -128,13 +126,11 @@ describe("addDiscoveredLight", () => {
     const addLightSpy = jest.spyOn(lightCache._discoveredLights, "push");
 
     await lightCache.addDiscoveredLight(discoveredLight);
-    expect(
-      lightCache._discoveredLights.find(({ id }) => id === discoveredLight.id)
-    ).toEqual(discoveredLight);
-    expect(addLightSpy).toBeCalledTimes(1);
-    expect(addLightSpy).toBeCalledWith(
-      expect.objectContaining(discoveredLight)
+    expect(lightCache._discoveredLights.find(({ id }) => id === discoveredLight.id)).toEqual(
+      discoveredLight
     );
+    expect(addLightSpy).toBeCalledTimes(1);
+    expect(addLightSpy).toBeCalledWith(expect.objectContaining(discoveredLight));
   });
   test("Rejects and does not add if no discoveredLight was provided", async () => {
     const addLightSpy = jest.spyOn(lightCache._discoveredLights, "push");
@@ -220,9 +216,7 @@ describe("getLightState", () => {
 
     const lightState = await lightCache.getLightState(LIGHT_ID);
 
-    expect(lightState).toEqual(
-      Object.assign({}, LIGHT_STATE, { id: LIGHT_ID })
-    );
+    expect(lightState).toEqual(Object.assign({}, LIGHT_STATE, { id: LIGHT_ID }));
   });
   test("Rejects if no id was provided", async () => {
     const LIGHT_ID = "mockLight";
@@ -245,9 +239,7 @@ describe("getLightState", () => {
 
     const cachePromise = lightCache.getLightState(LIGHT_ID);
 
-    await expect(cachePromise).rejects.toThrow(
-      `${LIGHT_ID}'s state not found in cache`
-    );
+    await expect(cachePromise).rejects.toThrow(`${LIGHT_ID}'s state not found in cache`);
   });
   test("Rejects if lightState is empty", async () => {
     const LIGHT_ID = "mockLight";
@@ -256,9 +248,7 @@ describe("getLightState", () => {
 
     const cachePromise = lightCache.getLightState(LIGHT_ID);
 
-    await expect(cachePromise).rejects.toThrow(
-      `${LIGHT_ID}'s state not found in cache`
-    );
+    await expect(cachePromise).rejects.toThrow(`${LIGHT_ID}'s state not found in cache`);
   });
 });
 
@@ -319,9 +309,7 @@ describe("initializeLightState", () => {
 
     await lightCache.initializeLightState(LIGHT_ID);
 
-    expect(lightCache._lightStates[LIGHT_ID]).toEqual(
-      lightCache.DEFAULT_LIGHT_STATE
-    );
+    expect(lightCache._lightStates[LIGHT_ID]).toEqual(lightCache.DEFAULT_LIGHT_STATE);
   });
 });
 

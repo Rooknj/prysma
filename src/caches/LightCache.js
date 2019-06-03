@@ -1,7 +1,4 @@
-const {
-  validateLightState,
-  validateDiscoveredLight,
-} = require("../validators/cacheValidators");
+const { validateLightState, validateDiscoveredLight } = require("../validators/cacheValidators");
 const errors = require("../errors");
 //const Debug = require("debug").default;
 
@@ -47,9 +44,7 @@ class LightCache {
     const validation = validateDiscoveredLight(discoveredLight);
     if (validation.error) throw new ValidationError(validation.error);
 
-    const alreadyDiscovered = this._discoveredLights.find(
-      light => light.id === discoveredLight.id
-    );
+    const alreadyDiscovered = this._discoveredLights.find(light => light.id === discoveredLight.id);
     if (!alreadyDiscovered) {
       this._discoveredLights.push(discoveredLight);
     }
@@ -58,9 +53,7 @@ class LightCache {
   async removeDiscoveredLight(lightId) {
     if (!lightId) throw new Error("No lightId provided");
 
-    this._discoveredLights = this._discoveredLights.filter(
-      light => light.id !== lightId
-    );
+    this._discoveredLights = this._discoveredLights.filter(light => light.id !== lightId);
   }
 
   async getLightState(lightId) {
@@ -80,11 +73,7 @@ class LightCache {
     const validation = validateLightState(lightState);
     if (validation.error) throw new ValidationError(validation.error);
 
-    this._lightStates[lightId] = Object.assign(
-      {},
-      this._lightStates[lightId],
-      lightState
-    );
+    this._lightStates[lightId] = Object.assign({}, this._lightStates[lightId], lightState);
   }
 
   async initializeLightState(lightId) {
