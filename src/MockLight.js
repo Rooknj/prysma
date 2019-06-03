@@ -1,16 +1,6 @@
 const mqtt = require("async-mqtt");
 const Debug = require("debug").default;
 
-const parseMqttMessage = jsonData => {
-  const message = JSON.parse(jsonData);
-
-  if (!message.name) {
-    debug(`Received a messsage that did not have an id. Ignoring\nMessage: ${message}`);
-    return;
-  }
-  return message;
-};
-
 class MockLight {
   constructor(lightId, config) {
     this._id = lightId;
@@ -151,7 +141,7 @@ class MockLight {
 
     // Parse the JSON into a usable javascript object
     if (topic === `${top}/${this._id}/${command}`) {
-      const data = parseMqttMessage(message.toString());
+      const data = JSON.parse(message.toString());
       await this._handleCommandMessage(data);
     } else if (topic === `${top}/${discovery}`) {
       await this._handleDiscoveryMessage();

@@ -1,6 +1,5 @@
-"use strict";
 // Enable console log statements in this file
-/*eslint no-console:0*/
+/* eslint no-console:0 */
 
 const config = require("./config");
 const Server = require("./server");
@@ -64,4 +63,5 @@ const start = async () => {
 start();
 
 // Start a new Mock Light
+// eslint-disable-next-line no-new
 new MockLight("Prysma-Mock", config.mqtt);

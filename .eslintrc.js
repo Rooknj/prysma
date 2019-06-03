@@ -36,7 +36,7 @@ module.exports = {
     "prefer-destructuring": "warn",
     radix: "off",
     "no-underscore-dangle": "off",
-    "prettier/prettier": "error",
+    "prettier/prettier": "off",
     // Project Specific Rules
   },
 };
