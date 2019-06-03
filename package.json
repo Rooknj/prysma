@@ -9,8 +9,7 @@
     "start": "node scripts/start",
     "clean": "node scripts/clean",
     "lint": "eslint src/**/*.js --config=.eslintrc.js",
-    "reformat": "prettier '**/*.js' --write",
-    "eslint-check": "eslint --print-config . | eslint-config-prettier-check"
+    "reformat": "prettier '**/*.js' --write"
   },
   "repository": {
     "type": "git",
