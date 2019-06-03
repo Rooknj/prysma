@@ -103,7 +103,7 @@ describe("getLights", () => {
   test("Returns all the lights", async () => {
     const testLights = await lightDao.getLights();
 
-    expect(Array.isArray(testLights));
+    expect(Array.isArray(testLights)).toBe(true);
     expect(Object.keys(testLights[0])).toEqual(expect.arrayContaining(Object.keys(mockLightModel)));
   });
   test("Rejects if it cant get the lights", async () => {
@@ -138,10 +138,10 @@ describe("setLight", () => {
     lightDao._db.findByPk = jest.fn(() => mockLightModel);
     await lightDao.setLight(ID, DATA);
 
-    expect(lightDao._db.findByPk).toBeCalledTimes(1);
-    expect(lightDao._db.findByPk).toBeCalledWith(ID);
-    expect(mockLightModel.update).toBeCalledTimes(1);
-    expect(mockLightModel.update).toBeCalledWith(expect.objectContaining(toLightModel(DATA)));
+    expect(lightDao._db.findByPk).toHaveBeenCalledTimes(1);
+    expect(lightDao._db.findByPk).toHaveBeenCalledWith(ID);
+    expect(mockLightModel.update).toHaveBeenCalledTimes(1);
+    expect(mockLightModel.update).toHaveBeenCalledWith(expect.objectContaining(toLightModel(DATA)));
   });
   test("Rejects if no id is given", async () => {
     const dbPromise = lightDao.setLight();

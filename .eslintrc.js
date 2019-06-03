@@ -9,6 +9,7 @@ module.exports = {
     // Shared Configs
     "eslint:recommended",
     "plugin:eslint-comments/recommended",
+    "plugin:jest/recommended",
     // Project Specific Configs
     "airbnb-base",
     // Make sure this is last
@@ -25,6 +26,7 @@ module.exports = {
     // Shared Plugins
     "import",
     "prettier",
+    "jest",
     // Project Specific Plugins
   ],
   rules: {

@@ -46,17 +46,17 @@ describe("constructor", () => {
   test("starts listening for connect events", () => {
     const lightMessenger = new LightMessenger(TOPICS);
 
-    expect(lightMessenger._client.on).toBeCalledWith("connect", expect.any(Function));
+    expect(lightMessenger._client.on).toHaveBeenCalledWith("connect", expect.any(Function));
   });
   test("starts listening for offline events", () => {
     const lightMessenger = new LightMessenger(TOPICS);
 
-    expect(lightMessenger._client.on).toBeCalledWith("offline", expect.any(Function));
+    expect(lightMessenger._client.on).toHaveBeenCalledWith("offline", expect.any(Function));
   });
   test("starts listening for messange events", () => {
     const lightMessenger = new LightMessenger(TOPICS);
 
-    expect(lightMessenger._client.on).toBeCalledWith("message", expect.any(Function));
+    expect(lightMessenger._client.on).toHaveBeenCalledWith("message", expect.any(Function));
   });
 });
 
@@ -74,11 +74,11 @@ describe("subscribeToLight", () => {
     await lightMessenger.subscribeToLight(ID);
 
     // Test
-    expect(mockClient.subscribe).toBeCalledTimes(4);
-    expect(mockClient.subscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.connected}`);
-    expect(mockClient.subscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.state}`);
-    expect(mockClient.subscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.effectList}`);
-    expect(mockClient.subscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.config}`);
+    expect(mockClient.subscribe).toHaveBeenCalledTimes(4);
+    expect(mockClient.subscribe).toHaveBeenCalledWith(`${TOPICS.top}/${ID}/${TOPICS.connected}`);
+    expect(mockClient.subscribe).toHaveBeenCalledWith(`${TOPICS.top}/${ID}/${TOPICS.state}`);
+    expect(mockClient.subscribe).toHaveBeenCalledWith(`${TOPICS.top}/${ID}/${TOPICS.effectList}`);
+    expect(mockClient.subscribe).toHaveBeenCalledWith(`${TOPICS.top}/${ID}/${TOPICS.config}`);
   });
   test("Subscribes to all the correct topics (Example 2)", async () => {
     // Create the client and lightMessenger
@@ -93,11 +93,11 @@ describe("subscribeToLight", () => {
     await lightMessenger.subscribeToLight(ID);
 
     // Test
-    expect(mockClient.subscribe).toBeCalledTimes(4);
-    expect(mockClient.subscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.connected}`);
-    expect(mockClient.subscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.state}`);
-    expect(mockClient.subscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.effectList}`);
-    expect(mockClient.subscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.config}`);
+    expect(mockClient.subscribe).toHaveBeenCalledTimes(4);
+    expect(mockClient.subscribe).toHaveBeenCalledWith(`${TOPICS.top}/${ID}/${TOPICS.connected}`);
+    expect(mockClient.subscribe).toHaveBeenCalledWith(`${TOPICS.top}/${ID}/${TOPICS.state}`);
+    expect(mockClient.subscribe).toHaveBeenCalledWith(`${TOPICS.top}/${ID}/${TOPICS.effectList}`);
+    expect(mockClient.subscribe).toHaveBeenCalledWith(`${TOPICS.top}/${ID}/${TOPICS.config}`);
   });
   test("rejects if the client is not connected", async () => {
     // Create the client and lightMessenger
@@ -128,7 +128,7 @@ describe("subscribeToLight", () => {
     const messengerPromise = lightMessenger.subscribeToLight(ID);
 
     await expect(messengerPromise).rejects.toThrow(Error);
-    expect(mockClient.subscribe).toBeCalled();
+    expect(mockClient.subscribe).toHaveBeenCalled();
   });
   test("rejects if no id was provided", async () => {
     // Create the client and lightMessenger
@@ -159,8 +159,8 @@ describe("publishToLight", () => {
     await lightMessenger.publishToLight(ID, MESSAGE);
 
     // Test
-    expect(mockClient.publish).toBeCalledTimes(1);
-    expect(mockClient.publish).toBeCalledWith(
+    expect(mockClient.publish).toHaveBeenCalledTimes(1);
+    expect(mockClient.publish).toHaveBeenCalledWith(
       `${TOPICS.top}/${ID}/${TOPICS.command}`,
       Buffer.from(JSON.stringify(MESSAGE))
     );
@@ -179,8 +179,8 @@ describe("publishToLight", () => {
     await lightMessenger.publishToLight(ID, MESSAGE);
 
     // Test
-    expect(mockClient.publish).toBeCalledTimes(1);
-    expect(mockClient.publish).toBeCalledWith(
+    expect(mockClient.publish).toHaveBeenCalledTimes(1);
+    expect(mockClient.publish).toHaveBeenCalledWith(
       `${TOPICS.top}/${ID}/${TOPICS.command}`,
       Buffer.from(JSON.stringify(MESSAGE))
     );
@@ -218,7 +218,7 @@ describe("publishToLight", () => {
 
     // Test
     await expect(messengerPromise).rejects.toThrow(Error);
-    expect(mockClient.publish).toBeCalled();
+    expect(mockClient.publish).toHaveBeenCalled();
   });
   test("rejects if no id was provided", async () => {
     // Create the client and lightMessenger
@@ -283,11 +283,11 @@ describe("unsubscribeFromLight", () => {
     await lightMessenger.unsubscribeFromLight(ID);
 
     // Test
-    expect(mockClient.unsubscribe).toBeCalledTimes(4);
-    expect(mockClient.unsubscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.connected}`);
-    expect(mockClient.unsubscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.state}`);
-    expect(mockClient.unsubscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.effectList}`);
-    expect(mockClient.unsubscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.config}`);
+    expect(mockClient.unsubscribe).toHaveBeenCalledTimes(4);
+    expect(mockClient.unsubscribe).toHaveBeenCalledWith(`${TOPICS.top}/${ID}/${TOPICS.connected}`);
+    expect(mockClient.unsubscribe).toHaveBeenCalledWith(`${TOPICS.top}/${ID}/${TOPICS.state}`);
+    expect(mockClient.unsubscribe).toHaveBeenCalledWith(`${TOPICS.top}/${ID}/${TOPICS.effectList}`);
+    expect(mockClient.unsubscribe).toHaveBeenCalledWith(`${TOPICS.top}/${ID}/${TOPICS.config}`);
   });
   test("Unsubscribes from all the correct topics (Example 2)", async () => {
     // Create the client and lightMessenger
@@ -302,11 +302,11 @@ describe("unsubscribeFromLight", () => {
     await lightMessenger.unsubscribeFromLight(ID);
 
     // Test
-    expect(mockClient.unsubscribe).toBeCalledTimes(4);
-    expect(mockClient.unsubscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.connected}`);
-    expect(mockClient.unsubscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.state}`);
-    expect(mockClient.unsubscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.effectList}`);
-    expect(mockClient.unsubscribe).toBeCalledWith(`${TOPICS.top}/${ID}/${TOPICS.config}`);
+    expect(mockClient.unsubscribe).toHaveBeenCalledTimes(4);
+    expect(mockClient.unsubscribe).toHaveBeenCalledWith(`${TOPICS.top}/${ID}/${TOPICS.connected}`);
+    expect(mockClient.unsubscribe).toHaveBeenCalledWith(`${TOPICS.top}/${ID}/${TOPICS.state}`);
+    expect(mockClient.unsubscribe).toHaveBeenCalledWith(`${TOPICS.top}/${ID}/${TOPICS.effectList}`);
+    expect(mockClient.unsubscribe).toHaveBeenCalledWith(`${TOPICS.top}/${ID}/${TOPICS.config}`);
   });
   test("does not reject if the client is not connected", async () => {
     // Create the client and lightMessenger
@@ -337,7 +337,7 @@ describe("unsubscribeFromLight", () => {
 
     // Test
     await expect(messengerPromise).rejects.toThrow(Error);
-    expect(mockClient.unsubscribe).toBeCalled();
+    expect(mockClient.unsubscribe).toHaveBeenCalled();
   });
   test("rejects if no id was provided", async () => {
     // Create the client and lightMessenger
@@ -372,7 +372,7 @@ describe("_handleConnect", () => {
     };
     lightMessenger._handleConnect(DATA);
 
-    expect(lightMessenger.emit).toBeCalledWith("connect", DATA);
+    expect(lightMessenger.emit).toHaveBeenCalledWith("connect", DATA);
   });
 });
 
@@ -395,7 +395,7 @@ describe("_handleDisconnect", () => {
     };
     lightMessenger._handleDisconnect(DATA);
 
-    expect(lightMessenger.emit).toBeCalledWith("disconnect", DATA);
+    expect(lightMessenger.emit).toHaveBeenCalledWith("disconnect", DATA);
   });
 });
 
@@ -409,7 +409,7 @@ describe("_handleMessage", () => {
     const message = Buffer.from(JSON.stringify(data));
     lightMessenger._handleMessage(topic, message);
 
-    expect(lightMessenger.emit).toBeCalledWith("connectedMessage", data);
+    expect(lightMessenger.emit).toHaveBeenCalledWith("connectedMessage", data);
   });
 
   test("emits stateMessage on a state message", () => {
@@ -428,7 +428,7 @@ describe("_handleMessage", () => {
     const message = Buffer.from(JSON.stringify(data));
     lightMessenger._handleMessage(topic, message);
 
-    expect(lightMessenger.emit).toBeCalledWith("stateMessage", data);
+    expect(lightMessenger.emit).toHaveBeenCalledWith("stateMessage", data);
   });
 
   test("emits effectListMessage on an effect list message", () => {
@@ -457,7 +457,7 @@ describe("_handleMessage", () => {
     const message = Buffer.from(JSON.stringify(data));
     lightMessenger._handleMessage(topic, message);
 
-    expect(lightMessenger.emit).toBeCalledWith("effectListMessage", data);
+    expect(lightMessenger.emit).toHaveBeenCalledWith("effectListMessage", data);
   });
 
   test("emits configMessage on a config message", () => {
@@ -480,7 +480,7 @@ describe("_handleMessage", () => {
     const message = Buffer.from(JSON.stringify(data));
     lightMessenger._handleMessage(topic, message);
 
-    expect(lightMessenger.emit).toBeCalledWith("configMessage", data);
+    expect(lightMessenger.emit).toHaveBeenCalledWith("configMessage", data);
   });
 
   test("emits discoveryMessage on a discovery message", () => {
@@ -503,7 +503,7 @@ describe("_handleMessage", () => {
     const message = Buffer.from(JSON.stringify(data));
     lightMessenger._handleMessage(topic, message);
 
-    expect(lightMessenger.emit).toBeCalledWith("discoveryMessage", data);
+    expect(lightMessenger.emit).toHaveBeenCalledWith("discoveryMessage", data);
   });
 
   test("does not emit anything on a bad connected message", () => {
@@ -515,7 +515,7 @@ describe("_handleMessage", () => {
     const message = Buffer.from(JSON.stringify(data));
     lightMessenger._handleMessage(topic, message);
 
-    expect(lightMessenger.emit).not.toBeCalled();
+    expect(lightMessenger.emit).not.toHaveBeenCalled();
   });
 
   test("does not emit anything on a bad state message", () => {
@@ -527,7 +527,7 @@ describe("_handleMessage", () => {
     const message = Buffer.from(JSON.stringify(data));
     lightMessenger._handleMessage(topic, message);
 
-    expect(lightMessenger.emit).not.toBeCalled();
+    expect(lightMessenger.emit).not.toHaveBeenCalled();
   });
 
   test("does not emit anything on a bad effect list message", () => {
@@ -539,7 +539,7 @@ describe("_handleMessage", () => {
     const message = Buffer.from(JSON.stringify(data));
     lightMessenger._handleMessage(topic, message);
 
-    expect(lightMessenger.emit).not.toBeCalled();
+    expect(lightMessenger.emit).not.toHaveBeenCalled();
   });
 
   test("does not emit anything on a bad config message", () => {
@@ -551,7 +551,7 @@ describe("_handleMessage", () => {
     const message = Buffer.from(JSON.stringify(data));
     lightMessenger._handleMessage(topic, message);
 
-    expect(lightMessenger.emit).not.toBeCalled();
+    expect(lightMessenger.emit).not.toHaveBeenCalled();
   });
 
   test("does not emit anything on a bad discovery message", () => {
@@ -563,7 +563,7 @@ describe("_handleMessage", () => {
     const message = Buffer.from(JSON.stringify(data));
     lightMessenger._handleMessage(topic, message);
 
-    expect(lightMessenger.emit).not.toBeCalled();
+    expect(lightMessenger.emit).not.toHaveBeenCalled();
   });
 
   test("does not emit anything on an unrelated top level topic", () => {
@@ -575,7 +575,7 @@ describe("_handleMessage", () => {
     const message = Buffer.from(JSON.stringify(data));
     lightMessenger._handleMessage(topic, message);
 
-    expect(lightMessenger.emit).not.toBeCalled();
+    expect(lightMessenger.emit).not.toHaveBeenCalled();
   });
 
   test("does not emit anything on an unrelated bottom level topic", () => {
@@ -587,7 +587,7 @@ describe("_handleMessage", () => {
     const message = Buffer.from(JSON.stringify(data));
     lightMessenger._handleMessage(topic, message);
 
-    expect(lightMessenger.emit).not.toBeCalled();
+    expect(lightMessenger.emit).not.toHaveBeenCalled();
   });
 
   test("does not emit anything on a too short topic", () => {
@@ -599,7 +599,7 @@ describe("_handleMessage", () => {
     const message = Buffer.from(JSON.stringify(data));
     lightMessenger._handleMessage(topic, message);
 
-    expect(lightMessenger.emit).not.toBeCalled();
+    expect(lightMessenger.emit).not.toHaveBeenCalled();
   });
 });
 
@@ -614,8 +614,10 @@ describe("startDiscovery", () => {
     await lightMessenger.startDiscovery();
 
     // Test
-    expect(mockClient.subscribe).toBeCalledTimes(1);
-    expect(mockClient.subscribe).toBeCalledWith(`${TOPICS.top}/+/${TOPICS.discoveryResponse}`);
+    expect(mockClient.subscribe).toHaveBeenCalledTimes(1);
+    expect(mockClient.subscribe).toHaveBeenCalledWith(
+      `${TOPICS.top}/+/${TOPICS.discoveryResponse}`
+    );
   });
 });
 
@@ -630,8 +632,10 @@ describe("stopDiscovery", () => {
     await lightMessenger.stopDiscovery();
 
     // Test
-    expect(mockClient.unsubscribe).toBeCalledTimes(1);
-    expect(mockClient.unsubscribe).toBeCalledWith(`${TOPICS.top}/+/${TOPICS.discoveryResponse}`);
+    expect(mockClient.unsubscribe).toHaveBeenCalledTimes(1);
+    expect(mockClient.unsubscribe).toHaveBeenCalledWith(
+      `${TOPICS.top}/+/${TOPICS.discoveryResponse}`
+    );
   });
 });
 
@@ -646,8 +650,8 @@ describe("publishDiscovery", () => {
     await lightMessenger.publishDiscovery();
 
     // Test
-    expect(mockClient.publish).toBeCalledTimes(1);
-    expect(mockClient.publish).toBeCalledWith(`${TOPICS.top}/${TOPICS.discovery}`, "ping");
+    expect(mockClient.publish).toHaveBeenCalledTimes(1);
+    expect(mockClient.publish).toHaveBeenCalledWith(`${TOPICS.top}/${TOPICS.discovery}`, "ping");
   });
   test("rejects if the client is not connected", async () => {
     // Create the client and lightMessenger

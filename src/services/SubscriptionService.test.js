@@ -32,28 +32,28 @@ describe("init", () => {
 
     subscriptionService.init();
 
-    expect(mediatorOnSpy).toBeCalledWith(LIGHT_ADDED_EVENT, expect.any(Function));
+    expect(mediatorOnSpy).toHaveBeenCalledWith(LIGHT_ADDED_EVENT, expect.any(Function));
   });
   test("sets a mediator lightRemoved listener", () => {
     const subscriptionService = new SubscriptionService();
 
     subscriptionService.init();
 
-    expect(mediatorOnSpy).toBeCalledWith(LIGHT_REMOVED_EVENT, expect.any(Function));
+    expect(mediatorOnSpy).toHaveBeenCalledWith(LIGHT_REMOVED_EVENT, expect.any(Function));
   });
   test("sets a mediator lightChanged listener", () => {
     const subscriptionService = new SubscriptionService();
 
     subscriptionService.init();
 
-    expect(mediatorOnSpy).toBeCalledWith(LIGHT_CHANGED_EVENT, expect.any(Function));
+    expect(mediatorOnSpy).toHaveBeenCalledWith(LIGHT_CHANGED_EVENT, expect.any(Function));
   });
   test("sets a mediator lightStateChanged listener", () => {
     const subscriptionService = new SubscriptionService();
 
     subscriptionService.init();
 
-    expect(mediatorOnSpy).toBeCalledWith(LIGHT_STATE_CHANGED_EVENT, expect.any(Function));
+    expect(mediatorOnSpy).toHaveBeenCalledWith(LIGHT_STATE_CHANGED_EVENT, expect.any(Function));
   });
 });
 
@@ -67,7 +67,7 @@ describe("subscribeToChangedLights", () => {
 
     const asyncIterator = subscriptionService.subscribeToChangedLights();
 
-    expect(asyncIteratorMock).toBeCalledWith(LIGHT_CHANGED_EVENT);
+    expect(asyncIteratorMock).toHaveBeenCalledWith(LIGHT_CHANGED_EVENT);
     expect(asyncIterator).toBe("asyncIterator");
   });
 });
@@ -82,7 +82,7 @@ describe("subscribeToAddedLights", () => {
 
     const asyncIterator = subscriptionService.subscribeToAddedLights();
 
-    expect(asyncIteratorMock).toBeCalledWith(LIGHT_ADDED_EVENT);
+    expect(asyncIteratorMock).toHaveBeenCalledWith(LIGHT_ADDED_EVENT);
     expect(asyncIterator).toBe("asyncIterator");
   });
 });
@@ -97,7 +97,7 @@ describe("subscribeToRemovedLights", () => {
 
     const asyncIterator = subscriptionService.subscribeToRemovedLights();
 
-    expect(asyncIteratorMock).toBeCalledWith(LIGHT_REMOVED_EVENT);
+    expect(asyncIteratorMock).toHaveBeenCalledWith(LIGHT_REMOVED_EVENT);
     expect(asyncIterator).toBe("asyncIterator");
   });
 });
@@ -112,7 +112,7 @@ describe("subscribeToChangedLightStates", () => {
 
     const asyncIterator = subscriptionService.subscribeToChangedLightStates();
 
-    expect(asyncIteratorMock).toBeCalledWith(LIGHT_STATE_CHANGED_EVENT);
+    expect(asyncIteratorMock).toHaveBeenCalledWith(LIGHT_STATE_CHANGED_EVENT);
     expect(asyncIterator).toBe("asyncIterator");
   });
 });
@@ -127,7 +127,7 @@ describe("_onLightChanged", () => {
 
     subscriptionService._onLightChanged("changedLight");
 
-    expect(publishMock).toBeCalledWith(LIGHT_CHANGED_EVENT, {
+    expect(publishMock).toHaveBeenCalledWith(LIGHT_CHANGED_EVENT, {
       lightChanged: "changedLight",
     });
   });
@@ -143,7 +143,7 @@ describe("_onLightAdded", () => {
 
     subscriptionService._onLightAdded("addedLight");
 
-    expect(publishMock).toBeCalledWith(LIGHT_ADDED_EVENT, {
+    expect(publishMock).toHaveBeenCalledWith(LIGHT_ADDED_EVENT, {
       lightAdded: "addedLight",
     });
   });
@@ -159,7 +159,7 @@ describe("_onLightRemoved", () => {
 
     subscriptionService._onLightRemoved("removedLight");
 
-    expect(publishMock).toBeCalledWith(LIGHT_REMOVED_EVENT, {
+    expect(publishMock).toHaveBeenCalledWith(LIGHT_REMOVED_EVENT, {
       lightRemoved: "removedLight",
     });
   });
@@ -175,7 +175,7 @@ describe("_onLightStateChanged", () => {
 
     subscriptionService._onLightStateChanged("changedLightState");
 
-    expect(publishMock).toBeCalledWith(LIGHT_STATE_CHANGED_EVENT, {
+    expect(publishMock).toHaveBeenCalledWith(LIGHT_STATE_CHANGED_EVENT, {
       lightStateChanged: "changedLightState",
     });
   });

@@ -113,8 +113,8 @@ describe("addDiscoveredLight", () => {
     expect(lightCache._discoveredLights.find(({ id }) => id === discoveredLight.id)).toEqual(
       discoveredLight
     );
-    expect(addLightSpy).toBeCalledTimes(1);
-    expect(addLightSpy).toBeCalledWith(expect.objectContaining(discoveredLight));
+    expect(addLightSpy).toHaveBeenCalledTimes(1);
+    expect(addLightSpy).toHaveBeenCalledWith(expect.objectContaining(discoveredLight));
   });
   test("Correctly adds the discovered light (Example 2)", async () => {
     const discoveredLight = Object.assign({}, correctDiscoveredLight, {
@@ -129,8 +129,8 @@ describe("addDiscoveredLight", () => {
     expect(lightCache._discoveredLights.find(({ id }) => id === discoveredLight.id)).toEqual(
       discoveredLight
     );
-    expect(addLightSpy).toBeCalledTimes(1);
-    expect(addLightSpy).toBeCalledWith(expect.objectContaining(discoveredLight));
+    expect(addLightSpy).toHaveBeenCalledTimes(1);
+    expect(addLightSpy).toHaveBeenCalledWith(expect.objectContaining(discoveredLight));
   });
   test("Rejects and does not add if no discoveredLight was provided", async () => {
     const addLightSpy = jest.spyOn(lightCache._discoveredLights, "push");
@@ -138,7 +138,7 @@ describe("addDiscoveredLight", () => {
     const messengerPromise = lightCache.addDiscoveredLight();
 
     await expect(messengerPromise).rejects.toThrow(Error);
-    expect(addLightSpy).not.toBeCalled();
+    expect(addLightSpy).not.toHaveBeenCalled();
   });
   test("Rejects and does not add if the discoveredLight is invalidly formatted", async () => {
     const discoveredLight = Object.assign({}, correctDiscoveredLight, {
@@ -153,14 +153,14 @@ describe("addDiscoveredLight", () => {
     const messengerPromise = lightCache.addDiscoveredLight(discoveredLight);
 
     await expect(messengerPromise).rejects.toThrow(Error);
-    expect(addLightSpy).not.toBeCalled();
+    expect(addLightSpy).not.toHaveBeenCalled();
   });
   test("Only adds the light once", async () => {
     const addLightSpy = jest.spyOn(lightCache._discoveredLights, "push");
     await lightCache.addDiscoveredLight(correctDiscoveredLight);
     await lightCache.addDiscoveredLight(correctDiscoveredLight);
 
-    expect(addLightSpy).toBeCalledTimes(1);
+    expect(addLightSpy).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -188,8 +188,8 @@ describe("removeDiscoveredLight", () => {
 
     await lightCache.removeDiscoveredLight(lightToRemove);
 
-    expect(removeLightSpy).toBeCalledTimes(1);
-    expect(removeLightSpy).toBeCalledWith(expect.anything());
+    expect(removeLightSpy).toHaveBeenCalledTimes(1);
+    expect(removeLightSpy).toHaveBeenCalledWith(expect.anything());
   });
   // test("Correctly removes the discovered light (Example 2)", async () => {});
   test("Does not reject if the light was already removed/doesnt exist", async () => {
