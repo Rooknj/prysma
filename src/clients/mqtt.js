@@ -1,5 +1,3 @@
-"use strict";
-
 const Mqtt = require("async-mqtt");
 const Debug = require("debug").default;
 
@@ -16,20 +14,16 @@ const initMqtt = async (host, options = {}) => {
   _mqtt = Mqtt.connect(host, {
     reconnectPeriod: options.reconnectPeriod, // Amount of time between reconnection attempts
     username: options.username,
-    password: options.password
+    password: options.password,
   });
 
   _mqtt.on("connect", () => debug(`Connected to mqtt broker at ${host}`));
-  _mqtt.on("close", () =>
-    debug(`Failed to get connection to mqtt broker at ${host}`)
-  );
+  _mqtt.on("close", () => debug(`Failed to get connection to mqtt broker at ${host}`));
   _mqtt.on("offline", () => debug("Mqtt client now offline."));
-
 };
 
 const getMqtt = () => {
-  if (!_mqtt)
-    throw new Error("Mqtt has not been initialized. Please call init first.");
+  if (!_mqtt) throw new Error("Mqtt has not been initialized. Please call init first.");
   return _mqtt;
 };
 
@@ -42,10 +36,11 @@ const closeMqtt = () => {
     return _mqtt.end();
   }
   debug(`Mqtt has not been initialized.`);
+  return null;
 };
 
 module.exports = {
   initMqtt,
   getMqtt,
-  closeMqtt
+  closeMqtt,
 };

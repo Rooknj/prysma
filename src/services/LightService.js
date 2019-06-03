@@ -1,3 +1,5 @@
+const { promisify } = require("util");
+const Debug = require("debug").default;
 const LightMessenger = require("../messengers/LightMessenger");
 const LightDao = require("../daos/LightDao");
 const LightCache = require("../caches/LightCache");
@@ -10,12 +12,10 @@ const {
   LIGHT_ADDED_EVENT,
   LIGHT_REMOVED_EVENT,
   LIGHT_CHANGED_EVENT,
-  LIGHT_STATE_CHANGED_EVENT
+  LIGHT_STATE_CHANGED_EVENT,
 } = require("./serviceConstants");
-const { promisify } = require("util");
-const asyncSetTimeout = promisify(setTimeout);
 
-const Debug = require("debug").default;
+const asyncSetTimeout = promisify(setTimeout);
 
 const debug = Debug("LightService");
 
@@ -32,9 +32,7 @@ class LightService {
   async init() {
     // Initialize cache
     const lights = await this._dao.getLights();
-    const cacheInitPromises = lights.map(({ id }) => {
-      this._cache.initializeLightState(id);
-    });
+    const cacheInitPromises = lights.map(({ id }) => this._cache.initializeLightState(id));
     await Promise.all(cacheInitPromises);
 
     // Handle connect if the messenger was already connected
@@ -44,24 +42,12 @@ class LightService {
 
     // Add Event Listeners (This cant be done until everything is set up)
     this._messenger.on("connect", this._handleMessengerConnect.bind(this));
-    this._messenger.on(
-      "disconnect",
-      this._handleMessengerDisconnect.bind(this)
-    );
-    this._messenger.on(
-      "connectedMessage",
-      this._handleConnectedMessage.bind(this)
-    );
+    this._messenger.on("disconnect", this._handleMessengerDisconnect.bind(this));
+    this._messenger.on("connectedMessage", this._handleConnectedMessage.bind(this));
     this._messenger.on("stateMessage", this._handleStateMessage.bind(this));
-    this._messenger.on(
-      "effectListMessage",
-      this._handleEffectListMessage.bind(this)
-    );
+    this._messenger.on("effectListMessage", this._handleEffectListMessage.bind(this));
     this._messenger.on("configMessage", this._handleConfigMessage.bind(this));
-    this._messenger.on(
-      "discoveryMessage",
-      this._handleDiscoveryMessage.bind(this)
-    );
+    this._messenger.on("discoveryMessage", this._handleDiscoveryMessage.bind(this));
   }
 
   async getLight(lightId) {
@@ -100,7 +86,7 @@ class LightService {
 
   // TODO: Add error handling and cleanup here if something fails
   async addLight(lightId, lightData) {
-    let name = undefined;
+    let name;
     if (lightData) {
       ({ name } = lightData);
     }
@@ -112,7 +98,7 @@ class LightService {
       // Add a default state to the light
       this._cache.initializeLightState(lightId),
       // Subscribe to new messages from the new light
-      this._messenger.subscribeToLight(lightId)
+      this._messenger.subscribeToLight(lightId),
     ];
 
     try {
@@ -145,9 +131,7 @@ class LightService {
       const lights = await this._dao.getLights();
 
       // Subscribe to all the lights
-      const subscriptionPromises = lights.map(({ id }) =>
-        this._messenger.subscribeToLight(id)
-      );
+      const subscriptionPromises = lights.map(({ id }) => this._messenger.subscribeToLight(id));
 
       // Subscribe to discovery topic
       subscriptionPromises.push(this._messenger.startDiscovery());
@@ -179,9 +163,7 @@ class LightService {
       const setStateResults = await Promise.all(setStatePromises);
 
       // Notify listeners of the new state
-      setStateResults.forEach(newState =>
-        mediator.emit(LIGHT_STATE_CHANGED_EVENT, newState)
-      );
+      setStateResults.forEach(newState => mediator.emit(LIGHT_STATE_CHANGED_EVENT, newState));
     } catch (error) {
       debug("Error handling messenger disconnect", error);
       throw error;
@@ -240,30 +222,28 @@ class LightService {
     // Check if the light exists already before doing anything else
     const currentState = await this._cache.getLightState(lightId);
     if (!currentState) throw new Error(`"${lightId}" was never added`);
-    if (!currentState.connected)
-      throw new Error(`"${lightId}" is not connected`);
+    if (!currentState.connected) throw new Error(`"${lightId}" is not connected`);
 
     // TODO: Implement the hardware to support on instead of state
     // Map the on property to the state property
-    if ("on" in lightState) {
-      lightState.state = lightState.on ? "ON" : "OFF";
-      delete lightState.on;
+    let newLightState = lightState;
+    if ("on" in newLightState) {
+      const { on, ...rest } = newLightState;
+      const state = newLightState.on ? "ON" : "OFF";
+      newLightState = { state, ...rest };
     }
 
     // Create the command payload
-    const mutationId = getSimpleUniqueId();
-    const payload = { mutationId, name: lightId, ...lightState };
+    const uniqueId = getSimpleUniqueId();
+    const payload = { mutationId: uniqueId, name: lightId, ...newLightState };
 
-    //Return a promise which resolves when the light responds to this message or rejects if it takes too long
+    // Return a promise which resolves when the light responds to this message or rejects if it takes too long
     return new Promise((resolve, reject) => {
       // Every time we get a new message from the light, check to see if it has the same mutationId
       const handleMutationResponse = ({ mutationId, newState }) => {
         if (mutationId === payload.mutationId) {
           // Remove this mutation's event listener
-          mediator.removeListener(
-            MUTATION_RESPONSE_EVENT,
-            handleMutationResponse
-          );
+          mediator.removeListener(MUTATION_RESPONSE_EVENT, handleMutationResponse);
           // Resolve with the light's response data
           resolve(newState);
         }
@@ -275,18 +255,12 @@ class LightService {
         .publishToLight(lightId, payload)
         .then(() => {
           setTimeout(() => {
-            mediator.removeListener(
-              MUTATION_RESPONSE_EVENT,
-              handleMutationResponse
-            );
+            mediator.removeListener(MUTATION_RESPONSE_EVENT, handleMutationResponse);
             reject(new Error(`Response from ${lightId} timed out`));
           }, TIMEOUT_WAIT);
         })
         .catch(error => {
-          mediator.removeListener(
-            MUTATION_RESPONSE_EVENT,
-            handleMutationResponse
-          );
+          mediator.removeListener(MUTATION_RESPONSE_EVENT, handleMutationResponse);
           reject(error);
         });
 

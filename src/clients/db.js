@@ -1,13 +1,11 @@
-"use strict";
-
 const Sequelize = require("sequelize");
-const LightModel = require("./models/LightModel");
 const Debug = require("debug").default;
+const LightModel = require("./models/LightModel");
 
 const debug = Debug("Client:Db");
 
 let _db;
-let _models = {};
+const _models = {};
 
 const initDb = async options => {
   if (_db) {
@@ -43,10 +41,11 @@ const closeDb = () => {
     return _db.close();
   }
   debug(`Db has not been initialized.`);
+  return null;
 };
 
 module.exports = {
   initDb,
   getDb,
-  closeDb
+  closeDb,
 };

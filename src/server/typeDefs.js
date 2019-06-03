@@ -1,4 +1,3 @@
-"use strict";
 const { gql } = require("apollo-server-express");
 
 const Query = gql`
@@ -100,7 +99,7 @@ const typeDefs = [
   LightState,
   LightStateInput,
   Color,
-  ColorInput
+  ColorInput,
 ];
 
 module.exports = typeDefs;

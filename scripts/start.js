@@ -33,7 +33,7 @@ if (argv.indexOf("--mock") >= 0) {
   // console.log("Spinning up Local Redis Server");
   // process.env.REDIS_HOST = "localhost";
   execSync("docker-compose up -d mqtt", {
-    stdio: [process.stdin, process.stdout] // Ignore stderr so nothing prints to the console if this fails.
+    stdio: [process.stdin, process.stdout], // Ignore stderr so nothing prints to the console if this fails.
   });
 }
 
@@ -43,9 +43,6 @@ spawn.sync(args.shift(), args, {
   stdio: ["inherit", "inherit", "inherit"],
   cwd: process.cwd(),
   env: Object.assign({}, process.env, {
-    PATH:
-      process.env.PATH +
-      delimiter +
-      pathResolve(process.cwd(), "node_modules", ".bin")
-  })
+    PATH: process.env.PATH + delimiter + pathResolve(process.cwd(), "node_modules", ".bin"),
+  }),
 });

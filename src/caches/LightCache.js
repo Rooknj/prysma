@@ -1,12 +1,9 @@
-const {
-  validateLightState,
-  validateDiscoveredLight
-} = require("../validators/cacheValidators");
+const { validateLightState, validateDiscoveredLight } = require("../validators/cacheValidators");
 const errors = require("../errors");
-//const Debug = require("debug").default;
+// const Debug = require("debug").default;
 
 const { ValidationError } = errors;
-//const debug = Debug("LightCache");
+// const debug = Debug("LightCache");
 
 class LightCache {
   constructor() {
@@ -18,11 +15,11 @@ class LightCache {
       color: {
         r: 255,
         g: 255,
-        b: 255
+        b: 255,
       },
       brightness: 100,
       effect: "None",
-      speed: 4
+      speed: 4,
     };
   }
 
@@ -47,9 +44,7 @@ class LightCache {
     const validation = validateDiscoveredLight(discoveredLight);
     if (validation.error) throw new ValidationError(validation.error);
 
-    const alreadyDiscovered = this._discoveredLights.find(
-      light => light.id === discoveredLight.id
-    );
+    const alreadyDiscovered = this._discoveredLights.find(light => light.id === discoveredLight.id);
     if (!alreadyDiscovered) {
       this._discoveredLights.push(discoveredLight);
     }
@@ -58,33 +53,29 @@ class LightCache {
   async removeDiscoveredLight(lightId) {
     if (!lightId) throw new Error("No lightId provided");
 
-    this._discoveredLights = this._discoveredLights.filter(
-      light => light.id !== lightId
-    );
+    this._discoveredLights = this._discoveredLights.filter(light => light.id !== lightId);
   }
 
   async getLightState(lightId) {
     if (!lightId) throw new Error("No ID provided");
     const lightState = this._lightStates[lightId];
-    if (!lightState || Object.entries(lightState).length === 0)
+    if (!lightState || Object.entries(lightState).length === 0) {
       throw new Error(`${lightId}'s state not found in cache`);
+    }
 
     return Object.assign({}, lightState, { id: lightId });
   }
 
   async setLightState(lightId, lightState) {
     if (!lightId) throw new Error("No ID provided");
-    if (!lightState || Object.entries(lightState).length === 0)
+    if (!lightState || Object.entries(lightState).length === 0) {
       throw new Error("No State provided");
+    }
 
     const validation = validateLightState(lightState);
     if (validation.error) throw new ValidationError(validation.error);
 
-    this._lightStates[lightId] = Object.assign(
-      {},
-      this._lightStates[lightId],
-      lightState
-    );
+    this._lightStates[lightId] = Object.assign({}, this._lightStates[lightId], lightState);
   }
 
   async initializeLightState(lightId) {

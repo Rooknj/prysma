@@ -7,7 +7,9 @@
     "test": "node scripts/test",
     "build": "node scripts/build",
     "start": "node scripts/start",
-    "clean": "node scripts/clean"
+    "clean": "node scripts/clean",
+    "lint": "eslint 'src/**/*.js' --config=.eslintrc.js",
+    "reformat": "prettier '**/*.js' --write"
   },
   "repository": {
     "type": "git",
@@ -22,6 +24,11 @@
   "devDependencies": {
     "cross-spawn": "^6.0.5",
     "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-plugin-eslint-comments": "^3.1.1",
+    "eslint-plugin-jest": "^22.6.4",
+    "eslint-plugin-prettier": "^3.1.0",
     "husky": "^2.1.0",
     "jest": "^24.7.1",
     "lint-staged": "^8.1.5",
@@ -32,17 +39,6 @@
     "sequelize-mock": "^0.10.2",
     "spawn-args": "^0.2.0"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "src/**/*.{js,json,md}": [
-      "prettier --write",
-      "git add"
-    ]
-  },
   "bin": {
     "prod-server": "src/index.js"
   },
@@ -51,6 +47,7 @@
     "apollo-server-express": "^2.4.8",
     "async-mqtt": "^2.2.1",
     "debug": "^4.1.1",
+    "eslint-plugin-import": "^2.17.3",
     "express": "^4.16.4",
     "faker": "^4.1.0",
     "graphql": "^14.2.1",

@@ -1,9 +1,9 @@
 const { getDb } = require("../clients/db");
 const { toLightObject, toLightModel } = require("../utils/lightUtils");
 const { ValidationError } = require("../errors");
-//const Debug = require("debug").default;
+// const Debug = require("debug").default;
 
-//const debug = Debug("LightDao");
+// const debug = Debug("LightDao");
 
 class LightDao {
   constructor() {
@@ -63,7 +63,7 @@ class LightDao {
     try {
       addedLight = await this._db.create({
         id: lightId,
-        name: lightName || lightId
+        name: lightName || lightId,
       });
     } catch (error) {
       if (error.name === "SequelizeValidationError") {

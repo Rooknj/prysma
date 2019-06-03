@@ -1,18 +1,6 @@
 const mqtt = require("async-mqtt");
 const Debug = require("debug").default;
 
-const parseMqttMessage = jsonData => {
-  const message = JSON.parse(jsonData);
-
-  if (!message.name) {
-    debug(
-      `Received a messsage that did not have an id. Ignoring\nMessage: ${message}`
-    );
-    return;
-  }
-  return message;
-};
-
 class MockLight {
   constructor(lightId, config) {
     this._id = lightId;
@@ -26,8 +14,8 @@ class MockLight {
         topic: `${top}/${this._id}/${connected}`,
         payload: Buffer.from(JSON.stringify({ name: this._id, connection: 0 })),
         qos: 0,
-        retain: true
-      }
+        retain: true,
+      },
     });
 
     this._state = {
@@ -35,7 +23,7 @@ class MockLight {
       color: { r: 255, g: 100, b: 0 },
       brightness: 100,
       effect: "None",
-      speed: 4
+      speed: 4,
     };
 
     this._config = {
@@ -48,7 +36,7 @@ class MockLight {
       ipAddress: "10.0.0.1",
       macAddress: "AA:BB:CC:DD:EE:FF",
       numLeds: 60,
-      udpPort: 7778
+      udpPort: 7778,
     };
 
     this._effectList = ["Test 1", "Test 2", "Test 3"];
@@ -60,7 +48,7 @@ class MockLight {
       this.publishToState({ name: this._id, ...this._state });
       this.publishToEffectList({
         name: this._id,
-        effectList: this._effectList
+        effectList: this._effectList,
       });
       this.publishToConnected({ name: this._id, connection: 2 });
       this.publishToConfig({ name: this._id, ...this._config });
@@ -153,7 +141,7 @@ class MockLight {
 
     // Parse the JSON into a usable javascript object
     if (topic === `${top}/${this._id}/${command}`) {
-      const data = parseMqttMessage(message.toString());
+      const data = JSON.parse(message.toString());
       await this._handleCommandMessage(data);
     } else if (topic === `${top}/${discovery}`) {
       await this._handleDiscoveryMessage();

@@ -1,5 +1,5 @@
-"use strict";
 const EventEmitter = require("events");
+const Debug = require("debug").default;
 const { getMqtt } = require("../clients/mqtt");
 const {
   validateConnectedMessage,
@@ -7,10 +7,9 @@ const {
   validateEffectListMessage,
   validateConfigMessage,
   validateDiscoveryMessage,
-  validateCommandMessage
+  validateCommandMessage,
 } = require("../validators/mqttValidators");
 const { ValidationError } = require("../errors");
-const Debug = require("debug").default;
 
 const debug = Debug("LightMessenger");
 
@@ -46,21 +45,12 @@ class LightMessenger extends EventEmitter {
     const { top, connected, state, effectList, config } = this._topics;
 
     // Subscribe to all relavent fields
-    const connectedPromise = this._client.subscribe(
-      `${top}/${lightId}/${connected}`
-    );
+    const connectedPromise = this._client.subscribe(`${top}/${lightId}/${connected}`);
     const statePromise = this._client.subscribe(`${top}/${lightId}/${state}`);
-    const effectListPromise = this._client.subscribe(
-      `${top}/${lightId}/${effectList}`
-    );
+    const effectListPromise = this._client.subscribe(`${top}/${lightId}/${effectList}`);
     const configPromise = this._client.subscribe(`${top}/${lightId}/${config}`);
 
-    await Promise.all([
-      connectedPromise,
-      statePromise,
-      effectListPromise,
-      configPromise
-    ]);
+    await Promise.all([connectedPromise, statePromise, effectListPromise, configPromise]);
 
     debug(`Successfully subscribed to ${lightId}`);
   }
@@ -84,23 +74,12 @@ class LightMessenger extends EventEmitter {
     const { top, connected, state, effectList, config } = this._topics;
 
     // Subscribe to all relavent fields
-    const connectedPromise = this._client.unsubscribe(
-      `${top}/${lightId}/${connected}`
-    );
+    const connectedPromise = this._client.unsubscribe(`${top}/${lightId}/${connected}`);
     const statePromise = this._client.unsubscribe(`${top}/${lightId}/${state}`);
-    const effectListPromise = this._client.unsubscribe(
-      `${top}/${lightId}/${effectList}`
-    );
-    const configPromise = this._client.unsubscribe(
-      `${top}/${lightId}/${config}`
-    );
+    const effectListPromise = this._client.unsubscribe(`${top}/${lightId}/${effectList}`);
+    const configPromise = this._client.unsubscribe(`${top}/${lightId}/${config}`);
 
-    await Promise.all([
-      connectedPromise,
-      statePromise,
-      effectListPromise,
-      configPromise
-    ]);
+    await Promise.all([connectedPromise, statePromise, effectListPromise, configPromise]);
 
     debug(`Successfully unsubscribed from ${lightId}`);
   }
@@ -175,27 +154,21 @@ class LightMessenger extends EventEmitter {
   }
 
   _handleMessage(topic, message) {
-    const {
-      top,
-      connected,
-      state,
-      effectList,
-      config,
-      discoveryResponse
-    } = this._topics;
+    const { top, connected, state, effectList, config, discoveryResponse } = this._topics;
     const topicTokens = topic.split("/");
     if (topicTokens.length < 2) {
       debug(`Ignoring Message on ${topic}: topic too short`);
       return;
-    } else if (topicTokens[0] !== top) {
+    }
+    if (topicTokens[0] !== top) {
       debug(`Ignoring Message on ${topic}: topic is unrealted to this app`);
       return;
     }
 
     const data = JSON.parse(message.toString());
-    let validation = null;
-    let event = null;
 
+    let validation;
+    let event;
     switch (topicTokens[2]) {
       case connected:
         validation = validateConnectedMessage(data);
@@ -217,6 +190,9 @@ class LightMessenger extends EventEmitter {
         validation = validateDiscoveryMessage(data);
         event = "discoveryMessage";
         break;
+      default:
+        validation = null;
+        event = null;
     }
 
     if (!validation) {
