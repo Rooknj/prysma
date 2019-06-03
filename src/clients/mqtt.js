@@ -1,5 +1,3 @@
-"use strict";
-
 const Mqtt = require("async-mqtt");
 const Debug = require("debug").default;
 
@@ -38,6 +36,7 @@ const closeMqtt = () => {
     return _mqtt.end();
   }
   debug(`Mqtt has not been initialized.`);
+  return null;
 };
 
 module.exports = {

@@ -766,9 +766,7 @@ describe("setLightState", () => {
   test("maps on: true to state: ON", async () => {
     // Mock getSimpleUniqueId to return a given value instead of a random one
     const MUTATION_ID = 77;
-    utils.getSimpleUniqueId.mockImplementationOnce(() => {
-      return 77;
-    });
+    utils.getSimpleUniqueId.mockImplementationOnce(() => 77);
 
     const lightService = new LightService();
     // Make sure the cache returns a connected light so no errors are thrown
@@ -798,9 +796,7 @@ describe("setLightState", () => {
   test("maps on: false to state: OFF", async () => {
     // Mock getSimpleUniqueId to return a given value instead of a random one
     const MUTATION_ID = 77;
-    utils.getSimpleUniqueId.mockImplementationOnce(() => {
-      return 77;
-    });
+    utils.getSimpleUniqueId.mockImplementationOnce(() => 77);
 
     const lightService = new LightService();
     // Make sure the cache returns a connected light so no errors are thrown
@@ -830,9 +826,7 @@ describe("setLightState", () => {
   test("appends on a mutationId", async () => {
     // Mock getSimpleUniqueId to return a given value instead of a random one
     const MUTATION_ID = 77;
-    utils.getSimpleUniqueId.mockImplementationOnce(() => {
-      return 77;
-    });
+    utils.getSimpleUniqueId.mockImplementationOnce(() => 77);
 
     const lightService = new LightService();
     // Make sure the cache returns a connected light so no errors are thrown
@@ -861,9 +855,7 @@ describe("setLightState", () => {
   test("publishes the desired state to the light", async () => {
     // Mock getSimpleUniqueId to return a given value instead of a random one
     const MUTATION_ID = 77;
-    utils.getSimpleUniqueId.mockImplementationOnce(() => {
-      return 77;
-    });
+    utils.getSimpleUniqueId.mockImplementationOnce(() => 77);
 
     const lightService = new LightService();
     // Make sure the cache returns a connected light so no errors are thrown
@@ -892,9 +884,7 @@ describe("setLightState", () => {
   test("removes the mutationResponse listener on success", async () => {
     // Mock getSimpleUniqueId to return a given value instead of a random one
     const MUTATION_ID = 77;
-    utils.getSimpleUniqueId.mockImplementationOnce(() => {
-      return 77;
-    });
+    utils.getSimpleUniqueId.mockImplementationOnce(() => 77);
 
     const lightService = new LightService();
     // Make sure the cache returns a connected light so no errors are thrown
@@ -920,9 +910,7 @@ describe("setLightState", () => {
   test("returns the changed light", async () => {
     // Mock getSimpleUniqueId to return a given value instead of a random one
     const MUTATION_ID = 77;
-    utils.getSimpleUniqueId.mockImplementationOnce(() => {
-      return 77;
-    });
+    utils.getSimpleUniqueId.mockImplementationOnce(() => 77);
 
     const lightService = new LightService();
     // Make sure the cache returns a connected light so no errors are thrown

@@ -2,6 +2,7 @@ const LightDao = require("./LightDao");
 const { toLightModel } = require("../utils/lightUtils");
 
 jest.mock("../clients/db", () => {
+  // eslint-disable-next-line global-require
   const DbConnectionMock = require("sequelize-mock");
   const dbConnectionMock = new DbConnectionMock();
 
@@ -23,9 +24,7 @@ jest.mock("../clients/db", () => {
   LightModelMock.update = jest.fn(LightModelMock.update);
   LightModelMock.destroy = jest.fn(LightModelMock.destroy);
 
-  const getDb = jest.fn(() => {
-    return Object.create(LightModelMock);
-  });
+  const getDb = jest.fn(() => Object.create(LightModelMock));
 
   return { getDb };
 });

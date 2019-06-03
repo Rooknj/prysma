@@ -1,5 +1,5 @@
-"use strict";
 const EventEmitter = require("events");
+const Debug = require("debug").default;
 const { getMqtt } = require("../clients/mqtt");
 const {
   validateConnectedMessage,
@@ -10,7 +10,6 @@ const {
   validateCommandMessage,
 } = require("../validators/mqttValidators");
 const { ValidationError } = require("../errors");
-const Debug = require("debug").default;
 
 const debug = Debug("LightMessenger");
 
@@ -160,15 +159,16 @@ class LightMessenger extends EventEmitter {
     if (topicTokens.length < 2) {
       debug(`Ignoring Message on ${topic}: topic too short`);
       return;
-    } else if (topicTokens[0] !== top) {
+    }
+    if (topicTokens[0] !== top) {
       debug(`Ignoring Message on ${topic}: topic is unrealted to this app`);
       return;
     }
 
     const data = JSON.parse(message.toString());
-    let validation = null;
-    let event = null;
 
+    let validation;
+    let event;
     switch (topicTokens[2]) {
       case connected:
         validation = validateConnectedMessage(data);
@@ -190,6 +190,9 @@ class LightMessenger extends EventEmitter {
         validation = validateDiscoveryMessage(data);
         event = "discoveryMessage";
         break;
+      default:
+        validation = null;
+        event = null;
     }
 
     if (!validation) {

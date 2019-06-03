@@ -10,9 +10,9 @@ beforeEach(() => {
 });
 
 describe("getDiscoveredLights", () => {
-  let discovered_light;
+  let correctDiscoveredLight;
   beforeEach(() => {
-    discovered_light = {
+    correctDiscoveredLight = {
       id: "Prysma-AABBCCDDEEFF",
       name: "Prysma-AABBCCDDEEFF",
       version: "1.0.0",
@@ -26,28 +26,28 @@ describe("getDiscoveredLights", () => {
     };
   });
   test("Gets the discovered lights as an array (Example 1)", async () => {
-    const discovered_light1 = Object.assign({}, discovered_light, {
+    const correctDiscoveredLight1 = Object.assign({}, correctDiscoveredLight, {
       id: "Prysma-Test",
     });
-    const discovered_light2 = Object.assign({}, discovered_light, {
+    const correctDiscoveredLight2 = Object.assign({}, correctDiscoveredLight, {
       id: "Prysma-Test2",
     });
-    const DISCOVERED_LIGHTS = [discovered_light1, discovered_light2];
+    const DISCOVERED_LIGHTS = [correctDiscoveredLight1, correctDiscoveredLight2];
     lightCache._discoveredLights = DISCOVERED_LIGHTS;
-    //const getLightSpy = jest.spyOn(lightCache._discoveredLights, "push");
+    // const getLightSpy = jest.spyOn(lightCache._discoveredLights, "push");
 
     const discoveredLights = await lightCache.getDiscoveredLights();
     expect(Array.isArray(discoveredLights)).toBe(true);
     expect(discoveredLights).toEqual(DISCOVERED_LIGHTS);
   });
   test("Gets the discovered lights as an array (Example 2)", async () => {
-    const discovered_light1 = Object.assign({}, discovered_light, {
+    const correctDiscoveredLight1 = Object.assign({}, correctDiscoveredLight, {
       id: "Default Mock",
     });
-    const discovered_light2 = Object.assign({}, discovered_light, {
+    const correctDiscoveredLight2 = Object.assign({}, correctDiscoveredLight, {
       id: "Hello World Window",
     });
-    const DISCOVERED_LIGHTS = [discovered_light1, discovered_light2];
+    const DISCOVERED_LIGHTS = [correctDiscoveredLight1, correctDiscoveredLight2];
     lightCache._discoveredLights = DISCOVERED_LIGHTS;
 
     const discoveredLights = await lightCache.getDiscoveredLights();
@@ -57,9 +57,9 @@ describe("getDiscoveredLights", () => {
 });
 
 describe("clearDiscoveredLights", () => {
-  let discovered_light;
+  let correctDiscoveredLight;
   beforeEach(() => {
-    discovered_light = {
+    correctDiscoveredLight = {
       id: "Prysma-AABBCCDDEEFF",
       name: "Prysma-AABBCCDDEEFF",
       version: "1.0.0",
@@ -74,7 +74,7 @@ describe("clearDiscoveredLights", () => {
   });
 
   test("Clears the discovered lights cache", async () => {
-    const discoveredLight = Object.assign({}, discovered_light, {
+    const discoveredLight = Object.assign({}, correctDiscoveredLight, {
       id: "Default Mock",
     });
     lightCache._discoveredLights = [discoveredLight];
@@ -86,9 +86,9 @@ describe("clearDiscoveredLights", () => {
 });
 
 describe("addDiscoveredLight", () => {
-  let discovered_light;
+  let correctDiscoveredLight;
   beforeEach(() => {
-    discovered_light = {
+    correctDiscoveredLight = {
       id: "Prysma-AABBCCDDEEFF",
       name: "Prysma-AABBCCDDEEFF",
       version: "1.0.0",
@@ -103,7 +103,7 @@ describe("addDiscoveredLight", () => {
   });
 
   test("Correctly adds the discovered light (Example 1)", async () => {
-    const discoveredLight = Object.assign({}, discovered_light, {
+    const discoveredLight = Object.assign({}, correctDiscoveredLight, {
       id: "Default Mock",
     });
 
@@ -117,7 +117,7 @@ describe("addDiscoveredLight", () => {
     expect(addLightSpy).toBeCalledWith(expect.objectContaining(discoveredLight));
   });
   test("Correctly adds the discovered light (Example 2)", async () => {
-    const discoveredLight = Object.assign({}, discovered_light, {
+    const discoveredLight = Object.assign({}, correctDiscoveredLight, {
       id: "Hello Mock Test WOrld",
       name: "Tester",
       udpPort: 7777,
@@ -141,7 +141,7 @@ describe("addDiscoveredLight", () => {
     expect(addLightSpy).not.toBeCalled();
   });
   test("Rejects and does not add if the discoveredLight is invalidly formatted", async () => {
-    const discoveredLight = Object.assign({}, discovered_light, {
+    const discoveredLight = Object.assign({}, correctDiscoveredLight, {
       id: "Hello Mock Test WOrld",
       name: 123456,
       udpPort: "Im a port!",
@@ -157,17 +157,17 @@ describe("addDiscoveredLight", () => {
   });
   test("Only adds the light once", async () => {
     const addLightSpy = jest.spyOn(lightCache._discoveredLights, "push");
-    await lightCache.addDiscoveredLight(discovered_light);
-    await lightCache.addDiscoveredLight(discovered_light);
+    await lightCache.addDiscoveredLight(correctDiscoveredLight);
+    await lightCache.addDiscoveredLight(correctDiscoveredLight);
 
     expect(addLightSpy).toBeCalledTimes(1);
   });
 });
 
 describe("removeDiscoveredLight", () => {
-  let discovered_light;
+  let correctDiscoveredLight;
   beforeEach(() => {
-    discovered_light = {
+    correctDiscoveredLight = {
       id: "Prysma-AABBCCDDEEFF",
       name: "Prysma-AABBCCDDEEFF",
       version: "1.0.0",
@@ -182,7 +182,7 @@ describe("removeDiscoveredLight", () => {
   });
 
   test("Correctly removes the discovered light (Example 1)", async () => {
-    const lightToRemove = discovered_light.id;
+    const lightToRemove = correctDiscoveredLight.id;
 
     const removeLightSpy = jest.spyOn(lightCache._discoveredLights, "filter");
 
@@ -191,7 +191,7 @@ describe("removeDiscoveredLight", () => {
     expect(removeLightSpy).toBeCalledTimes(1);
     expect(removeLightSpy).toBeCalledWith(expect.anything());
   });
-  //test("Correctly removes the discovered light (Example 2)", async () => {});
+  // test("Correctly removes the discovered light (Example 2)", async () => {});
   test("Does not reject if the light was already removed/doesnt exist", async () => {
     const lightToRemove = "This isnt added";
 

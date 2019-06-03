@@ -1,17 +1,17 @@
-"use strict";
 const http = require("http");
 const express = require("express");
 const { ApolloServer } = require("apollo-server-express");
 const typeDefs = require("./typeDefs");
 const resolvers = require("./resolvers");
+const Mocks = require("./mocks");
 
 class Server {
   constructor(services) {
     let mocks = false;
-    let context = undefined;
+    let context;
 
     if (process.env.MOCK) {
-      mocks = require("./mocks");
+      mocks = Mocks;
     } else {
       context = () => ({ ...services });
     }

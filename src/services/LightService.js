@@ -1,3 +1,5 @@
+const { promisify } = require("util");
+const Debug = require("debug").default;
 const LightMessenger = require("../messengers/LightMessenger");
 const LightDao = require("../daos/LightDao");
 const LightCache = require("../caches/LightCache");
@@ -12,10 +14,8 @@ const {
   LIGHT_CHANGED_EVENT,
   LIGHT_STATE_CHANGED_EVENT,
 } = require("./serviceConstants");
-const { promisify } = require("util");
-const asyncSetTimeout = promisify(setTimeout);
 
-const Debug = require("debug").default;
+const asyncSetTimeout = promisify(setTimeout);
 
 const debug = Debug("LightService");
 
@@ -32,9 +32,7 @@ class LightService {
   async init() {
     // Initialize cache
     const lights = await this._dao.getLights();
-    const cacheInitPromises = lights.map(({ id }) => {
-      this._cache.initializeLightState(id);
-    });
+    const cacheInitPromises = lights.map(({ id }) => this._cache.initializeLightState(id));
     await Promise.all(cacheInitPromises);
 
     // Handle connect if the messenger was already connected
@@ -88,7 +86,7 @@ class LightService {
 
   // TODO: Add error handling and cleanup here if something fails
   async addLight(lightId, lightData) {
-    let name = undefined;
+    let name;
     if (lightData) {
       ({ name } = lightData);
     }
@@ -228,16 +226,18 @@ class LightService {
 
     // TODO: Implement the hardware to support on instead of state
     // Map the on property to the state property
-    if ("on" in lightState) {
-      lightState.state = lightState.on ? "ON" : "OFF";
-      delete lightState.on;
+    let newLightState = lightState;
+    if ("on" in newLightState) {
+      const { on, ...rest } = newLightState;
+      const state = newLightState.on ? "ON" : "OFF";
+      newLightState = { state, ...rest };
     }
 
     // Create the command payload
-    const mutationId = getSimpleUniqueId();
-    const payload = { mutationId, name: lightId, ...lightState };
+    const uniqueId = getSimpleUniqueId();
+    const payload = { mutationId: uniqueId, name: lightId, ...newLightState };
 
-    //Return a promise which resolves when the light responds to this message or rejects if it takes too long
+    // Return a promise which resolves when the light responds to this message or rejects if it takes too long
     return new Promise((resolve, reject) => {
       // Every time we get a new message from the light, check to see if it has the same mutationId
       const handleMutationResponse = ({ mutationId, newState }) => {

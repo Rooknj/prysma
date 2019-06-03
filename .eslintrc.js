@@ -7,8 +7,11 @@ module.exports = {
   },
   extends: [
     // Shared Configs
-    "eslint:recommended"
+    "eslint:recommended",
     // Project Specific Configs
+    "airbnb-base",
+    // Make sure this is last
+    "prettier",
   ],
   globals: {
     Atomics: "readonly",
@@ -19,12 +22,18 @@ module.exports = {
   },
   plugins: [
     // Shared Plugins
+    "import",
+    "prettier",
     // Project Specific Plugins
   ],
   rules: {
     // Shared Rules
     "no-console": "warn",
     "no-unused-vars": "warn",
+    "object-curly-newline": "off",
+    "prefer-destructuring": "warn",
+    radix: "off",
+    "no-underscore-dangle": "off",
     // Project Specific Rules
   },
 };

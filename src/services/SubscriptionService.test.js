@@ -1,3 +1,4 @@
+const { PubSub } = require("graphql-subscriptions");
 const SubscriptionService = require("./SubscriptionService");
 const {
   LIGHT_ADDED_EVENT,
@@ -5,7 +6,6 @@ const {
   LIGHT_CHANGED_EVENT,
   LIGHT_STATE_CHANGED_EVENT,
 } = require("./serviceConstants");
-const { PubSub } = require("graphql-subscriptions");
 const mediator = require("./mediator");
 
 jest.mock("graphql-subscriptions");

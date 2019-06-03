@@ -1,9 +1,9 @@
 const { validateLightState, validateDiscoveredLight } = require("../validators/cacheValidators");
 const errors = require("../errors");
-//const Debug = require("debug").default;
+// const Debug = require("debug").default;
 
 const { ValidationError } = errors;
-//const debug = Debug("LightCache");
+// const debug = Debug("LightCache");
 
 class LightCache {
   constructor() {
@@ -59,16 +59,18 @@ class LightCache {
   async getLightState(lightId) {
     if (!lightId) throw new Error("No ID provided");
     const lightState = this._lightStates[lightId];
-    if (!lightState || Object.entries(lightState).length === 0)
+    if (!lightState || Object.entries(lightState).length === 0) {
       throw new Error(`${lightId}'s state not found in cache`);
+    }
 
     return Object.assign({}, lightState, { id: lightId });
   }
 
   async setLightState(lightId, lightState) {
     if (!lightId) throw new Error("No ID provided");
-    if (!lightState || Object.entries(lightState).length === 0)
+    if (!lightState || Object.entries(lightState).length === 0) {
       throw new Error("No State provided");
+    }
 
     const validation = validateLightState(lightState);
     if (validation.error) throw new ValidationError(validation.error);

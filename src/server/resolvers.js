@@ -1,4 +1,3 @@
-"use strict";
 const resolvers = {
   Query: {
     light: (_, { lightId }, { lightService }) => lightService.getLight(lightId),
@@ -21,24 +20,19 @@ const resolvers = {
   },
   Subscription: {
     lightChanged: {
-      subscribe: (_, args, { subscriptionService }) => {
-        return subscriptionService.subscribeToChangedLights();
-      },
+      subscribe: (_, args, { subscriptionService }) =>
+        subscriptionService.subscribeToChangedLights(),
     },
     lightAdded: {
-      subscribe: (_, args, { subscriptionService }) => {
-        return subscriptionService.subscribeToAddedLights();
-      },
+      subscribe: (_, args, { subscriptionService }) => subscriptionService.subscribeToAddedLights(),
     },
     lightRemoved: {
-      subscribe: (_, args, { subscriptionService }) => {
-        return subscriptionService.subscribeToRemovedLights();
-      },
+      subscribe: (_, args, { subscriptionService }) =>
+        subscriptionService.subscribeToRemovedLights(),
     },
     lightStateChanged: {
-      subscribe: (_, args, { subscriptionService }) => {
-        return subscriptionService.subscribeToChangedLightStates();
-      },
+      subscribe: (_, args, { subscriptionService }) =>
+        subscriptionService.subscribeToChangedLightStates(),
     },
   },
 };
