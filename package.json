@@ -54,5 +54,10 @@
     "graphql-subscriptions": "^1.1.0",
     "sequelize": "^5.8.0",
     "sqlite3": "^4.0.6"
+  },
+  "pkg": {
+    "assets": [
+      "ui/build/**/*"
+    ]
   }
 }
