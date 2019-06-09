@@ -2,7 +2,7 @@ const LightMessenger = require("../messengers/LightMessenger");
 const LightDao = require("../daos/LightDao");
 const LightCache = require("../caches/LightCache");
 const mediator = require("./mediator");
-const utils = require("../utils/lightUtils");
+const utils = require("../lib/lightUtil");
 const {
   TIMEOUT_WAIT,
   DISCOVERY_DURATION,
@@ -18,7 +18,7 @@ const LightService = require("./LightService");
 jest.mock("../messengers/LightMessenger");
 jest.mock("../daos/LightDao");
 jest.mock("../caches/LightCache");
-jest.mock("../utils/lightUtils");
+jest.mock("../lib/lightUtil");
 // Mock util because a promisified setTimeout doesnt work with jest mock timers
 // https://stackoverflow.com/questions/52727220/jest-doesnt-work-with-util-promisifysettimeout
 jest.mock("util", () => {

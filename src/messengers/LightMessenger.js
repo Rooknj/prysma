@@ -9,7 +9,7 @@ const {
   validateDiscoveryMessage,
   validateCommandMessage,
 } = require("../validators/mqttValidators");
-const { ValidationError } = require("../errors");
+const { ValidationError } = require("../lib/errors");
 
 const debug = Debug("LightMessenger");
 

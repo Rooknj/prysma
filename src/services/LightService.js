@@ -4,7 +4,7 @@ const LightMessenger = require("../messengers/LightMessenger");
 const LightDao = require("../daos/LightDao");
 const LightCache = require("../caches/LightCache");
 const mediator = require("./mediator");
-const { getSimpleUniqueId } = require("../utils/lightUtils");
+const { getSimpleUniqueId } = require("../lib/lightUtil");
 const {
   TIMEOUT_WAIT,
   DISCOVERY_DURATION,

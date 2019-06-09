@@ -1,5 +1,5 @@
 const LightDao = require("./LightDao");
-const { toLightModel } = require("../utils/lightUtils");
+const { toLightModel } = require("../lib/lightUtil");
 
 jest.mock("../clients/db", () => {
   // eslint-disable-next-line global-require

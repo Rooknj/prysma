@@ -8,7 +8,7 @@ const { initDb, closeDb } = require("./clients/db");
 const { initMqtt, closeMqtt } = require("./clients/mqtt");
 const LightService = require("./services/LightService");
 const SubscriptionService = require("./services/SubscriptionService");
-const MockLight = require("./MockLight");
+const MockLight = require("./lib/MockLight");
 
 // Verbose statement of service starting
 const { version } = packageJson;
