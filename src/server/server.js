@@ -1,4 +1,5 @@
 const http = require("http");
+const path = require("path");
 const express = require("express");
 const { ApolloServer } = require("apollo-server-express");
 const typeDefs = require("./typeDefs");
@@ -26,6 +27,7 @@ class Server {
     this.subscriptionsPath = apolloServer.subscriptionsPath;
 
     const app = express();
+    app.use("/", express.static(path.join(__dirname, "..", "..", "ui")));
     apolloServer.applyMiddleware({ app });
     this.httpServer = http.createServer(app);
     apolloServer.installSubscriptionHandlers(this.httpServer);

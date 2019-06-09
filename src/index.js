@@ -30,7 +30,7 @@ process.on("SIGINT", async () => {
   console.log("SIGINT signal received, shutting down gracefully...");
   const closePromises = [closeDb(), closeMqtt()];
   await Promise.all(closePromises);
-  console.log("Succesfully shut down. Goodbye");
+  console.log("Successfully shut down. Goodbye");
   process.exit(0);
 });
 
@@ -54,6 +54,9 @@ const start = async () => {
   console.log("Starting Server...");
   const server = new Server(services);
   server.start(config.server.port);
+  console.log(
+    `🚀 UI ready at http://localhost:${config.server.port}`
+  );
   console.log(`🚀 Server ready at http://localhost:${config.server.port}${server.graphqlPath}`);
   console.log(
     `🚀 Subscriptions ready at ws://localhost:${config.server.port}${server.subscriptionsPath}`
