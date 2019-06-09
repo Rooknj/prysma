@@ -12,6 +12,7 @@ const { initMqtt, closeMqtt } = require("./clients/mqtt");
 const LightService = require("./services/lightService/LightService");
 const SubscriptionService = require("./services/subscriptionService/SubscriptionService");
 const MockLight = require("./lib/MockLight");
+const health = require("./routes/health");
 
 // Verbose statement of service starting
 const { version } = packageJson;
@@ -62,8 +63,8 @@ const init = async () => {
 const start = async services => {
   const app = express();
 
-  // app.get("/health/full", health.full);
-  // app.get("/health/version", health.version);
+  app.get("/health/full", health.full);
+  app.get("/health/version", health.version);
   app.disable("x-powered-by");
   app.use("/", express.static(path.join(__dirname, "..", "ui")));
 
