@@ -5,8 +5,8 @@ const {
   LIGHT_REMOVED_EVENT,
   LIGHT_CHANGED_EVENT,
   LIGHT_STATE_CHANGED_EVENT,
-} = require("./serviceConstants");
-const mediator = require("./mediator");
+} = require("../serviceConstants");
+const mediator = require("../mediator");
 
 jest.mock("graphql-subscriptions");
 

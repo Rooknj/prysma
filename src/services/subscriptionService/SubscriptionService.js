@@ -1,11 +1,11 @@
 const { PubSub } = require("graphql-subscriptions");
-const mediator = require("./mediator");
+const mediator = require("../mediator");
 const {
   LIGHT_ADDED_EVENT,
   LIGHT_REMOVED_EVENT,
   LIGHT_CHANGED_EVENT,
   LIGHT_STATE_CHANGED_EVENT,
-} = require("./serviceConstants");
+} = require("../serviceConstants");
 
 class SubscriptionService {
   constructor() {

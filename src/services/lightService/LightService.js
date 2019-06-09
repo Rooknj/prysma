@@ -1,10 +1,10 @@
 const { promisify } = require("util");
 const Debug = require("debug").default;
-const LightMessenger = require("../messengers/LightMessenger");
-const LightDao = require("../daos/LightDao");
-const LightCache = require("../caches/LightCache");
-const mediator = require("./mediator");
-const { getSimpleUniqueId } = require("../utils/lightUtils");
+const LightMessenger = require("./messenger/LightMessenger");
+const LightDao = require("./dao/LightDao");
+const LightCache = require("./cache/LightCache");
+const mediator = require("../mediator");
+const { getSimpleUniqueId } = require("../../lib/lightUtil");
 const {
   TIMEOUT_WAIT,
   DISCOVERY_DURATION,
@@ -13,7 +13,7 @@ const {
   LIGHT_REMOVED_EVENT,
   LIGHT_CHANGED_EVENT,
   LIGHT_STATE_CHANGED_EVENT,
-} = require("./serviceConstants");
+} = require("../serviceConstants");
 
 const asyncSetTimeout = promisify(setTimeout);
 

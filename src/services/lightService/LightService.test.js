@@ -1,8 +1,8 @@
-const LightMessenger = require("../messengers/LightMessenger");
-const LightDao = require("../daos/LightDao");
-const LightCache = require("../caches/LightCache");
-const mediator = require("./mediator");
-const utils = require("../utils/lightUtils");
+const LightMessenger = require("./messenger/LightMessenger");
+const LightDao = require("./dao/LightDao");
+const LightCache = require("./cache/LightCache");
+const mediator = require("../mediator");
+const utils = require("../../lib/lightUtil");
 const {
   TIMEOUT_WAIT,
   DISCOVERY_DURATION,
@@ -11,14 +11,14 @@ const {
   LIGHT_REMOVED_EVENT,
   LIGHT_CHANGED_EVENT,
   LIGHT_STATE_CHANGED_EVENT,
-} = require("./serviceConstants");
+} = require("../serviceConstants");
 const LightService = require("./LightService");
 
 // Generate auto mocks for these module
-jest.mock("../messengers/LightMessenger");
-jest.mock("../daos/LightDao");
-jest.mock("../caches/LightCache");
-jest.mock("../utils/lightUtils");
+jest.mock("./messenger/LightMessenger");
+jest.mock("./dao/LightDao");
+jest.mock("./cache/LightCache");
+jest.mock("../../lib/lightUtil");
 // Mock util because a promisified setTimeout doesnt work with jest mock timers
 // https://stackoverflow.com/questions/52727220/jest-doesnt-work-with-util-promisifysettimeout
 jest.mock("util", () => {

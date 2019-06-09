@@ -1,7 +1,7 @@
 const LightDao = require("./LightDao");
-const { toLightModel } = require("../utils/lightUtils");
+const { toLightModel } = require("../../../lib/lightUtil");
 
-jest.mock("../clients/db", () => {
+jest.mock("../../../clients/db", () => {
   // eslint-disable-next-line global-require
   const DbConnectionMock = require("sequelize-mock");
   const dbConnectionMock = new DbConnectionMock();

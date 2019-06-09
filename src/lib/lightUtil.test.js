@@ -1,4 +1,4 @@
-const lightUtils = require("./lightUtils");
+const lightUtils = require("./lightUtil");
 
 describe("toLightObject", () => {
   test("correctly converts supportedEffects", () => {
