@@ -27,7 +27,7 @@ class Server {
     this.subscriptionsPath = apolloServer.subscriptionsPath;
 
     const app = express();
-    app.use("/", express.static(path.join(__dirname, "..", "..", "ui", "build")));
+    app.use("/", express.static(path.join(__dirname, "..", "..", "ui")));
     apolloServer.applyMiddleware({ app });
     this.httpServer = http.createServer(app);
     apolloServer.installSubscriptionHandlers(this.httpServer);
