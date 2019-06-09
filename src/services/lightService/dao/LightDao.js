@@ -1,6 +1,6 @@
-const { getDb } = require("../clients/db");
-const { toLightObject, toLightModel } = require("../lib/lightUtil");
-const { ValidationError } = require("../lib/errors");
+const { getDb } = require("../../../clients/db");
+const { toLightObject, toLightModel } = require("../../../lib/lightUtil");
+const { ValidationError } = require("../../../lib/errors");
 // const Debug = require("debug").default;
 
 // const debug = Debug("LightDao");

@@ -1,6 +1,6 @@
 const EventEmitter = require("events");
 const Debug = require("debug").default;
-const { getMqtt } = require("../clients/mqtt");
+const { getMqtt } = require("../../../clients/mqtt");
 const {
   validateConnectedMessage,
   validateStateMessage,
@@ -9,7 +9,7 @@ const {
   validateDiscoveryMessage,
   validateCommandMessage,
 } = require("../validators/mqttValidators");
-const { ValidationError } = require("../lib/errors");
+const { ValidationError } = require("../../../lib/errors");
 
 const debug = Debug("LightMessenger");
 

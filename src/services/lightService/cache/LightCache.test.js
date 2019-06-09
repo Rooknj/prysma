@@ -1,5 +1,5 @@
 const LightCache = require("./LightCache");
-const { ValidationError } = require("../lib/errors");
+const { ValidationError } = require("../../../lib/errors");
 
 const NO_ID_MESSAGE = "No ID provided";
 const NO_STATE_MESSAGE = "No State provided";

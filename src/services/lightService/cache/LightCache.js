@@ -1,5 +1,5 @@
 const { validateLightState, validateDiscoveredLight } = require("../validators/cacheValidators");
-const errors = require("../lib/errors");
+const errors = require("../../../lib/errors");
 // const Debug = require("debug").default;
 
 const { ValidationError } = errors;

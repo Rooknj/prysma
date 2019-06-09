@@ -1,7 +1,7 @@
 const LightMessenger = require("./LightMessenger");
-const { ValidationError } = require("../lib/errors");
+const { ValidationError } = require("../../../lib/errors");
 
-jest.mock("../clients/mqtt", () => {
+jest.mock("../../../clients/mqtt", () => {
   const getMqtt = jest.fn(() =>
     Object.create({
       on: jest.fn(),

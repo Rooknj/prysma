@@ -9,8 +9,8 @@ const config = require("./config");
 const packageJson = require("../package.json");
 const { initDb, closeDb } = require("./clients/db");
 const { initMqtt, closeMqtt } = require("./clients/mqtt");
-const LightService = require("./services/LightService");
-const SubscriptionService = require("./services/SubscriptionService");
+const LightService = require("./services/lightService/LightService");
+const SubscriptionService = require("./services/subscriptionService/SubscriptionService");
 const MockLight = require("./lib/MockLight");
 
 // Verbose statement of service starting
@@ -70,7 +70,7 @@ const start = async services => {
   const apolloServer = new ApolloServer({
     typeDefs,
     resolvers,
-    context: { services },
+    context: { ...services },
     mocks: process.env.MOCK ? mocks : false,
   });
   const { graphqlPath, subscriptionsPath } = apolloServer;
