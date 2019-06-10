@@ -74,6 +74,10 @@ const start = async services => {
     resolvers,
     context: { ...services },
     mocks: process.env.MOCK ? mocks : false,
+    formatError: error => {
+      logger.error(error);
+      return error;
+    },
   });
   const { graphqlPath, subscriptionsPath } = apolloServer;
   apolloServer.applyMiddleware({ app });
