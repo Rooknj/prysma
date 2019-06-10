@@ -1,5 +1,4 @@
 const EventEmitter = require("events");
-const Debug = require("debug").default;
 const { getMqtt } = require("../../../clients/mqtt");
 const {
   validateConnectedMessage,
@@ -10,8 +9,7 @@ const {
   validateCommandMessage,
 } = require("../validators/mqttValidators");
 const { ValidationError } = require("../../../lib/errors");
-
-const debug = Debug("LightMessenger");
+const logger = require("../../../lib/logger");
 
 class LightMessenger extends EventEmitter {
   constructor(topics) {
@@ -32,13 +30,13 @@ class LightMessenger extends EventEmitter {
   async subscribeToLight(lightId) {
     if (!this.connected) {
       const errorMessage = `Can not subscribe to (${lightId}). MQTT client not connected`;
-      debug(errorMessage);
+      logger.error(errorMessage);
       throw new Error(errorMessage);
     }
 
     if (!lightId) {
       const errorMessage = "You must provide a light id";
-      debug(errorMessage);
+      logger.error(errorMessage);
       throw new Error(errorMessage);
     }
 
@@ -52,7 +50,7 @@ class LightMessenger extends EventEmitter {
 
     await Promise.all([connectedPromise, statePromise, effectListPromise, configPromise]);
 
-    debug(`Successfully subscribed to ${lightId}`);
+    logger.info(`Successfully subscribed to ${lightId}`);
   }
 
   /**
@@ -61,13 +59,13 @@ class LightMessenger extends EventEmitter {
    */
   async unsubscribeFromLight(lightId) {
     if (!this.connected) {
-      debug(`Already unsubscribed from ${lightId} due to disconnect`);
+      logger.info(`Already unsubscribed from ${lightId} due to disconnect`);
       return;
     }
 
     if (!lightId) {
       const errorMessage = "You must provide a light id";
-      debug(errorMessage);
+      logger.error(errorMessage);
       throw new Error(errorMessage);
     }
 
@@ -81,7 +79,7 @@ class LightMessenger extends EventEmitter {
 
     await Promise.all([connectedPromise, statePromise, effectListPromise, configPromise]);
 
-    debug(`Successfully unsubscribed from ${lightId}`);
+    logger.info(`Successfully unsubscribed from ${lightId}`);
   }
 
   /**
@@ -92,18 +90,18 @@ class LightMessenger extends EventEmitter {
   async publishToLight(lightId, message) {
     if (!this.connected) {
       const errorMessage = `Can not publish to (${lightId}). MQTT client not connected`;
-      debug(errorMessage);
+      logger.error(errorMessage);
       throw new Error(errorMessage);
     }
 
     if (!lightId) {
       const errorMessage = "You must provide a light id";
-      debug(errorMessage);
+      logger.error(errorMessage);
       throw new Error(errorMessage);
     }
     if (!message) {
       const errorMessage = "You must provide a message";
-      debug(errorMessage);
+      logger.error(errorMessage);
       throw new Error(errorMessage);
     }
 
@@ -116,31 +114,31 @@ class LightMessenger extends EventEmitter {
     const payload = Buffer.from(JSON.stringify(message));
     await this._client.publish(`${top}/${lightId}/${command}`, payload);
 
-    debug(`Successfully published ${payload.toString()} to ${lightId}`);
+    logger.info(`Successfully published ${payload.toString()} to ${lightId}`);
   }
 
   async startDiscovery() {
     const { top, discoveryResponse } = this._topics;
     await this._client.subscribe(`${top}/+/${discoveryResponse}`);
-    debug(`Started Light Discovery`);
+    logger.info(`Started Light Discovery`);
   }
 
   async stopDiscovery() {
     const { top, discoveryResponse } = this._topics;
     await this._client.unsubscribe(`${top}/+/${discoveryResponse}`);
-    debug(`Stopped Light Discovery`);
+    logger.info(`Stopped Light Discovery`);
   }
 
   async publishDiscovery() {
     if (!this.connected) {
       const errorMessage = `Can not publish discovery message. MQTT client not connected`;
-      debug(errorMessage);
+      logger.error(errorMessage);
       throw new Error(errorMessage);
     }
 
     const { top, discovery } = this._topics;
     await this._client.publish(`${top}/${discovery}`, "ping");
-    debug(`Successfully published discovery message`);
+    logger.info(`Successfully published discovery message`);
   }
 
   _handleConnect(data) {
@@ -157,11 +155,11 @@ class LightMessenger extends EventEmitter {
     const { top, connected, state, effectList, config, discoveryResponse } = this._topics;
     const topicTokens = topic.split("/");
     if (topicTokens.length < 2) {
-      debug(`Ignoring Message on ${topic}: topic too short`);
+      logger.warn(`Ignoring Message on ${topic}: topic too short`);
       return;
     }
     if (topicTokens[0] !== top) {
-      debug(`Ignoring Message on ${topic}: topic is unrealted to this app`);
+      logger.warn(`Ignoring Message on ${topic}: topic is unrealted to this app`);
       return;
     }
 
@@ -202,7 +200,7 @@ class LightMessenger extends EventEmitter {
     if (!validation.error) {
       this.emit(event, validation.value);
     } else {
-      debug(validation.error);
+      logger.error(validation.error);
     }
   }
 }

@@ -1,10 +1,9 @@
 const mqtt = require("async-mqtt");
-const Debug = require("debug").default;
+const logger = require("../lib/logger");
 
 class MockLight {
   constructor(lightId, config) {
     this._id = lightId;
-    this._debug = Debug(`MockLight:${lightId}`);
     this._topics = config.topics;
 
     const { top, connected } = this._topics;
@@ -42,7 +41,7 @@ class MockLight {
     this._effectList = ["Test 1", "Test 2", "Test 3"];
 
     this._client.on("connect", () => {
-      this._debug("Connected to MQTT");
+      logger.debug("Connected to MQTT");
       this.subscribeToCommands();
       this.subscribeToDiscovery();
       this.publishToState({ name: this._id, ...this._state });
@@ -61,10 +60,10 @@ class MockLight {
     const topic = `${top}/${this._id}/${state}`;
     const payload = Buffer.from(JSON.stringify(stateMessage));
     try {
-      this._debug(`Publishing State: ${payload}`);
+      logger.debug(`Publishing State: ${payload}`);
       await this._client.publish(topic, payload, { retain: true });
     } catch (error) {
-      this._debug(error);
+      logger.debug(error);
     }
   }
 
@@ -73,10 +72,10 @@ class MockLight {
     const topic = `${top}/${this._id}/${effectList}`;
     const payload = Buffer.from(JSON.stringify(effectListMessage));
     try {
-      this._debug(`Publishing Effect List: ${payload}`);
+      logger.debug(`Publishing Effect List: ${payload}`);
       await this._client.publish(topic, payload, { retain: true });
     } catch (error) {
-      this._debug(error);
+      logger.debug(error);
     }
   }
 
@@ -85,10 +84,10 @@ class MockLight {
     const topic = `${top}/${this._id}/${connected}`;
     const payload = Buffer.from(JSON.stringify(connectedMessage));
     try {
-      this._debug(`Publishing Connected: ${payload}`);
+      logger.debug(`Publishing Connected: ${payload}`);
       await this._client.publish(topic, payload, { retain: true });
     } catch (error) {
-      this._debug(error);
+      logger.debug(error);
     }
   }
 
@@ -97,10 +96,10 @@ class MockLight {
     const topic = `${top}/${this._id}/${config}`;
     const payload = Buffer.from(JSON.stringify(configMessage));
     try {
-      this._debug(`Publishing Config: ${payload}`);
+      logger.debug(`Publishing Config: ${payload}`);
       await this._client.publish(topic, payload, { retain: true });
     } catch (error) {
-      this._debug(error);
+      logger.debug(error);
     }
   }
 
@@ -109,10 +108,10 @@ class MockLight {
     const topic = `${top}/${this._id}/${discoveryResponse}`;
     const payload = Buffer.from(JSON.stringify(discoveryResponseMessage));
     try {
-      this._debug(`Publishing Discovery Response: ${payload}`);
+      logger.debug(`Publishing Discovery Response: ${payload}`);
       await this._client.publish(topic, payload);
     } catch (error) {
-      this._debug(error);
+      logger.debug(error);
     }
   }
 
@@ -122,7 +121,7 @@ class MockLight {
     try {
       await this._client.subscribe(topic);
     } catch (error) {
-      this._debug(error);
+      logger.debug(error);
     }
   }
 
@@ -132,7 +131,7 @@ class MockLight {
     try {
       await this._client.subscribe(topic);
     } catch (error) {
-      this._debug(error);
+      logger.debug(error);
     }
   }
 
@@ -149,29 +148,29 @@ class MockLight {
   }
 
   async _handleCommandMessage(data) {
-    this._debug("Recieved command message:", data);
+    logger.debug("Recieved command message:", data);
     const { mutationId, state, color, brightness, effect, speed } = data;
     // Set the new state
-    if (state) this._state.state = state;
-    if (color) {
+    if ("state" in data) this._state.state = state;
+    if ("color" in data) {
       this._state.effect = "None";
       this._state.color = color;
       this._state.state = "ON";
     }
-    if (brightness) this._state.brightness = brightness;
-    if (effect) {
+    if ("brightness" in data) this._state.brightness = brightness;
+    if ("effect" in data) {
       this._state.effect = effect;
       this._state.color = { r: 255, g: 255, b: 255 };
       this._state.state = "ON";
     }
-    if (speed) this._state.speed = speed;
+    if ("speed" in data) this._state.speed = speed;
 
     const response = { name: this._id, mutationId, ...this._state };
     await this.publishToState(response);
   }
 
   async _handleDiscoveryMessage() {
-    this._debug(`Recieved Discovery message`);
+    logger.debug(`Recieved Discovery message`);
     const response = { name: this._id, ...this._config };
     await this.publishToDiscoveryResponse(response);
   }
