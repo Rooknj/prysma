@@ -5,10 +5,16 @@ const { createLogger, format, transports } = require("winston");
 // Background colors: blackBG, redBG, greenBG, yellowBG, blueBG magentaBG, cyanBG, whiteBG
 const colors = { info: "cyan", warn: "yellow", error: "red" };
 
+// const coloredJSON = format.combine(
+//   format.timestamp(),
+//   format.errors({ stack: true }),
+//   format.json(),
+//   format.colorize({ colors, all: true })
+// );
+
 const upperLogLevel = format(info => {
   return Object.assign(info, { level: info.level.toUpperCase() });
 });
-
 const printfTransform = info => {
   let message = `${info.timestamp} [${info.level}]: ${info.message} ${info.ms}`;
   if (info.stack) {
@@ -16,8 +22,7 @@ const printfTransform = info => {
   }
   return message;
 };
-
-const customFormat = format.combine(
+const human = format.combine(
   format.timestamp(),
   format.ms(),
   format.errors({ stack: true }),
@@ -28,7 +33,7 @@ const customFormat = format.combine(
 );
 
 const logger = createLogger({
-  format: customFormat,
+  format: human,
   transports: [new transports.Console()],
 });
 

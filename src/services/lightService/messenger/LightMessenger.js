@@ -23,7 +23,7 @@ class LightMessenger extends EventEmitter {
   }
 
   /**
-   * Subscribes to all relavent light topics.
+   * Subscribes to all relevant light topics.
    * Will return an error if any of the subscriptions fail.
    * @param {string} lightId
    */
@@ -42,7 +42,7 @@ class LightMessenger extends EventEmitter {
 
     const { top, connected, state, effectList, config } = this._topics;
 
-    // Subscribe to all relavent fields
+    // Subscribe to all relevant fields
     const connectedPromise = this._client.subscribe(`${top}/${lightId}/${connected}`);
     const statePromise = this._client.subscribe(`${top}/${lightId}/${state}`);
     const effectListPromise = this._client.subscribe(`${top}/${lightId}/${effectList}`);
@@ -54,7 +54,7 @@ class LightMessenger extends EventEmitter {
   }
 
   /**
-   * Unsubscribe from all relavent light topics
+   * Unsubscribe from all relevant light topics
    * @param {string} lightId
    */
   async unsubscribeFromLight(lightId) {
@@ -71,7 +71,7 @@ class LightMessenger extends EventEmitter {
 
     const { top, connected, state, effectList, config } = this._topics;
 
-    // Subscribe to all relavent fields
+    // Subscribe to all relevant fields
     const connectedPromise = this._client.unsubscribe(`${top}/${lightId}/${connected}`);
     const statePromise = this._client.unsubscribe(`${top}/${lightId}/${state}`);
     const effectListPromise = this._client.unsubscribe(`${top}/${lightId}/${effectList}`);
@@ -159,11 +159,17 @@ class LightMessenger extends EventEmitter {
       return;
     }
     if (topicTokens[0] !== top) {
-      logger.warn(`Ignoring Message on ${topic}: topic is unrealted to this app`);
+      logger.warn(`Ignoring Message on ${topic}: topic is unrelated to this app`);
       return;
     }
 
-    const data = JSON.parse(message.toString());
+    let data;
+    try {
+      data = JSON.parse(message.toString());
+    } catch (error) {
+      logger.error(error);
+      return;
+    }
 
     let validation;
     let event;
