@@ -1,9 +1,7 @@
 const { validateLightState, validateDiscoveredLight } = require("../validators/cacheValidators");
 const errors = require("../../../lib/errors");
-// const Debug = require("debug").default;
 
 const { ValidationError } = errors;
-// const debug = Debug("LightCache");
 
 class LightCache {
   constructor() {

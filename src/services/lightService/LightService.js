@@ -1,5 +1,5 @@
 const { promisify } = require("util");
-const Debug = require("debug").default;
+const logger = require("../../lib/logger");
 const LightMessenger = require("./messenger/LightMessenger");
 const LightDao = require("./dao/LightDao");
 const LightCache = require("./cache/LightCache");
@@ -16,8 +16,6 @@ const {
 } = require("../serviceConstants");
 
 const asyncSetTimeout = promisify(setTimeout);
-
-const debug = Debug("LightService");
 
 class LightService {
   constructor(config = { mqtt: {} }) {
@@ -105,7 +103,7 @@ class LightService {
       await Promise.all(addPromises);
     } catch (error) {
       // TODO: Figure out what to do if any of these error
-      debug(error);
+      logger.error(error);
     }
 
     // Get the newly added light, notify any listeners, and return it
@@ -139,7 +137,7 @@ class LightService {
       // Wait for all the promises to resolve
       await Promise.all(subscriptionPromises);
     } catch (error) {
-      debug("Error handling messenger connect", error);
+      logger.error("Error handling messenger connect", error);
       throw error;
     }
   }
@@ -165,7 +163,7 @@ class LightService {
       // Notify listeners of the new state
       setStateResults.forEach(newState => mediator.emit(LIGHT_STATE_CHANGED_EVENT, newState));
     } catch (error) {
-      debug("Error handling messenger disconnect", error);
+      logger.error("Error handling messenger disconnect", error);
       throw error;
     }
   }
@@ -179,7 +177,7 @@ class LightService {
       const newLight = await this._dao.getLight(name);
       mediator.emit(LIGHT_CHANGED_EVENT, newLight);
     } catch (error) {
-      debug("Error handling Effect List Message", error);
+      logger.error("Error handling Effect List Message", error);
     }
   }
 
@@ -192,7 +190,7 @@ class LightService {
       const newLight = await this._dao.getLight(name);
       mediator.emit(LIGHT_CHANGED_EVENT, newLight);
     } catch (error) {
-      debug("Error handling Config Message", error);
+      logger.error("Error handling Config Message", error);
     }
   }
 
@@ -205,7 +203,7 @@ class LightService {
     }
 
     if (lightIsAlreadyAdded) {
-      debug(`${message.id} is already added. Ignoring discovery response.`);
+      logger.error(`${message.id} is already added. Ignoring discovery response.`);
       return;
     }
 
@@ -283,7 +281,7 @@ class LightService {
       const newState = await this._cache.getLightState(name);
       mediator.emit(LIGHT_STATE_CHANGED_EVENT, newState);
     } catch (error) {
-      debug("Error handling Connected Message", error);
+      logger.error("Error handling Connected Message", error);
     }
   }
 
@@ -303,7 +301,7 @@ class LightService {
       mediator.emit(MUTATION_RESPONSE_EVENT, { mutationId, newState });
       mediator.emit(LIGHT_STATE_CHANGED_EVENT, newState);
     } catch (error) {
-      debug("Error handling State Message", error);
+      logger.error("Error handling State Message", error);
     }
   }
 }
