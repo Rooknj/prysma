@@ -34,7 +34,15 @@ const human = format.combine(
 
 const logger = createLogger({
   format: human,
-  transports: [new transports.Console()],
+  transports: [new transports.Console({})],
 });
+
+// Silence all logs if in test mode
+if (process.env.NODE_ENV === "test") {
+  logger.transports.forEach(t => {
+    // eslint-disable-next-line no-param-reassign
+    t.silent = true;
+  });
+}
 
 module.exports = logger;
