@@ -2,6 +2,9 @@
 # What this gives you is a QEMU supported environment so you can build ARM images on x86 machines
 # This also gives you a prebuilt and installed sqlite3 package since it takes forever to build from source
 
+# Instructions to run: docker build -t rooknj/prysma-base:build .
+# Instructions to publish: docker push rooknj/prysma-base:build
+
 # We are using the -build version so that npm does not generate a 
 #   Z_INDEX_ERROR: Too far back
 FROM balenalib/armv7hf-node:10-stretch-build as builder
