@@ -1,6 +1,8 @@
+# Docker Specific
+docker-compose.yml
+
 # Project Specific
 .vscode
-/data
 *.sqlite
 
 # production
@@ -71,3 +73,6 @@ typings/
 
 # MacOS files
 .DS_Store
+
+
+
