@@ -54,7 +54,7 @@ const { status } = spawn.sync("tsc", {
   stdio: ["inherit", "inherit", "inherit"],
 });
 // If the typescript compilation failed, return with an error exit code
-if (status && status !== 0) {
+if (status) {
   console.log("Error Compiling Typescript ❌");
   process.exit(status);
 } else {

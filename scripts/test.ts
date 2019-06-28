@@ -33,4 +33,4 @@ const { status } = spawn.sync("jest", argv, {
 });
 
 // If any tests failed, return with an error exit code
-if (status !== 0) process.exit(status);
+if (status) process.exit(status);
