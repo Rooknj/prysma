@@ -1,3 +1,4 @@
+import { promisify } from "util";
 import { Service } from "typedi";
 import { Connection, Repository } from "typeorm";
 import { PubSub } from "apollo-server";
@@ -21,7 +22,6 @@ import {
   configPayloadToLightFields,
 } from "./light-utils";
 
-// TODO: Add Discovery
 @Service()
 export class LightService {
   private readonly lightRepo: Repository<Light>;
@@ -29,6 +29,8 @@ export class LightService {
   private readonly messenger: LightMessenger;
 
   private readonly pubSub: PubSub;
+
+  private discoveredLights: Light[] = [];
 
   // The constructor parameters are Dependency Injected
   public constructor(connection: Connection, messenger: LightMessenger, pubSub: PubSub) {
@@ -54,11 +56,12 @@ export class LightService {
 
     // Subscribe to all the lights
     const lights = await this.lightRepo.find();
-    await Promise.all(lights.map(({ id }): Promise<void> => this.messenger.subscribeToLight(id)));
-
-    // TODO: Subscribe to discovery topics
-    // // Subscribe to discovery topic
-    // subscriptionPromises.push(this.messenger.startDiscovery());
+    const subscriptionPromises = lights.map(
+      ({ id }): Promise<void> => this.messenger.subscribeToLight(id)
+    );
+    // Subscribe to discovery topic
+    subscriptionPromises.push(this.messenger.startDiscovery());
+    await Promise.all(subscriptionPromises);
     // TODO: Actually handle an error if one occurs (or just keep on crashing)
   };
 
@@ -96,9 +99,33 @@ export class LightService {
     await this.updateLight(name, configPayloadToLightFields(configPayload));
   };
 
-  private handleDiscoveryResponseMessage = async (data: ConfigPayload): Promise<void> => {
-    console.log("Discovery Response Message", data);
-    // TODO: Update the DB
+  private handleDiscoveryResponseMessage = async (
+    discoveryResponsePayload: ConfigPayload
+  ): Promise<void> => {
+    console.log("Discovery Response Message");
+    const { name } = discoveryResponsePayload;
+
+    // Make sure the light isn't already added
+    let lightIsAlreadyAdded = true;
+    try {
+      await this.lightRepo.findOneOrFail(name);
+    } catch (error) {
+      lightIsAlreadyAdded = false;
+    }
+    if (lightIsAlreadyAdded) {
+      console.log(`${name} is already added. Ignoring discovery response.`);
+      return;
+    }
+
+    // Make sure we didn't already discover the light
+    if (this.discoveredLights.find((light): boolean => light.id === name)) {
+      console.log(`${name} was already discovered. Ignoring discovery response.`);
+    }
+
+    // Add the discovered light to this.discoveredLights
+    const discoveredLight = Light.createDefaultLight(name);
+    Object.assign(discoveredLight, configPayloadToLightFields(discoveryResponsePayload));
+    this.discoveredLights.push(discoveredLight);
   };
 
   // This updates the light data in persistent storage and notifies subscribers
@@ -128,6 +155,13 @@ export class LightService {
     this.pubSub.publish(LIGHT_CHANGED, lightToUpdate);
 
     return lightToUpdate;
+  };
+
+  public discoverLights = async (discoveryDuration: number): Promise<Light[]> => {
+    this.discoveredLights = [];
+    await this.messenger.sendDiscoveryQuery();
+    await promisify(setTimeout)(discoveryDuration);
+    return this.discoveredLights;
   };
 
   public findLightById = (id: string): Promise<Light> => {

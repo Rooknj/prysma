@@ -38,6 +38,13 @@ export class LightResolver {
     return this.lightService.findAllLights();
   }
 
+  @Query((): ClassType<Light>[] => [Light], {
+    description: "Get all currently added lights in the order they were added",
+  })
+  public discoveredLights(): Promise<Light[]> {
+    return this.lightService.discoverLights(2000);
+  }
+
   @Mutation((): ClassType<Light> => Light, {
     description: "Change some of the light's data (use setLightState to change the state)",
   })

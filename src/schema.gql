@@ -95,6 +95,9 @@ type Query {
 
   """Get all currently added lights in the order they were added"""
   lights: [Light!]!
+
+  """Get all currently added lights in the order they were added"""
+  discoveredLights: [Light!]!
 }
 
 type Subscription {

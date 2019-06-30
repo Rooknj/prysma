@@ -172,35 +172,28 @@ export class LightMessenger extends EventEmitter {
     console.info(`Successfully unsubscribed from ${id}`);
   };
 
-  public async publishToLight(id: string, message: CommandPayload): Promise<void> {
+  public startDiscovery = async (): Promise<void> => {
+    const { top, discoveryResponse } = this.topics;
+    await this.client.subscribe(`${top}/+/${discoveryResponse}`);
+    console.log(`Started Light Discovery`);
+  };
+
+  public stopDiscovery = async (): Promise<void> => {
+    const { top, discoveryResponse } = this.topics;
+    await this.client.unsubscribe(`${top}/+/${discoveryResponse}`);
+    console.log(`Stopped Light Discovery`);
+  };
+
+  public sendDiscoveryQuery = async (): Promise<void> => {
     if (!this.connected) {
-      const errorMessage = `Can not publish to (${id}). MQTT client not connected`;
-      console.error(errorMessage);
+      const errorMessage = `Can not publish discovery message. MQTT client not connected`;
       throw new Error(errorMessage);
     }
 
-    if (!id) {
-      const errorMessage = "You must provide a light id";
-      console.error(errorMessage);
-      throw new Error(errorMessage);
-    }
-    if (!message) {
-      const errorMessage = "You must provide a message";
-      console.error(errorMessage);
-      throw new Error(errorMessage);
-    }
-
-    const errors = await validate(message);
-    if (errors.length > 0) {
-      throw errors;
-    }
-
-    const { top, command } = this.topics;
-    const payload = Buffer.from(JSON.stringify(message));
-    await this.client.publish(`${top}/${id}/${command}`, payload);
-
-    console.info(`Successfully published ${payload.toString()} to ${id}`);
-  }
+    const { top, discovery } = this.topics;
+    await this.client.publish(`${top}/${discovery}`, "ping");
+    console.log(`Successfully sent Discovery Query`);
+  };
 
   // Physically send a command to the light and wait for a response.
   private sendCommand = (
