@@ -1,5 +1,5 @@
 import { plainToClass } from "class-transformer";
-import { RGB, PublishPayload, PowerState } from "./light-messenger";
+import { RGB, CommandPayload, PowerState } from "./message-types";
 import { LightInput } from "./LightInput";
 
 export const hexStringToRgb = (hex: string): RGB => {
@@ -36,12 +36,12 @@ export const powerStateToOn = (state: PowerState): boolean => {
   return state === PowerState.on;
 };
 
-export const lightInputToPublishPayload = (id: string, lightInput: LightInput): PublishPayload => {
+export const lightInputToCommandPayload = (id: string, lightInput: LightInput): CommandPayload => {
   const { on, brightness, color, effect, speed } = lightInput;
-  const publishPayload = new PublishPayload();
+  const publishPayload = new CommandPayload();
   publishPayload.name = id;
 
-  // Need to check if the property is in lightStateInput because on can be false
+  // Need to check if the properties are in lightStateInput because they can be falsy values like false or 0
   if ("on" in lightInput) {
     // TODO: Implement the hardware to support on instead of state
     publishPayload.state = onToPowerState(on);

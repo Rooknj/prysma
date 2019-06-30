@@ -1,175 +1,16 @@
 import { Service, Inject } from "typedi";
 import { AsyncMqttClient } from "async-mqtt";
 import { EventEmitter } from "events";
-import {
-  validate,
-  IsInt,
-  IsString,
-  Length,
-  IsEnum,
-  Min,
-  Max,
-  IsOptional,
-  IsIn,
-  IsArray,
-  IsIP,
-  Matches,
-} from "class-validator";
+import { validate } from "class-validator";
 import { plainToClass } from "class-transformer";
-
-export enum MessageType {
-  Connected = "connectedMessage",
-  State = "stateMessage",
-  EffectList = "effectListMessage",
-  Config = "configMessage",
-  DiscoveryResponse = "discoveryResponseMessage",
-}
-
-export enum PowerState {
-  on = "ON",
-  off = "OFF",
-}
-
-export class RGB {
-  @IsInt()
-  @Min(0)
-  @Max(255)
-  public r!: number;
-
-  @IsInt()
-  @Min(0)
-  @Max(255)
-  public g!: number;
-
-  @IsInt()
-  @Min(0)
-  @Max(255)
-  public b!: number;
-}
-
-export class PublishPayload {
-  @IsInt()
-  public mutationId!: number;
-
-  @IsString()
-  @Length(1, 255)
-  public name!: string;
-
-  @IsEnum(PowerState)
-  @IsOptional()
-  public state?: PowerState;
-
-  @IsOptional()
-  public color?: RGB;
-
-  @IsInt()
-  @Min(0)
-  @Max(100)
-  @IsOptional()
-  public brightness?: number;
-
-  @IsString()
-  @IsOptional()
-  public effect?: string;
-
-  @IsInt()
-  @Min(1)
-  @Max(7)
-  @IsOptional()
-  public speed?: number;
-
-  public constructor() {
-    // TODO: Implement String Uuid on hardware instead of using an int (unless this hurts performance)
-    // This is the max number supported by the esp8266 lights (it's 2^32 because its a 32 bit int)
-    this.mutationId = Math.floor(Math.random() * 4294967296);
-  }
-}
-
-export class ConnectionPayload {
-  @IsString()
-  @Length(1, 255)
-  public name!: string;
-
-  @IsIn(["0", "2"])
-  public connection!: "0" | "2";
-}
-
-export class StatePayload {
-  @IsInt()
-  @IsOptional()
-  public mutationId?: number;
-
-  @IsString()
-  @Length(1, 255)
-  public name!: string;
-
-  @IsEnum(PowerState)
-  @IsOptional()
-  public state!: PowerState;
-
-  @IsOptional()
-  public color!: RGB;
-
-  @IsInt()
-  @Min(0)
-  @Max(100)
-  @IsOptional()
-  public brightness!: number;
-
-  @IsString()
-  @IsOptional()
-  public effect!: string;
-
-  @IsInt()
-  @Min(1)
-  @Max(7)
-  @IsOptional()
-  public speed!: number;
-}
-
-export class EffectListPayload {
-  @IsString()
-  @Length(1, 255)
-  public name!: string;
-
-  @IsArray()
-  @IsString({ each: true })
-  public effectList!: string[];
-}
-
-export class ConfigPayload {
-  @IsString()
-  @Length(1, 255)
-  public id!: string;
-
-  @IsString()
-  @Length(1, 255)
-  public name!: string;
-
-  @IsString()
-  public version!: string;
-
-  @IsString()
-  public hardware!: string;
-
-  @IsString()
-  public colorOrder!: string;
-
-  @IsString()
-  public stripType!: string;
-
-  @IsIP("4")
-  public ipAddress!: string;
-
-  @Matches(/^([0-9a-fA-F][0-9a-fA-F]:){5}([0-9a-fA-F][0-9a-fA-F])$/)
-  public macAddress!: string;
-
-  @IsInt()
-  public numLeds!: number;
-
-  @IsInt()
-  public udpPort!: number;
-}
+import {
+  MessageType,
+  ConnectionPayload,
+  StatePayload,
+  EffectListPayload,
+  ConfigPayload,
+  CommandPayload,
+} from "./message-types";
 
 @Service()
 export class LightMessenger extends EventEmitter {
@@ -331,7 +172,7 @@ export class LightMessenger extends EventEmitter {
     console.info(`Successfully unsubscribed from ${id}`);
   };
 
-  public async publishToLight(id: string, message: PublishPayload): Promise<void> {
+  public async publishToLight(id: string, message: CommandPayload): Promise<void> {
     if (!this.connected) {
       const errorMessage = `Can not publish to (${id}). MQTT client not connected`;
       console.error(errorMessage);
@@ -359,5 +200,66 @@ export class LightMessenger extends EventEmitter {
     await this.client.publish(`${top}/${id}/${command}`, payload);
 
     console.info(`Successfully published ${payload.toString()} to ${id}`);
+  }
+
+  // Physically send a command to the light and wait for a response.
+  private sendCommand = (
+    id: string,
+    commandPayload: CommandPayload,
+    timeout: number = 5000
+  ): Promise<void> =>
+    new Promise((resolve, reject): void => {
+      // Set up a response listener
+      const onStateMessage = ({ mutationId }: StatePayload): void => {
+        if (mutationId === commandPayload.mutationId) {
+          this.removeListener(MessageType.State, onStateMessage);
+          resolve();
+        }
+      };
+      this.on(MessageType.State, onStateMessage);
+
+      // Convert the commandPayload into a JSON buffer
+      const { top, command } = this.topics;
+      const payload = Buffer.from(JSON.stringify(commandPayload));
+
+      // Send the command and wait for a response
+      // Times out after a specified duration
+      this.client
+        .publish(`${top}/${id}/${command}`, payload)
+        .then((): void => {
+          console.log(`Successfully published ${payload.toString()} to ${id}`);
+          setTimeout((): void => {
+            this.removeListener(MessageType.State, onStateMessage);
+            reject(new Error(`Request timed out after ${timeout}ms`));
+          }, timeout);
+        })
+        .catch((error): void => {
+          this.removeListener(MessageType.State, onStateMessage);
+          reject(error);
+        });
+    });
+
+  public async commandLight(id: string, commandPayload: CommandPayload): Promise<void> {
+    // Validate the input
+    if (!id) {
+      const errorMessage = "You must provide a light id";
+      throw new Error(errorMessage);
+    }
+    if (!commandPayload) {
+      const errorMessage = "You must provide a command payload";
+      throw new Error(errorMessage);
+    }
+    const errors = await validate(commandPayload);
+    if (errors.length > 0) {
+      throw errors;
+    }
+
+    // Make sure the mqtt client is connected
+    if (!this.connected) {
+      const errorMessage = `Can not publish to (${id}). MQTT client not connected`;
+      throw new Error(errorMessage);
+    }
+
+    await this.sendCommand(id, commandPayload);
   }
 }

@@ -4,16 +4,16 @@ import { PubSub } from "apollo-server";
 import { validate } from "class-validator";
 import { Light } from "./LightEntity";
 import { LightInput } from "./LightInput";
+import { LightMessenger } from "./LightMessenger";
 import {
-  LightMessenger,
   ConnectionPayload,
   MessageType,
   StatePayload,
   EffectListPayload,
   ConfigPayload,
-} from "./light-messenger";
+} from "./message-types";
 import { LIGHT_CHANGED } from "./light-events";
-import { lightInputToPublishPayload, powerStateToOn, rgbToHexString } from "./light-utils";
+import { powerStateToOn, rgbToHexString, lightInputToCommandPayload } from "./light-utils";
 
 // TODO: Add Discovery
 @Service()
@@ -74,11 +74,7 @@ export class LightService {
 
   private handleStateMessage = async (data: StatePayload): Promise<void> => {
     console.log("State Message");
-    const { mutationId, name } = data;
-    if (mutationId) {
-      // Notify changeLight
-      console.log("Mutation Response");
-    }
+    const { name } = data;
     await this.updateLight(name, {
       on: powerStateToOn(data.state),
       brightness: data.brightness,
@@ -122,6 +118,7 @@ export class LightService {
   ): Promise<Light> => {
     console.log(`Updating Light: ${id}`);
 
+    // Make sure the light is currently added
     const lightToUpdate = await this.lightRepo.findOneOrFail(id);
 
     // Assign the new properties to the light
@@ -155,23 +152,31 @@ export class LightService {
   // This physically sends a command message to the light if any state fields are specified
   public changeLight = async (id: string, lightData: LightInput): Promise<Light> => {
     console.log(`Changing Light: ${id}`);
-
-    // Check if the light exists and is connected
+    // Make sure the light exists and is connected
     const lightToChange = await this.lightRepo.findOneOrFail(id);
     if (!lightToChange.connected) throw new Error(`"${id}" is not connected`);
 
-    const publishPayload = lightInputToPublishPayload(id, lightData);
-    console.log(publishPayload);
+    const { name, ...stateData } = lightData;
 
-    // TODO: Implement this properly so it only returns once a response from the light was received or times out after 5 seconds
-    //await this.messenger.publishToLight(id, publishPayload);
+    // If we want to change the name, update the name
+    if (name) {
+      await this.updateLight(id, { name });
+    }
+
+    // Physically change the light if any state fields were included in lightData.
+    // The actual database update will be performed by handleStateMessage
+    if (Object.keys(stateData).length) {
+      const commandPayload = lightInputToCommandPayload(id, stateData);
+      await this.messenger.commandLight(id, commandPayload);
+    }
 
     return lightToChange;
   };
 
   public addNewLight = async (id: string): Promise<Light> => {
     console.log(`Adding Light: ${id}`);
-    // Check if the light was already added
+
+    // Make sure the light was not already added
     let lightAlreadyExists = true;
     try {
       await this.lightRepo.findOneOrFail(id);
@@ -187,7 +192,7 @@ export class LightService {
     // Create the new light object
     const light = Light.createDefaultLight(id);
 
-    await this.lightRepo.save(light);
+    await this.lightRepo.insert(light);
 
     // Subscribe to the light
     try {
@@ -198,11 +203,21 @@ export class LightService {
       // TODO: Do nothing if the error was due to the messenger not being connected, throw otherwise
     }
 
-    return light;
+    // Return the added light with the find operation
+    // This gives the server time to update the added light's state based on incoming MQTT messages
+    return this.lightRepo.findOneOrFail(id);
   };
 
   public removeLightById = async (id: string): Promise<Light> => {
     console.log(`Removing Light: ${id}`);
+
+    // Make sure the light is currently added
+    let lightToRemove: Light;
+    try {
+      lightToRemove = await this.lightRepo.findOneOrFail(id);
+    } catch (error) {
+      throw new Error(`${id} is not currently added`);
+    }
 
     // Unsubscribe from the light
     try {
@@ -213,13 +228,8 @@ export class LightService {
       // TODO: Do nothing if the error was due to the messenger not being connected, throw otherwise
     }
 
-    const lightToRemove = await this.lightRepo.findOneOrFail(id);
+    await this.lightRepo.delete(id);
 
-    // For some reason repo.remove deletes the ID of lightToRemove, so we are saving a deep copy to return
-    const removedLight = Object.assign({}, lightToRemove);
-
-    await this.lightRepo.remove(lightToRemove);
-
-    return removedLight;
+    return lightToRemove;
   };
 }
