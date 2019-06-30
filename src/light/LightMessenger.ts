@@ -11,6 +11,7 @@ import {
   ConfigPayload,
   CommandPayload,
 } from "./message-types";
+import { mqtt } from "../config";
 
 @Service()
 export class LightMessenger extends EventEmitter {
@@ -18,16 +19,7 @@ export class LightMessenger extends EventEmitter {
 
   public connected: boolean;
 
-  private readonly topics = {
-    top: "prysmalight",
-    connected: "connected",
-    state: "state",
-    command: "command",
-    effectList: "effects",
-    config: "config",
-    discovery: "discovery",
-    discoveryResponse: "hello",
-  };
+  private readonly topics = mqtt.topics;
 
   public constructor(@Inject("MQTT_CLIENT") client: AsyncMqttClient) {
     super();

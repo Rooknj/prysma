@@ -4,11 +4,12 @@ import path from "path";
 import { Container } from "typedi";
 import { ApolloServer } from "apollo-server";
 import { buildSchema } from "type-graphql";
-import { createConnection, Connection, ConnectionOptions } from "typeorm";
+import { createConnection, Connection } from "typeorm";
 import { PubSub } from "graphql-subscriptions";
 import MQTT from "async-mqtt";
 import { LightResolver } from "./light/LightResolver";
 import { Light } from "./light/LightEntity";
+import * as config from "./config";
 
 console.log(`💡  Initializing Prysma 💡`);
 
@@ -43,26 +44,9 @@ process.on(
   Container.set(PubSub, pubSub); // Set up Dependency Injection
 
   // Connect to outside dependencies
-  const DB_NAME = "test.sqlite";
-  const DB_OPTIONS: ConnectionOptions = {
-    type: "sqlite",
-    // Create the SQLite database in the executable's directory if running from a pkg executable
-    database: process.env.NODE_ENV
-      ? path.join(__dirname, "..", "data", DB_NAME)
-      : path.join("data", DB_NAME),
-    entities: [Light],
-    synchronize: true,
-    logging: false,
-  };
-  const MQTT_HOST = `tcp://${process.env.MQTT_HOST || "localhost"}:1883`;
-  const MQTT_OPTIONS: MQTT.IClientOptions = {
-    reconnectPeriod: 5000, // Amount of time between reconnection attempts
-    username: "pi",
-    password: "MQTTIsBetterThanUDP",
-  };
   const [connection, mqttClient] = await Promise.all([
-    createConnection(DB_OPTIONS),
-    MQTT.connect(MQTT_HOST, MQTT_OPTIONS),
+    createConnection({ ...config.db, entities: [Light] }),
+    MQTT.connect(config.mqtt.host, config.mqtt.options),
   ]);
   Container.set(Connection, connection); // Set up Dependency Injection
   Container.set("MQTT_CLIENT", mqttClient); // Set up Dependency Injection (AsyncMqttClient type causes an error here)
@@ -86,6 +70,6 @@ process.on(
     playground: true,
   });
 
-  const { url } = await server.listen(4000);
+  const { url } = await server.listen(config.server.port);
   console.log(`🚀 Server ready at ${url}`);
 })();
