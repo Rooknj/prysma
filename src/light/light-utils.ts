@@ -1,6 +1,15 @@
 import { plainToClass } from "class-transformer";
-import { RGB, CommandPayload, PowerState } from "./message-types";
+import {
+  RGB,
+  CommandPayload,
+  PowerState,
+  StatePayload,
+  ConnectionPayload,
+  EffectListPayload,
+  ConfigPayload,
+} from "./message-types";
 import { LightInput } from "./LightInput";
+import { Light } from "./LightEntity";
 
 export const hexStringToRgb = (hex: string): RGB => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -60,4 +69,38 @@ export const lightInputToCommandPayload = (id: string, lightInput: LightInput): 
   }
 
   return publishPayload;
+};
+
+export const connectionPayloadToLightFields = (
+  connectionPayload: ConnectionPayload
+): Partial<Light> => {
+  return { connected: connectionPayload.connection === "2" };
+};
+
+export const statePayloadToLightFields = (statePayload: StatePayload): Partial<Light> => {
+  return {
+    on: powerStateToOn(statePayload.state),
+    brightness: statePayload.brightness,
+    color: rgbToHexString(statePayload.color),
+    effect: statePayload.effect,
+    speed: statePayload.speed,
+  };
+};
+
+export const effectListPayloadToLightFields = (
+  effectListPayload: EffectListPayload
+): Partial<Light> => {
+  return { supportedEffects: effectListPayload.effectList };
+};
+export const configPayloadToLightFields = (configPayload: ConfigPayload): Partial<Light> => {
+  return {
+    version: configPayload.version,
+    hardware: configPayload.hardware,
+    colorOrder: configPayload.colorOrder,
+    stripType: configPayload.stripType,
+    ipAddress: configPayload.ipAddress,
+    macAddress: configPayload.macAddress,
+    numLeds: configPayload.numLeds,
+    udpPort: configPayload.udpPort,
+  };
 };

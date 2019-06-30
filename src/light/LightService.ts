@@ -13,7 +13,13 @@ import {
   ConfigPayload,
 } from "./message-types";
 import { LIGHT_CHANGED } from "./light-events";
-import { powerStateToOn, rgbToHexString, lightInputToCommandPayload } from "./light-utils";
+import {
+  lightInputToCommandPayload,
+  statePayloadToLightFields,
+  connectionPayloadToLightFields,
+  effectListPayloadToLightFields,
+  configPayloadToLightFields,
+} from "./light-utils";
 
 // TODO: Add Discovery
 @Service()
@@ -66,43 +72,28 @@ export class LightService {
     );
   };
 
-  private handleConnectionMessage = async (data: ConnectionPayload): Promise<void> => {
+  private handleConnectionMessage = async (connectionPayload: ConnectionPayload): Promise<void> => {
     console.log("connection Message");
-    const { name } = data;
-    await this.updateLight(name, { connected: data.connection === "2" });
+    const { name } = connectionPayload;
+    await this.updateLight(name, connectionPayloadToLightFields(connectionPayload));
   };
 
-  private handleStateMessage = async (data: StatePayload): Promise<void> => {
+  private handleStateMessage = async (statePayload: StatePayload): Promise<void> => {
     console.log("State Message");
-    const { name } = data;
-    await this.updateLight(name, {
-      on: powerStateToOn(data.state),
-      brightness: data.brightness,
-      color: rgbToHexString(data.color),
-      effect: data.effect,
-      speed: data.speed,
-    });
+    const { name } = statePayload;
+    await this.updateLight(name, statePayloadToLightFields(statePayload));
   };
 
-  private handleEffectListMessage = async (data: EffectListPayload): Promise<void> => {
+  private handleEffectListMessage = async (effectListPayload: EffectListPayload): Promise<void> => {
     console.log("EffectList Message");
-    const { name } = data;
-    await this.updateLight(name, { supportedEffects: data.effectList });
+    const { name } = effectListPayload;
+    await this.updateLight(name, effectListPayloadToLightFields(effectListPayload));
   };
 
-  private handleConfigMessage = async (data: ConfigPayload): Promise<void> => {
+  private handleConfigMessage = async (configPayload: ConfigPayload): Promise<void> => {
     console.log("Config Message");
-    const { name } = data;
-    await this.updateLight(name, {
-      version: data.version,
-      hardware: data.hardware,
-      colorOrder: data.colorOrder,
-      stripType: data.stripType,
-      ipAddress: data.ipAddress,
-      macAddress: data.macAddress,
-      numLeds: data.numLeds,
-      udpPort: data.udpPort,
-    });
+    const { name } = configPayload;
+    await this.updateLight(name, configPayloadToLightFields(configPayload));
   };
 
   private handleDiscoveryResponseMessage = async (data: ConfigPayload): Promise<void> => {
@@ -159,18 +150,23 @@ export class LightService {
     const { name, ...stateData } = lightData;
 
     // If we want to change the name, update the name
+    let changedLight: Light = lightToChange;
     if (name) {
-      await this.updateLight(id, { name });
+      changedLight = await this.updateLight(id, { name });
     }
 
     // Physically change the light if any state fields were included in lightData.
     // The actual database update will be performed by handleStateMessage
     if (Object.keys(stateData).length) {
+      // Generate the command to send
       const commandPayload = lightInputToCommandPayload(id, stateData);
-      await this.messenger.commandLight(id, commandPayload);
+      // Actually send the command and wait for a response
+      const statePayload = await this.messenger.commandLight(id, commandPayload);
+      // Update the return object with the new state data
+      Object.assign(changedLight, statePayloadToLightFields(statePayload));
     }
 
-    return lightToChange;
+    return changedLight;
   };
 
   public addNewLight = async (id: string): Promise<Light> => {

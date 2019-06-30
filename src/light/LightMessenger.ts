@@ -207,13 +207,13 @@ export class LightMessenger extends EventEmitter {
     id: string,
     commandPayload: CommandPayload,
     timeout: number = 5000
-  ): Promise<void> =>
+  ): Promise<StatePayload> =>
     new Promise((resolve, reject): void => {
       // Set up a response listener
-      const onStateMessage = ({ mutationId }: StatePayload): void => {
-        if (mutationId === commandPayload.mutationId) {
+      const onStateMessage = (statePayload: StatePayload): void => {
+        if (statePayload.mutationId === commandPayload.mutationId) {
           this.removeListener(MessageType.State, onStateMessage);
-          resolve();
+          resolve(statePayload);
         }
       };
       this.on(MessageType.State, onStateMessage);
@@ -239,7 +239,7 @@ export class LightMessenger extends EventEmitter {
         });
     });
 
-  public async commandLight(id: string, commandPayload: CommandPayload): Promise<void> {
+  public async commandLight(id: string, commandPayload: CommandPayload): Promise<StatePayload> {
     // Validate the input
     if (!id) {
       const errorMessage = "You must provide a light id";
@@ -260,6 +260,6 @@ export class LightMessenger extends EventEmitter {
       throw new Error(errorMessage);
     }
 
-    await this.sendCommand(id, commandPayload);
+    return this.sendCommand(id, commandPayload);
   }
 }
