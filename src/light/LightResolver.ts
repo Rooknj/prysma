@@ -10,10 +10,10 @@ import {
   Publisher,
 } from "type-graphql";
 import { Service } from "typedi";
-import { Light, LightState } from "./light-type";
-import { LightStateInput, LightInput } from "./light-input";
-import { LightService } from "./light-service";
-import { LIGHT_CHANGED, LIGHT_STATE_CHANGED, LIGHT_ADDED, LIGHT_REMOVED } from "./light-events";
+import { Light } from "./LightEntity";
+import { LightInput } from "./LightInput";
+import { LightService } from "./LightService";
+import { LIGHT_CHANGED, LIGHT_ADDED, LIGHT_REMOVED } from "./light-events";
 
 @Service()
 @Resolver((): ClassType<Light> => Light)
@@ -30,12 +30,10 @@ export class LightResolver {
     return this.lightService.findLightById(id);
   }
 
-  @Query((): ClassType<Light> => Light, { description: "Get a light's state by it's id" })
-  public lightState(@Arg("id") id: string): Promise<LightState> {
-    return this.lightService.findLightStateById(id);
-  }
-
-  @Query((): ClassType<Light>[] => [Light], { description: "Get all currently added lights" })
+  // TODO: Add lights as a property of a Room or Group class so you can order the lights within a group/room
+  @Query((): ClassType<Light>[] => [Light], {
+    description: "Get all currently added lights in the order they were added",
+  })
   public lights(): Promise<Light[]> {
     return this.lightService.findAllLights();
   }
@@ -45,26 +43,16 @@ export class LightResolver {
   })
   public setLight(@Arg("id") id: string, @Arg("lightData") lightData: LightInput): Promise<Light> {
     // Subscriptions are updated inside of the lightService class because the light can be updated from MQTT messages
-    return this.lightService.updateLight(id, lightData);
-  }
-
-  @Mutation((): ClassType<LightState> => LightState, { description: "Change the light's state" })
-  public setLightState(
-    @Arg("id") id: string,
-    @Arg("lightStateData") lightStateData: LightStateInput
-  ): Promise<LightState> {
-    // Subscriptions are updated inside of the lightService class because the light state can be updated from MQTT messages
-    return this.lightService.commandLightToChangeState(id, lightStateData);
+    return this.lightService.changeLight(id, lightData);
   }
 
   @Mutation((): ClassType<Light> => Light, { description: "Add a new light" })
   public async addLight(
     @Arg("id") id: string,
-    @Arg("lightData") lightData: LightInput,
     @PubSub(LIGHT_ADDED) publish: Publisher<Light>
   ): Promise<Light> {
     // Add the light
-    const addedLight = await this.lightService.addNewLight(id, lightData);
+    const addedLight = await this.lightService.addNewLight(id);
 
     // Notify subscriptions
     // This is handled here because this is the only possible way to add a light
@@ -91,11 +79,6 @@ export class LightResolver {
   @Subscription({ topics: LIGHT_CHANGED })
   public lightChanged(@Root() updatedLight: Light): Light {
     return updatedLight;
-  }
-
-  @Subscription({ topics: LIGHT_STATE_CHANGED })
-  public lightStateChanged(@Root() updatedLightState: LightState): LightState {
-    return updatedLightState;
   }
 
   @Subscription({ topics: LIGHT_ADDED })

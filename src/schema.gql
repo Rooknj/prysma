@@ -10,54 +10,6 @@ type Light {
   """The display name of the Light"""
   name: String!
 
-  """
-  The ordering of the light. Lower means closer to the top and higher means closer to the bottom
-  """
-  pos: Float!
-
-  """The list of effects the light can play"""
-  supportedEffects: [String!]
-
-  """The IP Address of the light's controller"""
-  ipAddress: String
-
-  """The MAC Address of the light's controller"""
-  macAddress: String
-
-  """The number of LEDs the light has"""
-  numLeds: Int
-
-  """The UDP port the light is listening on for music visualization data"""
-  udpPort: Int
-
-  """The firmware version the light's controller is running"""
-  version: String
-
-  """The hardware of the light's controller"""
-  hardware: String
-
-  """The order of colors the light strip runs on ex: RGB, GRB, BGR"""
-  colorOrder: String
-
-  """The type of LED strip the light is ex: WS2812B, APA102"""
-  stripType: String
-  state: LightState
-}
-
-input LightInput {
-  """Set the display name of the light"""
-  name: String
-
-  """
-  Set the position of the light (can not be the same as another light's position)
-  """
-  pos: Float
-}
-
-"""Object representing a Light's State"""
-type LightState {
-  id: ID!
-
   """Whether the light is connected to the MQTT broker or not"""
   connected: Boolean!
 
@@ -75,9 +27,39 @@ type LightState {
 
   """The speed of the currently playing effect from 1-7"""
   speed: Int!
+
+  """The list of effects the light can play"""
+  supportedEffects: [String!]!
+
+  """The IP Address of the light's controller"""
+  ipAddress: String!
+
+  """The MAC Address of the light's controller"""
+  macAddress: String!
+
+  """The number of LEDs the light has"""
+  numLeds: Int!
+
+  """The UDP port the light is listening on for music visualization data"""
+  udpPort: Int!
+
+  """The firmware version the light's controller is running"""
+  version: String!
+
+  """The hardware of the light's controller"""
+  hardware: String!
+
+  """The order of colors the light strip runs on ex: RGB, GRB, BGR"""
+  colorOrder: String!
+
+  """The type of LED strip the light is ex: WS2812B, APA102"""
+  stripType: String!
 }
 
-input LightStateInput {
+input LightInput {
+  """Set the display name of the light"""
+  name: String
+
   """Power the light on or off"""
   on: Boolean
 
@@ -100,11 +82,8 @@ type Mutation {
   """
   setLight(lightData: LightInput!, id: String!): Light!
 
-  """Change the light's state"""
-  setLightState(lightStateData: LightStateInput!, id: String!): LightState!
-
   """Add a new light"""
-  addLight(lightData: LightInput!, id: String!): Light!
+  addLight(id: String!): Light!
 
   """Remove a currently added light"""
   removeLight(id: String!): Light!
@@ -114,16 +93,12 @@ type Query {
   """Get a light by it's ID"""
   light(id: String!): Light!
 
-  """Get a light's state by it's id"""
-  lightState(id: String!): Light!
-
-  """Get all currently added lights"""
+  """Get all currently added lights in the order they were added"""
   lights: [Light!]!
 }
 
 type Subscription {
   lightChanged: Light!
-  lightStateChanged: LightState!
   lightAdded: Light!
   lightRemoved: Light!
 }

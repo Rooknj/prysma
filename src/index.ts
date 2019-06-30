@@ -7,8 +7,8 @@ import { buildSchema } from "type-graphql";
 import { createConnection, Connection, ConnectionOptions } from "typeorm";
 import { PubSub } from "graphql-subscriptions";
 import MQTT from "async-mqtt";
-import { LightResolver } from "./Lights/light-resolver";
-import { Light, LightState } from "./Lights/light-type";
+import { LightResolver } from "./light/LightResolver";
+import { Light } from "./light/LightEntity";
 
 console.log(`💡  Initializing Prysma 💡`);
 
@@ -48,7 +48,7 @@ process.on(
     database: process.env.NODE_ENV
       ? path.join(__dirname, "..", "data", DB_NAME)
       : path.join("data", DB_NAME),
-    entities: [Light, LightState],
+    entities: [Light],
     synchronize: true,
     logging: false,
   };
