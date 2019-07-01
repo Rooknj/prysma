@@ -10,6 +10,7 @@ import MQTT from "async-mqtt";
 import { LightResolver } from "./light/LightResolver";
 import { Light } from "./light/LightEntity";
 import * as config from "./config";
+import { MockLight } from "./light/MockLight";
 
 console.log(`💡  Initializing Prysma 💡`);
 
@@ -69,6 +70,11 @@ process.on(
     // enable GraphQL Playground
     playground: true,
   });
+
+  if (process.env.NODE_ENV === "development") {
+    // eslint-disable-next-line no-new
+    new MockLight("Prysma-Mock", config.mqtt);
+  }
 
   const { url } = await server.listen(config.server.port);
   console.log(`🚀 Server ready at ${url}`);
