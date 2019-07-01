@@ -42,7 +42,7 @@ export class LightResolver {
     description: "Get all currently added lights in the order they were added",
   })
   public discoveredLights(): Promise<Light[]> {
-    return this.lightService.discoverLights(2000);
+    return this.lightService.discoverLights();
   }
 
   @Mutation((): ClassType<Light> => Light, {

@@ -3,6 +3,7 @@ import { Service } from "typedi";
 import { Connection, Repository } from "typeorm";
 import { PubSub } from "apollo-server";
 import { validate } from "class-validator";
+import throttle from "lodash.throttle";
 import { Light } from "./LightEntity";
 import { LightInput } from "./LightInput";
 import { LightMessenger } from "./LightMessenger";
@@ -22,6 +23,7 @@ import {
   configPayloadToLightFields,
 } from "./light-utils";
 
+const discoveryDuration = 2000;
 @Service()
 export class LightService {
   private readonly lightRepo: Repository<Light>;
@@ -157,22 +159,27 @@ export class LightService {
     return lightToUpdate;
   };
 
-  public discoverLights = async (discoveryDuration: number): Promise<Light[]> => {
-    this.discoveredLights = [];
-    await this.messenger.sendDiscoveryQuery();
-    await promisify(setTimeout)(discoveryDuration);
-    return this.discoveredLights.sort((a: Light, b: Light): number => {
-      const x = a.id.toLowerCase();
-      const y = b.id.toLowerCase();
-      if (x < y) {
-        return -1;
-      }
-      if (x > y) {
-        return 1;
-      }
-      return 0;
-    });
-  };
+  // This function is throttled in case multiple clients are looking for lights at the same time so we don't clear discoveredLights every time
+  public discoverLights = throttle(
+    async (): Promise<Light[]> => {
+      this.discoveredLights = [];
+      await this.messenger.sendDiscoveryQuery();
+      await promisify(setTimeout)(discoveryDuration);
+      return this.discoveredLights.sort((a: Light, b: Light): number => {
+        const x = a.id.toLowerCase();
+        const y = b.id.toLowerCase();
+        if (x < y) {
+          return -1;
+        }
+        if (x > y) {
+          return 1;
+        }
+        return 0;
+      });
+    },
+    discoveryDuration,
+    { leading: true, trailing: false }
+  );
 
   public findLightById = (id: string): Promise<Light> => {
     console.log(`Finding Light: ${id}`);
