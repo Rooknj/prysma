@@ -161,7 +161,17 @@ export class LightService {
     this.discoveredLights = [];
     await this.messenger.sendDiscoveryQuery();
     await promisify(setTimeout)(discoveryDuration);
-    return this.discoveredLights;
+    return this.discoveredLights.sort((a: Light, b: Light): number => {
+      const x = a.id.toLowerCase();
+      const y = b.id.toLowerCase();
+      if (x < y) {
+        return -1;
+      }
+      if (x > y) {
+        return 1;
+      }
+      return 0;
+    });
   };
 
   public findLightById = (id: string): Promise<Light> => {

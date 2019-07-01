@@ -72,8 +72,10 @@ process.on(
   });
 
   if (process.env.NODE_ENV === "development") {
-    // eslint-disable-next-line no-new
-    new MockLight("Prysma-Mock", config.mqtt);
+    for (let i = 1; i < 9; i += 1) {
+      // eslint-disable-next-line no-new
+      new MockLight(`Prysma-Mock${i}`, config.mqtt);
+    }
   }
 
   const { url } = await server.listen(config.server.port);
