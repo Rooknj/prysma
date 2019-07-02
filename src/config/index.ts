@@ -30,6 +30,6 @@ export const db: ConnectionOptions = {
   logging: false,
   // Create the SQLite database in the executable's directory if running from a pkg executable
   database: process.env.NODE_ENV
-    ? path.join(__dirname, "..", "data", "test.sqlite")
+    ? path.join(__dirname, "..", "..", "data", "test.sqlite")
     : path.join("data", "test.sqlite"),
 };
