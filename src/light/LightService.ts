@@ -22,6 +22,7 @@ import {
   effectListPayloadToLightFields,
   configPayloadToLightFields,
 } from "./light-utils";
+import logger from "../lib/logger";
 
 const discoveryDuration = 2000;
 @Service()
@@ -54,7 +55,7 @@ export class LightService {
   }
 
   private handleMessengerConnect = async (): Promise<void> => {
-    console.log("Messenger Connected");
+    logger.info("Messenger Connected");
 
     // Subscribe to all the lights
     const lights = await this.lightRepo.find();
@@ -68,7 +69,7 @@ export class LightService {
   };
 
   private handleMessengerDisconnect = async (): Promise<void> => {
-    console.log("Messenger Disconnected");
+    logger.info("Messenger Disconnected");
 
     // Set all light's connected status to false
     const lights = await this.lightRepo.find();
@@ -78,25 +79,25 @@ export class LightService {
   };
 
   private handleConnectionMessage = async (connectionPayload: ConnectionPayload): Promise<void> => {
-    console.log("connection Message");
+    logger.info("connection Message");
     const { name } = connectionPayload;
     await this.updateLight(name, connectionPayloadToLightFields(connectionPayload));
   };
 
   private handleStateMessage = async (statePayload: StatePayload): Promise<void> => {
-    console.log("State Message");
+    logger.info("State Message");
     const { name } = statePayload;
     await this.updateLight(name, statePayloadToLightFields(statePayload));
   };
 
   private handleEffectListMessage = async (effectListPayload: EffectListPayload): Promise<void> => {
-    console.log("EffectList Message");
+    logger.info("EffectList Message");
     const { name } = effectListPayload;
     await this.updateLight(name, effectListPayloadToLightFields(effectListPayload));
   };
 
   private handleConfigMessage = async (configPayload: ConfigPayload): Promise<void> => {
-    console.log("Config Message");
+    logger.info("Config Message");
     const { name } = configPayload;
     await this.updateLight(name, configPayloadToLightFields(configPayload));
   };
@@ -104,7 +105,7 @@ export class LightService {
   private handleDiscoveryResponseMessage = async (
     discoveryResponsePayload: ConfigPayload
   ): Promise<void> => {
-    console.log("Discovery Response Message");
+    logger.info("Discovery Response Message");
     const { name } = discoveryResponsePayload;
 
     // Make sure the light isn't already added
@@ -115,13 +116,13 @@ export class LightService {
       lightIsAlreadyAdded = false;
     }
     if (lightIsAlreadyAdded) {
-      console.log(`${name} is already added. Ignoring discovery response.`);
+      logger.info(`${name} is already added. Ignoring discovery response.`);
       return;
     }
 
     // Make sure we didn't already discover the light
     if (this.discoveredLights.find((light): boolean => light.id === name)) {
-      console.log(`${name} was already discovered. Ignoring discovery response.`);
+      logger.info(`${name} was already discovered. Ignoring discovery response.`);
     }
 
     // Add the discovered light to this.discoveredLights
@@ -136,7 +137,7 @@ export class LightService {
     id: string,
     lightData: Partial<Omit<Light, "id">>
   ): Promise<Light> => {
-    console.log(`Updating Light: ${id}`);
+    logger.info(`Updating Light: ${id}`);
 
     // Make sure the light is currently added
     const lightToUpdate = await this.lightRepo.findOneOrFail(id);
@@ -182,18 +183,18 @@ export class LightService {
   );
 
   public findLightById = (id: string): Promise<Light> => {
-    console.log(`Finding Light: ${id}`);
+    logger.info(`Finding Light: ${id}`);
     return this.lightRepo.findOneOrFail(id);
   };
 
   public findAllLights = (): Promise<Light[]> => {
-    console.log(`Finding All Lights`);
+    logger.info(`Finding All Lights`);
     return this.lightRepo.find();
   };
 
   // This physically sends a command message to the light if any state fields are specified
   public changeLight = async (id: string, lightData: LightInput): Promise<Light> => {
-    console.log(`Changing Light: ${id}`);
+    logger.info(`Changing Light: ${id}`);
     // Make sure the light exists and is connected
     const lightToChange = await this.lightRepo.findOneOrFail(id);
     if (!lightToChange.connected) throw new Error(`"${id}" is not connected`);
@@ -221,7 +222,7 @@ export class LightService {
   };
 
   public addNewLight = async (id: string): Promise<Light> => {
-    console.log(`Adding Light: ${id}`);
+    logger.info(`Adding Light: ${id}`);
 
     // Make sure the light was not already added
     let lightAlreadyExists = true;
@@ -246,7 +247,7 @@ export class LightService {
       await this.messenger.subscribeToLight(id);
     } catch (error) {
       // Do nothing because we will just resubscribe when the messenger connects due to this.handleMessengerConnect
-      console.error(`Error subscribing to ${id}`, error);
+      logger.error(`Error subscribing to ${id}`, error);
       // TODO: Do nothing if the error was due to the messenger not being connected, throw otherwise
     }
 
@@ -256,7 +257,7 @@ export class LightService {
   };
 
   public removeLightById = async (id: string): Promise<Light> => {
-    console.log(`Removing Light: ${id}`);
+    logger.info(`Removing Light: ${id}`);
 
     // Make sure the light is currently added
     let lightToRemove: Light;
@@ -271,7 +272,7 @@ export class LightService {
       await this.messenger.unsubscribeFromLight(id);
     } catch (error) {
       // Do nothing because we are already unsubscribed if the messenger isn't connected
-      console.error(`Error unsubscribing from ${id}`, error);
+      logger.error(`Error unsubscribing from ${id}`, error);
       // TODO: Do nothing if the error was due to the messenger not being connected, throw otherwise
     }
 

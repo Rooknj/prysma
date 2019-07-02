@@ -12,6 +12,7 @@ import {
   CommandPayload,
 } from "./message-types";
 import { mqtt } from "../config";
+import logger from "../lib/logger";
 
 @Service()
 export class LightMessenger extends EventEmitter {
@@ -32,13 +33,13 @@ export class LightMessenger extends EventEmitter {
 
   private handleClientConnect = (): void => {
     this.connected = true;
-    console.log("Connected to MQTT Broker");
+    logger.info("Connected to MQTT Broker");
     this.emit("connect");
   };
 
   private handleClientDisconnect = (): void => {
     this.connected = false;
-    console.log("Disconnected to MQTT Broker");
+    logger.info("Disconnected to MQTT Broker");
     this.emit("disconnect");
   };
 
@@ -48,11 +49,11 @@ export class LightMessenger extends EventEmitter {
 
     // Validate the topic the message came in on
     if (topicTokens.length < 2) {
-      console.log(`Ignoring Message on ${topic}: topic too short`);
+      logger.info(`Ignoring Message on ${topic}: topic too short`);
       return;
     }
     if (topicTokens[0] !== top) {
-      console.log(`Ignoring Message on ${topic}: topic is unrelated to this app`);
+      logger.info(`Ignoring Message on ${topic}: topic is unrelated to this app`);
       return;
     }
 
@@ -60,7 +61,7 @@ export class LightMessenger extends EventEmitter {
     try {
       data = JSON.parse(message.toString());
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       return;
     }
 
@@ -102,12 +103,12 @@ export class LightMessenger extends EventEmitter {
     const errors = await validate(payload);
 
     if (errors.length > 0) {
-      console.error(`Invalid message on ${topic}: Ignoring\n`, errors);
+      logger.error(`Invalid message on ${topic}: Ignoring\n`, errors);
       return;
     }
 
     if (!event || !payload) {
-      console.error("The event or payload was not defined");
+      logger.error("The event or payload was not defined");
     }
 
     this.emit(event, payload);
@@ -116,13 +117,13 @@ export class LightMessenger extends EventEmitter {
   public subscribeToLight = async (id: string): Promise<void> => {
     if (!this.connected) {
       const errorMessage = `Can not subscribe to (${id}). MQTT client not connected`;
-      console.error(errorMessage);
+      logger.error(errorMessage);
       throw new Error(errorMessage);
     }
 
     if (!id) {
       const errorMessage = "You must provide a light id";
-      console.error(errorMessage);
+      logger.error(errorMessage);
       throw new Error(errorMessage);
     }
 
@@ -136,18 +137,18 @@ export class LightMessenger extends EventEmitter {
 
     await Promise.all([connectedPromise, statePromise, effectListPromise, configPromise]);
 
-    console.info(`Successfully subscribed to ${id}`);
+    logger.info(`Successfully subscribed to ${id}`);
   };
 
   public unsubscribeFromLight = async (id: string): Promise<void> => {
     if (!this.connected) {
-      console.info(`Already unsubscribed from ${id} due to disconnect`);
+      logger.info(`Already unsubscribed from ${id} due to disconnect`);
       return;
     }
 
     if (!id) {
       const errorMessage = "You must provide a light id";
-      console.error(errorMessage);
+      logger.error(errorMessage);
       throw new Error(errorMessage);
     }
 
@@ -161,19 +162,19 @@ export class LightMessenger extends EventEmitter {
 
     await Promise.all([connectedPromise, statePromise, effectListPromise, configPromise]);
 
-    console.info(`Successfully unsubscribed from ${id}`);
+    logger.info(`Successfully unsubscribed from ${id}`);
   };
 
   public startDiscovery = async (): Promise<void> => {
     const { top, discoveryResponse } = this.topics;
     await this.client.subscribe(`${top}/+/${discoveryResponse}`);
-    console.log(`Started Light Discovery`);
+    logger.info(`Started Light Discovery`);
   };
 
   public stopDiscovery = async (): Promise<void> => {
     const { top, discoveryResponse } = this.topics;
     await this.client.unsubscribe(`${top}/+/${discoveryResponse}`);
-    console.log(`Stopped Light Discovery`);
+    logger.info(`Stopped Light Discovery`);
   };
 
   public sendDiscoveryQuery = async (): Promise<void> => {
@@ -184,7 +185,7 @@ export class LightMessenger extends EventEmitter {
 
     const { top, discovery } = this.topics;
     await this.client.publish(`${top}/${discovery}`, "ping");
-    console.log(`Successfully sent Discovery Query`);
+    logger.info(`Successfully sent Discovery Query`);
   };
 
   // Physically send a command to the light and wait for a response.
@@ -212,7 +213,7 @@ export class LightMessenger extends EventEmitter {
       this.client
         .publish(`${top}/${id}/${command}`, payload)
         .then((): void => {
-          console.log(`Successfully published ${payload.toString()} to ${id}`);
+          logger.info(`Successfully published ${payload.toString()} to ${id}`);
           setTimeout((): void => {
             this.removeListener(MessageType.State, onStateMessage);
             reject(new Error(`Request timed out after ${timeout}ms`));

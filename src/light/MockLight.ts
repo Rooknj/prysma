@@ -7,6 +7,7 @@ import {
   EffectListPayload,
   PowerState,
 } from "./message-types";
+import logger from "../lib/logger";
 
 export class MockLight {
   private id: string;
@@ -58,7 +59,7 @@ export class MockLight {
     });
 
     this.client.on("connect", (): void => {
-      console.log("Mock: Connected to MQTT");
+      logger.debug("Mock: Connected to MQTT");
       this.subscribeToCommands();
       this.subscribeToDiscovery();
       this.publishToState({ name: this.id, ...this.state });
@@ -73,7 +74,7 @@ export class MockLight {
   }
 
   private async handleCommandMessage(data: CommandPayload): Promise<void> {
-    console.log("Received command message:", data);
+    logger.debug("Received command message:", data);
     const { mutationId, state, color, brightness, effect, speed } = data;
     // Set the new state
     if ("state" in data && state !== undefined) this.state.state = state;
@@ -95,7 +96,7 @@ export class MockLight {
   }
 
   private async handleDiscoveryMessage(): Promise<void> {
-    console.log(`Received Discovery message`);
+    logger.debug(`Received Discovery message`);
     await this.publishToDiscoveryResponse(this.config);
   }
 
@@ -104,10 +105,10 @@ export class MockLight {
     const topic = `${top}/${this.id}/${state}`;
     const payload = Buffer.from(JSON.stringify(stateMessage));
     try {
-      console.log(`Publishing State: ${payload}`);
+      logger.debug(`Publishing State: ${payload}`);
       await this.client.publish(topic, payload, { qos: 0, retain: true });
     } catch (error) {
-      console.log(error);
+      logger.debug(error);
     }
   }
 
@@ -116,10 +117,10 @@ export class MockLight {
     const topic = `${top}/${this.id}/${effectList}`;
     const payload = Buffer.from(JSON.stringify(effectListMessage));
     try {
-      console.log(`Publishing Effect List: ${payload}`);
+      logger.debug(`Publishing Effect List: ${payload}`);
       await this.client.publish(topic, payload, { qos: 0, retain: true });
     } catch (error) {
-      console.log(error);
+      logger.debug(error);
     }
   }
 
@@ -128,10 +129,10 @@ export class MockLight {
     const topic = `${top}/${this.id}/${connected}`;
     const payload = Buffer.from(JSON.stringify(connectedMessage));
     try {
-      console.log(`Publishing Connected: ${payload}`);
+      logger.debug(`Publishing Connected: ${payload}`);
       await this.client.publish(topic, payload, { qos: 0, retain: true });
     } catch (error) {
-      console.log(error);
+      logger.debug(error);
     }
   }
 
@@ -140,10 +141,10 @@ export class MockLight {
     const topic = `${top}/${this.id}/${config}`;
     const payload = Buffer.from(JSON.stringify(configMessage));
     try {
-      console.log(`Publishing Config: ${payload}`);
+      logger.debug(`Publishing Config: ${payload}`);
       await this.client.publish(topic, payload, { qos: 0, retain: true });
     } catch (error) {
-      console.log(error);
+      logger.debug(error);
     }
   }
 
@@ -152,10 +153,10 @@ export class MockLight {
     const topic = `${top}/${this.id}/${discoveryResponse}`;
     const payload = Buffer.from(JSON.stringify(discoveryResponseMessage));
     try {
-      console.log(`Publishing Discovery Response: ${payload}`);
+      logger.debug(`Publishing Discovery Response: ${payload}`);
       await this.client.publish(topic, payload);
     } catch (error) {
-      console.log(error);
+      logger.debug(error);
     }
   }
 
@@ -165,7 +166,7 @@ export class MockLight {
     try {
       await this.client.subscribe(topic);
     } catch (error) {
-      console.log(error);
+      logger.debug(error);
     }
   }
 
@@ -175,7 +176,7 @@ export class MockLight {
     try {
       await this.client.subscribe(topic);
     } catch (error) {
-      console.log(error);
+      logger.debug(error);
     }
   }
 

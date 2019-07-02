@@ -11,16 +11,17 @@ import { LightResolver } from "./light/LightResolver";
 import { Light } from "./light/LightEntity";
 import * as config from "./config";
 import { MockLight } from "./light/MockLight";
+import logger from "./lib/logger";
 
 console.log(`💡  Initializing Prysma 💡`);
 
 // Unhandled error logging
 process.on("uncaughtException", (error): void => {
-  console.error("Unhandled Exception", error);
+  logger.error("Unhandled Exception", error);
   process.exit(1);
 });
 process.on("unhandledRejection", (error): void => {
-  console.error("Unhandled Rejection", error);
+  logger.error("Unhandled Rejection", error);
   process.exit(1);
 });
 
@@ -29,9 +30,9 @@ process.on("unhandledRejection", (error): void => {
 process.on(
   "SIGINT",
   async (): Promise<void> => {
-    console.log("SIGINT signal received, shutting down gracefully...");
+    logger.info("SIGINT signal received, shutting down gracefully...");
     // TODO: Close connected clients
-    console.log("Successfully shut down. Goodbye");
+    logger.info("Successfully shut down. Goodbye");
     process.exit(0);
   }
 );
