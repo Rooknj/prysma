@@ -4,9 +4,12 @@ import path from "path";
 import { Container } from "typedi";
 import { ApolloServer } from "apollo-server";
 import { buildSchema } from "type-graphql";
-import { createConnection, Connection } from "typeorm";
-import { PubSub } from "graphql-subscriptions";
-import MQTT from "async-mqtt";
+import { initDbConnection, closeDbConnection } from "./lib/connections/dbConnection";
+import { initMqttClient, closeMqttClient } from "./lib/connections/mqttClient";
+import {
+  initGraphqlSubscriptionsPubSub,
+  closeGraphqlSubscriptionsPubSub,
+} from "./lib/connections/graphqlSubscriptionsPubSub";
 import { LightResolver } from "./light/LightResolver";
 import { Light } from "./light/LightEntity";
 import * as config from "./config";
@@ -31,7 +34,7 @@ process.on(
   "SIGINT",
   async (): Promise<void> => {
     logger.info("SIGINT signal received, shutting down gracefully...");
-    // TODO: Close connected clients
+    await Promise.all([closeDbConnection(), closeMqttClient(), closeGraphqlSubscriptionsPubSub()]);
     logger.info("Successfully shut down. Goodbye");
     process.exit(0);
   }
@@ -41,16 +44,14 @@ process.on(
 // TODO: Somehow initialize the listeners so that the server isn't ready until the lightMessenger is initialized
 // Wrap index.js inside an immediately invoked async function
 (async (): Promise<void> => {
-  // Set up a pub sub system for Graphql Subscriptions
-  const pubSub = new PubSub();
-  Container.set(PubSub, pubSub); // Set up Dependency Injection
-
   // Connect to outside dependencies
-  const [connection, mqttClient] = await Promise.all([
-    createConnection({ ...config.db, entities: [Light] }),
-    MQTT.connect(config.mqtt.host, config.mqtt.options),
+  const [connection, mqttClient, pubSub] = await Promise.all([
+    initDbConnection({ ...config.db, entities: [Light] }),
+    initMqttClient(config.mqtt.host, config.mqtt.options),
+    initGraphqlSubscriptionsPubSub(),
   ]);
-  Container.set(Connection, connection); // Set up Dependency Injection
+  Container.set("GRAPHQL_PUB_SUB", pubSub); // Set up Dependency Injection
+  Container.set("DB_CONNECTION", connection); // Set up Dependency Injection
   Container.set("MQTT_CLIENT", mqttClient); // Set up Dependency Injection (AsyncMqttClient type causes an error here)
 
   // build TypeGraphQL executable schema

@@ -1,5 +1,5 @@
 import { promisify } from "util";
-import { Service } from "typedi";
+import { Service, Inject } from "typedi";
 import { Connection, Repository } from "typeorm";
 import { PubSub } from "apollo-server";
 import { validate } from "class-validator";
@@ -36,7 +36,11 @@ export class LightService {
   private discoveredLights: Light[] = [];
 
   // The constructor parameters are Dependency Injected
-  public constructor(connection: Connection, messenger: LightMessenger, pubSub: PubSub) {
+  public constructor(
+    @Inject("DB_CONNECTION") connection: Connection,
+    messenger: LightMessenger,
+    @Inject("GRAPHQL_PUB_SUB") pubSub: PubSub
+  ) {
     this.lightRepo = connection.getRepository(Light);
     this.messenger = messenger;
     this.pubSub = pubSub;
