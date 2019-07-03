@@ -9,20 +9,17 @@ import {
   PubSub,
   Publisher,
 } from "type-graphql";
-import { Service } from "typedi";
 import { Light } from "./LightEntity";
 import { LightInput } from "./LightInput";
 import { LightService } from "./LightService";
 import { LIGHT_CHANGED, LIGHT_ADDED, LIGHT_REMOVED } from "./light-events";
 
-@Service()
 @Resolver((): ClassType<Light> => Light)
 export class LightResolver {
   private lightService: LightService;
 
-  // Dependency injection of the service
-  public constructor(lightService: LightService) {
-    this.lightService = lightService;
+  public constructor() {
+    this.lightService = new LightService();
   }
 
   @Query((): ClassType<Light> => Light, { description: "Get a light by it's ID" })

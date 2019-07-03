@@ -1,7 +1,6 @@
 /* eslint no-console:0 */
 import "reflect-metadata";
 import path from "path";
-import { Container } from "typedi";
 import { ApolloServer } from "apollo-server";
 import { buildSchema } from "type-graphql";
 import { initDbConnection, closeDbConnection } from "./lib/connections/dbConnection";
@@ -45,14 +44,11 @@ process.on(
 // Wrap index.js inside an immediately invoked async function
 (async (): Promise<void> => {
   // Connect to outside dependencies
-  const [connection, mqttClient, pubSub] = await Promise.all([
+  const [pubSub] = await Promise.all([
+    initGraphqlSubscriptionsPubSub(),
     initDbConnection({ ...config.db, entities: [Light] }),
     initMqttClient(config.mqtt.host, config.mqtt.options),
-    initGraphqlSubscriptionsPubSub(),
   ]);
-  Container.set("GRAPHQL_PUB_SUB", pubSub); // Set up Dependency Injection
-  Container.set("DB_CONNECTION", connection); // Set up Dependency Injection
-  Container.set("MQTT_CLIENT", mqttClient); // Set up Dependency Injection (AsyncMqttClient type causes an error here)
 
   // build TypeGraphQL executable schema
   const schema = await buildSchema({
@@ -60,8 +56,6 @@ process.on(
     // Automatically create `schema.gql` file with schema definition in current folder if not running from a pkg executable
     // Don't create the schema file if running from a pkg executable
     emitSchemaFile: process.env.NODE_ENV ? path.resolve(__dirname, "schema.gql") : false,
-    // register 3rd party IOC container
-    container: Container,
     // Use our custom PubSub system
     pubSub,
   });

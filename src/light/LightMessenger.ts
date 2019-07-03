@@ -1,8 +1,8 @@
-import { Service, Inject } from "typedi";
 import { AsyncMqttClient } from "async-mqtt";
 import { EventEmitter } from "events";
 import { validate } from "class-validator";
 import { plainToClass } from "class-transformer";
+import { getMqttClient } from "../lib/connections/mqttClient";
 import {
   MessageType,
   ConnectionPayload,
@@ -14,7 +14,6 @@ import {
 import { mqtt } from "../config";
 import logger from "../lib/logger";
 
-@Service()
 export class LightMessenger extends EventEmitter {
   private readonly client: AsyncMqttClient;
 
@@ -22,9 +21,9 @@ export class LightMessenger extends EventEmitter {
 
   private readonly topics = mqtt.topics;
 
-  public constructor(@Inject("MQTT_CLIENT") client: AsyncMqttClient) {
+  public constructor() {
     super();
-    this.client = client;
+    this.client = getMqttClient();
     this.connected = this.client.connected;
     this.client.on("connect", this.handleClientConnect);
     this.client.on("offline", this.handleClientDisconnect);

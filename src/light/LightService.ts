@@ -1,9 +1,10 @@
 import { promisify } from "util";
-import { Service, Inject } from "typedi";
-import { Connection, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { PubSub } from "apollo-server";
 import { validate } from "class-validator";
 import throttle from "lodash.throttle";
+import { getDbConnection } from "../lib/connections/dbConnection";
+import { getGraphqlSubscriptionsPubSub } from "../lib/connections/graphqlSubscriptionsPubSub";
 import { Light } from "./LightEntity";
 import { LightInput } from "./LightInput";
 import { LightMessenger } from "./LightMessenger";
@@ -25,7 +26,7 @@ import {
 import logger from "../lib/logger";
 
 const discoveryDuration = 2000;
-@Service()
+
 export class LightService {
   private readonly lightRepo: Repository<Light>;
 
@@ -36,14 +37,10 @@ export class LightService {
   private discoveredLights: Light[] = [];
 
   // The constructor parameters are Dependency Injected
-  public constructor(
-    @Inject("DB_CONNECTION") connection: Connection,
-    messenger: LightMessenger,
-    @Inject("GRAPHQL_PUB_SUB") pubSub: PubSub
-  ) {
-    this.lightRepo = connection.getRepository(Light);
-    this.messenger = messenger;
-    this.pubSub = pubSub;
+  public constructor() {
+    this.lightRepo = getDbConnection().getRepository(Light);
+    this.pubSub = getGraphqlSubscriptionsPubSub();
+    this.messenger = new LightMessenger();
 
     if (this.messenger.connected) {
       this.handleMessengerConnect();
