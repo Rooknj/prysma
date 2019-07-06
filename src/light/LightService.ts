@@ -270,6 +270,11 @@ export class LightService {
       // TODO: Do nothing if the error was due to the messenger not being connected, throw otherwise
     }
 
+    // Remove the light from the discoveredLights array since we just added it
+    this.discoveredLights = this.discoveredLights.filter(
+      (discoveredLight): boolean => discoveredLight.id !== id
+    );
+
     // Return the added light with the find operation
     // This gives the server time to update the added light's state based on incoming MQTT messages
     return this.lightRepo.findOneOrFail(id);
