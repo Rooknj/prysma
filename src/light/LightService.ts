@@ -79,28 +79,46 @@ export class LightService {
     );
   };
 
+  // TODO: Make these message handlers more generic using the Strategy Pattern
+  // TODO: Be more specific on the type of error that can/cannot be thrown by updateLight
   private handleConnectionMessage = async (connectionPayload: ConnectionPayload): Promise<void> => {
     logger.info("connection Message");
     const { name } = connectionPayload;
-    await this.updateLight(name, connectionPayloadToLightFields(connectionPayload));
+    try {
+      await this.updateLight(name, connectionPayloadToLightFields(connectionPayload));
+    } catch (error) {
+      logger.error(`Error handling connection message: ${error}`);
+    }
   };
 
   private handleStateMessage = async (statePayload: StatePayload): Promise<void> => {
     logger.info("State Message");
     const { name } = statePayload;
-    await this.updateLight(name, statePayloadToLightFields(statePayload));
+    try {
+      await this.updateLight(name, statePayloadToLightFields(statePayload));
+    } catch (error) {
+      logger.error(`Error handling state message: ${error}`);
+    }
   };
 
   private handleEffectListMessage = async (effectListPayload: EffectListPayload): Promise<void> => {
     logger.info("EffectList Message");
     const { name } = effectListPayload;
-    await this.updateLight(name, effectListPayloadToLightFields(effectListPayload));
+    try {
+      await this.updateLight(name, effectListPayloadToLightFields(effectListPayload));
+    } catch (error) {
+      logger.error(`Error handling effect list message: ${error}`);
+    }
   };
 
   private handleConfigMessage = async (configPayload: ConfigPayload): Promise<void> => {
     logger.info("Config Message");
     const { name } = configPayload;
-    await this.updateLight(name, configPayloadToLightFields(configPayload));
+    try {
+      await this.updateLight(name, configPayloadToLightFields(configPayload));
+    } catch (error) {
+      logger.error(`Error handling config message: ${error}`);
+    }
   };
 
   private handleDiscoveryResponseMessage = async (

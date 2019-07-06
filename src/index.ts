@@ -39,8 +39,6 @@ process.on(
   }
 );
 
-// TODO: Figure out how to get rid of dependency injection and instead use getRepository on typeORM and the singleton pattern
-// TODO: Somehow initialize the listeners so that the server isn't ready until the lightMessenger is initialized
 // Wrap index.js inside an immediately invoked async function
 (async (): Promise<void> => {
   // Connect to outside dependencies
