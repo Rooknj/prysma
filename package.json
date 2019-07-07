@@ -21,6 +21,11 @@
   "bin": {
     "prod-server": "dist/index.js"
   },
+  "pkg": {
+    "assets": [
+      "ui/**/*"
+    ]
+  },
   "devDependencies": {
     "@babel/core": "^7.4.5",
     "@babel/preset-env": "^7.4.5",
@@ -54,10 +59,11 @@
     "typescript": "^3.5.2"
   },
   "dependencies": {
-    "apollo-server": "^2.6.4",
+    "apollo-server-express": "^2.6.7",
     "async-mqtt": "^2.3.0",
     "class-transformer": "^0.2.3",
     "class-validator": "^0.9.1",
+    "express": "^4.17.1",
     "graphql": "^14.3.1",
     "graphql-subscriptions": "^1.1.0",
     "lodash.throttle": "^4.1.1",

@@ -1,7 +1,6 @@
 /* eslint no-console:0 */
 import "reflect-metadata";
 import path from "path";
-import { ApolloServer } from "apollo-server";
 import { buildSchema } from "type-graphql";
 import { initDbConnection, closeDbConnection } from "./lib/connections/dbConnection";
 import { initMqttClient, closeMqttClient } from "./lib/connections/mqttClient";
@@ -13,6 +12,7 @@ import { LightResolver } from "./light/LightResolver";
 import { Light } from "./light/LightEntity";
 import * as config from "./config";
 import { MockLight } from "./light/MockLight";
+import GraphqlServer from "./lib/GraphqlServer";
 import logger from "./lib/logger";
 
 console.log(`💡  Initializing Prysma 💡`);
@@ -59,11 +59,8 @@ process.on(
   });
 
   // Create GraphQL server
-  const server = new ApolloServer({
-    schema,
-    // enable GraphQL Playground
-    playground: true,
-  });
+  const graphqlServer = new GraphqlServer(config.server.port, schema);
+  graphqlServer.start();
 
   if (process.env.NODE_ENV === "development") {
     for (let i = 1; i < 9; i += 1) {
@@ -71,7 +68,4 @@ process.on(
       new MockLight(`Prysma-Mock${i}`, config.mqtt);
     }
   }
-
-  const { url } = await server.listen(config.server.port);
-  console.log(`🚀 Server ready at ${url}`);
 })();

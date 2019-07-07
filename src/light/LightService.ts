@@ -1,6 +1,6 @@
 import { promisify } from "util";
 import { Repository } from "typeorm";
-import { PubSub } from "apollo-server";
+import { PubSub } from "graphql-subscriptions";
 import { validate } from "class-validator";
 import throttle from "lodash.throttle";
 import { getDbConnection } from "../lib/connections/dbConnection";
