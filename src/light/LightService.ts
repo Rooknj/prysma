@@ -25,6 +25,8 @@ import {
 } from "./light-utils";
 import logger from "../lib/logger";
 
+const asyncSetTimeout = promisify(setTimeout);
+const addLightDelay = 500;
 const discoveryDuration = 2000;
 
 export class LightService {
@@ -184,7 +186,7 @@ export class LightService {
     async (): Promise<Light[]> => {
       this.discoveredLights = [];
       await this.messenger.sendDiscoveryQuery();
-      await promisify(setTimeout)(discoveryDuration);
+      await asyncSetTimeout(discoveryDuration);
       return this.discoveredLights.sort((a: Light, b: Light): number => {
         const x = a.id.toLowerCase();
         const y = b.id.toLowerCase();
@@ -275,8 +277,11 @@ export class LightService {
       (discoveredLight): boolean => discoveredLight.id !== id
     );
 
-    // Return the added light with the find operation
     // This gives the server time to update the added light's state based on incoming MQTT messages
+    // TODO: See if there is a better way to do this
+    await asyncSetTimeout(addLightDelay);
+
+    // Return the added light with the find operation
     return this.lightRepo.findOneOrFail(id);
   };
 
