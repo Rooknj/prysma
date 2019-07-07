@@ -26,6 +26,7 @@ import {
 import logger from "../lib/logger";
 
 const asyncSetTimeout = promisify(setTimeout);
+// TODO: Make these 0 if in test environment (process.env.NODE_ENV) or add these to a constants file to mock out
 const addLightDelay = 500;
 const discoveryDuration = 2000;
 
