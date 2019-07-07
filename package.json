@@ -1,63 +1,77 @@
 {
   "name": "prysma",
   "version": "0.1.0-alpha",
-  "description": "prysma LED light hub",
-  "main": "src/index.js",
+  "description": "NodeJS Light Management Service",
+  "main": "index.js",
+  "repository": "https://github.com/Rooknj/prysma.git",
+  "author": "Nick Rook <rooknj@gmail.com>",
+  "license": "MIT",
+  "private": true,
   "scripts": {
-    "test": "node scripts/test",
-    "build": "node scripts/build",
-    "start": "node scripts/start",
-    "clean": "node scripts/clean",
-    "lint": "eslint 'src/**/*.js' --config=.eslintrc.js",
-    "reformat": "prettier '**/*.js' --write"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Rooknj/prysma.git"
-  },
-  "author": "Nick Rook",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Rooknj/prysma/issues"
-  },
-  "homepage": "https://github.com/Rooknj/prysma#readme",
-  "devDependencies": {
-    "cross-spawn": "^6.0.5",
-    "eslint": "^5.16.0",
-    "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-config-prettier": "^4.3.0",
-    "eslint-plugin-eslint-comments": "^3.1.1",
-    "eslint-plugin-jest": "^22.6.4",
-    "eslint-plugin-prettier": "^3.1.0",
-    "husky": "^2.1.0",
-    "jest": "^24.7.1",
-    "lint-staged": "^8.1.5",
-    "nodemon": "^1.18.11",
-    "pkg": "^4.3.7",
-    "prettier": "1.17.0",
-    "rimraf": "^2.6.3",
-    "sequelize-mock": "^0.10.2",
-    "spawn-args": "^0.2.0"
+    "start": "ts-node scripts/start",
+    "build": "ts-node scripts/build",
+    "build:ts": "tsc",
+    "test": "ts-node scripts/test",
+    "clean": "ts-node scripts/clean",
+    "lint": "eslint 'src/**/*.{ts,js,json,md}' --config=.eslintrc.js",
+    "reformat": "prettier 'src/**/*.{ts,js,json,md}' --write",
+    "docker:build": "ts-node scripts/dockerUtil build",
+    "docker:publish": "ts-node scripts/dockerUtil publish"
   },
   "bin": {
-    "prod-server": "src/index.js"
-  },
-  "dependencies": {
-    "@hapi/joi": "^15.0.0",
-    "apollo-server-express": "^2.4.8",
-    "async-mqtt": "^2.2.1",
-    "eslint-plugin-import": "^2.17.3",
-    "express": "^4.16.4",
-    "faker": "^4.1.0",
-    "graphql": "^14.2.1",
-    "graphql-subscriptions": "^1.1.0",
-    "sequelize": "^5.8.0",
-    "sqlite3": "^4.0.6",
-    "winston": "^3.2.1"
+    "prod-server": "dist/index.js"
   },
   "pkg": {
     "assets": [
       "ui/**/*"
     ]
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.5",
+    "@babel/preset-env": "^7.4.5",
+    "@babel/preset-typescript": "^7.3.3",
+    "@types/cross-spawn": "^6.0.0",
+    "@types/graphql": "^14.2.1",
+    "@types/jest": "^24.0.15",
+    "@types/lodash.throttle": "^4.1.6",
+    "@types/minimist": "^1.2.0",
+    "@types/node": "^12.0.8",
+    "@types/rimraf": "^2.0.2",
+    "@typescript-eslint/eslint-plugin": "^1.10.2",
+    "@typescript-eslint/parser": "^1.10.2",
+    "cross-spawn": "^6.0.5",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-plugin-eslint-comments": "^3.1.1",
+    "eslint-plugin-import": "^2.17.3",
+    "eslint-plugin-jest": "^22.6.4",
+    "eslint-plugin-prettier": "^3.1.0",
+    "husky": "^2.4.1",
+    "jest": "^24.8.0",
+    "lint-staged": "^8.2.1",
+    "minimist": "^1.2.0",
+    "nodemon": "^1.19.1",
+    "pkg": "^4.4.0",
+    "prettier": "^1.18.2",
+    "rimraf": "^2.6.3",
+    "ts-node": "^8.3.0",
+    "typescript": "^3.5.2"
+  },
+  "dependencies": {
+    "apollo-server-express": "^2.6.7",
+    "async-mqtt": "^2.3.0",
+    "class-transformer": "^0.2.3",
+    "class-validator": "^0.9.1",
+    "express": "^4.17.1",
+    "graphql": "^14.3.1",
+    "graphql-subscriptions": "^1.1.0",
+    "lodash.throttle": "^4.1.1",
+    "logform": "^2.1.2",
+    "reflect-metadata": "^0.1.13",
+    "sqlite3": "4.0.9",
+    "type-graphql": "^0.17.4",
+    "typeorm": "^0.2.18",
+    "winston": "^3.2.1"
   }
 }

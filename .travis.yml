@@ -2,17 +2,17 @@ language: node_js
 node_js: 10
 sudo: required
 services:
-- docker
+  - docker
 cache: yarn
 before_install:
-- yarn add minimist cross-spawn
-script: node scripts/dockerUtil.js build
+  - yarn add minimist cross-spawn
+script: yarn docker:build
 before_deploy:
-- echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+  - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
 deploy:
   provider: script
   skip_cleanup: true
-  script: node scripts/dockerUtil.js publish
+  script: yarn docker:publish
   on:
     all_branches: true
 env:

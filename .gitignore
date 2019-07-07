@@ -1,9 +1,11 @@
-#
+# Project Specific
 .vscode
+/data
 *.sqlite
 
 # production
 /build
+/dist
 
 # Logs
 logs
