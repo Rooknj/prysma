@@ -6,7 +6,7 @@
   "repository": "https://github.com/Rooknj/prysma.git",
   "author": "Nick Rook <rooknj@gmail.com>",
   "license": "MIT",
-  "private": true,
+  "private": false,
   "scripts": {
     "start": "ts-node scripts/start",
     "build": "ts-node scripts/build",
@@ -19,8 +19,13 @@
     "docker:publish": "ts-node scripts/dockerUtil publish"
   },
   "bin": {
-    "prod-server": "dist/index.js"
+    "prysma": "dist/index.js"
   },
+  "preferGlobal": true,
+  "files": [
+    "dist",
+    "ui"
+  ],
   "pkg": {
     "assets": [
       "ui/**/*"

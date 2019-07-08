@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /* eslint no-console:0 */
 import "reflect-metadata";
 import path from "path";
