@@ -15,9 +15,9 @@ class Server {
   private routes: string[] = [];
 
   /* public modifier is a default and can be omitted. I prefer to always set it, so code  style is more consistent. */
-  public port: number;
+  public port: string | number;
 
-  public constructor(port: number = 4001) {
+  public constructor(port: string | number = 4001) {
     this.app = express();
     this.port = port;
     this.app.set("port", port);

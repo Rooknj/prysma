@@ -5,7 +5,7 @@ import Server from "./Server";
 class GraphqlServer extends Server {
   protected apolloServer: ApolloServer;
 
-  public constructor(port: number, schema: GraphQLSchema) {
+  public constructor(port: string | number, schema: GraphQLSchema) {
     super(port);
     // Create GraphQL server
     this.apolloServer = new ApolloServer({
