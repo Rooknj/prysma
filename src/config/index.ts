@@ -41,6 +41,6 @@ export const db: ConnectionOptions = {
   // TODO: Store in configuration directory
   database:
     NODE_ENV === "development"
-      ? path.join(__dirname, "..", "..", "data", "prysma.sqlite")
-      : path.join("data", "prysma.sqlite"),
+      ? path.join(__dirname, "..", "..", ".prysma", "prysma.db")
+      : path.join("~", ".prysma", "prysma.db"),
 };

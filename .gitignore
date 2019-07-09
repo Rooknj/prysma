@@ -1,7 +1,7 @@
 # Project Specific
 .vscode
-/data
-*.sqlite
+*.db
+.prysma
 
 # production
 /build
