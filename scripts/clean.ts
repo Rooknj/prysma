@@ -1,19 +1,16 @@
 /* eslint no-console:0 */
 /* eslint import/no-extraneous-dependencies: ["error", {"devDependencies": true}] */
 import rimraf from "rimraf";
-// import { execSync } from "child_process";
+import { execSync } from "child_process";
 
 const remove = (fileOrDirectory: string): void => {
-  rimraf(
-    fileOrDirectory,
-    (error: Error): void => {
-      if (error) {
-        console.log(`Error removing ${fileOrDirectory} ❌: `, error);
-      } else {
-        console.log(`Successfully removed ${fileOrDirectory} ✅`);
-      }
+  rimraf(fileOrDirectory, (error: Error): void => {
+    if (error) {
+      console.log(`Error removing ${fileOrDirectory} ❌: `, error);
+    } else {
+      console.log(`Successfully removed ${fileOrDirectory} ✅`);
     }
-  );
+  });
 };
 
 // Remove dist folder
@@ -25,9 +22,9 @@ remove("build");
 // Remove coverage folder
 remove("coverage");
 
-// Remove persistent data
-remove("data");
+// Remove prysma config directory
+remove(".prysma");
 
 // Bring down docker containers
-// console.log("Bringing docker containers down");
-// execSync("docker-compose down");
+console.log("Bringing docker containers down");
+execSync("docker-compose down");

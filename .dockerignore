@@ -3,7 +3,9 @@ docker-compose.yml
 
 # Project Specific
 .vscode
-*.sqlite
+*.db
+.prysma
+
 
 # production
 /build
