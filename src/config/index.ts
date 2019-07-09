@@ -1,5 +1,6 @@
 import path from "path";
 import { ConnectionOptions } from "typeorm";
+import { homedir } from "os";
 
 const {
   PORT = 4001,
@@ -8,6 +9,7 @@ const {
   MQTT_USERNAME = "pi",
   MQTT_PASSWORD = "MQTTIsBetterThanUDP",
   NODE_ENV,
+  DOCKER,
 } = process.env;
 
 export const server = {
@@ -33,14 +35,21 @@ export const mqtt = {
   },
 };
 
+const getBaseConfigPath = (): string => {
+  if (DOCKER) {
+    return "data";
+  }
+
+  if (NODE_ENV === "development") {
+    return path.join(__dirname, "..", "..");
+  }
+
+  return homedir();
+};
+
 export const db: ConnectionOptions = {
   type: "sqlite",
   synchronize: true,
   logging: false,
-  // Create the SQLite database in the executable's directory if running from a pkg executable
-  // TODO: Store in configuration directory
-  database:
-    NODE_ENV === "development"
-      ? path.join(__dirname, "..", "..", ".prysma", "prysma.db")
-      : path.join("~", ".prysma", "prysma.db"),
+  database: path.join(getBaseConfigPath(), ".prysma", "prysma.db"),
 };
