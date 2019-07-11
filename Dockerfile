@@ -19,7 +19,7 @@ RUN yarn install
 RUN yarn test --no-watch
 
 # Install pkg and Build App
-RUN yarn build
+RUN yarn build --exe
 
 ## Prod Environment
 FROM balenalib/armv7hf:stretch-run

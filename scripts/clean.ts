@@ -1,30 +1,40 @@
 /* eslint no-console:0 */
 /* eslint import/no-extraneous-dependencies: ["error", {"devDependencies": true}] */
 import rimraf from "rimraf";
-import { execSync } from "child_process";
+import execa, { ExecaChildProcess } from "execa";
+import Listr from "listr";
+import { promisify } from "util";
 
-const remove = (fileOrDirectory: string): void => {
-  rimraf(fileOrDirectory, (error: Error): void => {
-    if (error) {
-      console.log(`Error removing ${fileOrDirectory} ❌: `, error);
-    } else {
-      console.log(`Successfully removed ${fileOrDirectory} ✅`);
-    }
-  });
-};
+const asyncRimraf = promisify(rimraf);
 
-// Remove dist folder
-remove("dist");
+const tasks = new Listr(
+  [
+    {
+      title: "Remove dist folder",
+      task: (): Promise<void> => asyncRimraf("dist"),
+    },
+    {
+      title: "Remove build folder",
+      task: (): Promise<void> => asyncRimraf("build"),
+    },
+    {
+      title: "Remove coverage folder",
+      task: (): Promise<void> => asyncRimraf("coverage"),
+    },
+    {
+      title: "Remove prysma data folder",
+      task: (): Promise<void> => asyncRimraf(".prysma"),
+    },
+    {
+      title: "Bring docker containers down",
+      task: (): ExecaChildProcess<string> => execa("docker-compose", ["down"]),
+    },
+  ],
+  {
+    concurrent: true,
+  }
+);
 
-// Remove build folder
-remove("build");
-
-// Remove coverage folder
-remove("coverage");
-
-// Remove prysma config directory
-remove(".prysma");
-
-// Bring down docker containers
-console.log("Bringing docker containers down");
-execSync("docker-compose down");
+tasks.run().catch((err): void => {
+  throw err
+});
