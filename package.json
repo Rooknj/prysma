@@ -2,7 +2,7 @@
   "name": "prysma",
   "version": "0.1.0-alpha",
   "description": "NodeJS Light Management Service",
-  "main": "index.js",
+  "main": "dist/index.js",
   "repository": "https://github.com/Rooknj/prysma.git",
   "author": "Nick Rook <rooknj@gmail.com>",
   "license": "MIT",
