@@ -1,14 +1,8 @@
-/* eslint-disable-next-line spaced-comment */
-/// <reference types="./@types/pkg" />
-
 /* eslint no-console:0 */
 /* eslint import/no-extraneous-dependencies: ["error", {"devDependencies": true}] */
-// import { argv } from "yargs";
-import path from "path";
+import { argv } from "yargs";
 import execa, { ExecaChildProcess } from "execa";
 import Listr from "listr";
-import { argv } from "yargs";
-import { exec } from "pkg";
 // @ts-ignore
 import { name, version } from "../package.json";
 
@@ -23,7 +17,7 @@ process.on("unhandledRejection", (err): never => {
   throw err;
 });
 
-const buildExecutable = (): Promise<void> => {
+const buildExecutable = (): ExecaChildProcess<string> => {
   // BUILD: Build an executable with pkg
   let target: string;
   if (process.env.PKG_TARGET) {
@@ -46,26 +40,24 @@ const buildExecutable = (): Promise<void> => {
   }
 
   const outputFile = `./${BUILD_FOLDER}/${EXECUTABLE_NAME}`;
-  return exec([".", "--target", target, "--output", outputFile]).then((): void => {
-    console.log(`Executable located at ${path.join(BUILD_FOLDER, EXECUTABLE_NAME)}`);
-  });
+  return execa("pkg", [".", "--target", target, "--output", outputFile]);
+  // .then((): void => {
+  //   console.log(`Executable located at ${path.join(BUILD_FOLDER, EXECUTABLE_NAME)}`);
+  // });
 };
 
 console.log(`🛠  Building ${name} v${version} 🛠`);
-const tasks = new Listr(
-  [
-    {
-      title: "Compile Typescript",
-      task: (): ExecaChildProcess<string> => execa("tsc"),
-    },
-    {
-      title: "Build Executable",
-      enabled: (): boolean => !!argv.exe,
-      task: (): Promise<void> => buildExecutable(),
-    },
-  ],
-  { renderer: "verbose" }
-);
+const tasks = new Listr([
+  {
+    title: "Compile Typescript",
+    task: (): ExecaChildProcess<string> => execa("tsc"),
+  },
+  {
+    title: "Build Executable",
+    enabled: (): boolean => !!argv.createExecutable,
+    task: (): ExecaChildProcess<string> => buildExecutable(),
+  },
+]);
 
 tasks.run().catch((err): void => {
   throw err;

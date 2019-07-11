@@ -23,13 +23,11 @@ if (argv.mock) {
   // Start docker containers
   console.log("Spinning up Local MQTT broker");
   process.env.MQTT_HOST = "localhost";
-  execa.sync("docker-compose", ["up", "-d", "mqtt"], {
-    stdio: [process.stdin, process.stdout], // Ignore stderr so nothing prints to the console if this fails.
-  });
+  execa.sync("docker-compose", ["up", "-d", "mqtt"]);
 }
 
 // Start Nodemon
 execa.sync("nodemon", ["--ext", "ts", "--watch", "./src", "--exec", "ts-node", "src/index.ts"], {
   stdio: "inherit",
-  preferLocal: true
+  preferLocal: true,
 });

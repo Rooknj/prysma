@@ -1,8 +1,8 @@
 /* eslint no-console:0 */
 /* eslint import/no-extraneous-dependencies: ["error", {"devDependencies": true}] */
-import rimraf from "rimraf";
 import execa, { ExecaChildProcess } from "execa";
 import Listr from "listr";
+import rimraf from "rimraf";
 import { promisify } from "util";
 
 const asyncRimraf = promisify(rimraf);
@@ -36,5 +36,5 @@ const tasks = new Listr(
 );
 
 tasks.run().catch((err): void => {
-  throw err
+  throw err;
 });

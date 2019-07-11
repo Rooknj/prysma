@@ -10,11 +10,11 @@
   "scripts": {
     "start": "ts-node scripts/start",
     "build": "ts-node scripts/build",
-    "build:exe": "ts-node scripts/build --exe",
+    "build:exe": "ts-node scripts/build --createExecutable",
     "test": "ts-node scripts/test",
     "clean": "ts-node scripts/clean",
     "lint": "eslint 'src/**/*.{ts,js,json,md}' --config=.eslintrc.js",
-    "reformat": "prettier 'src/**/*.{ts,js,json,md}' --write",
+    "reformat": "prettier './**/*.{ts,js,json,md}' --write",
     "docker:build": "ts-node scripts/dockerUtil build",
     "docker:publish": "ts-node scripts/dockerUtil publish"
   },

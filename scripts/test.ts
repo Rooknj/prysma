@@ -3,8 +3,6 @@
 import { argv } from "yargs";
 import execa from "execa";
 
-console.log(argv);
-
 // Set Environment Variables
 process.env.NODE_ENV = "test";
 
