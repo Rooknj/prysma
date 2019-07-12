@@ -1,6 +1,6 @@
 {
   "name": "prysma",
-  "version": "0.1.0-alpha",
+  "version": "0.0.0-development",
   "description": "NodeJS Light Management Service",
   "main": "dist/index.js",
   "repository": "https://github.com/Rooknj/prysma.git",
@@ -16,7 +16,8 @@
     "lint": "eslint 'src/**/*.{ts,js,json,md}' --config=.eslintrc.js",
     "reformat": "prettier './**/*.{ts,js,json,md}' --write",
     "docker:build": "ts-node scripts/dockerUtil build",
-    "docker:publish": "ts-node scripts/dockerUtil publish"
+    "docker:publish": "ts-node scripts/dockerUtil publish",
+    "semantic-release": "semantic-release"
   },
   "bin": {
     "prysma": "dist/index.js"
@@ -35,6 +36,11 @@
     "@babel/core": "^7.4.5",
     "@babel/preset-env": "^7.4.5",
     "@babel/preset-typescript": "^7.3.3",
+    "@commitlint/cli": "^8.0.0",
+    "@commitlint/config-conventional": "^8.0.0",
+    "@commitlint/travis-cli": "^8.0.0",
+    "@semantic-release/changelog": "^3.0.4",
+    "@semantic-release/git": "^7.0.16",
     "@types/graphql": "^14.2.1",
     "@types/jest": "^24.0.15",
     "@types/listr": "^0.14.0",
@@ -59,6 +65,7 @@
     "pkg": "^4.4.0",
     "prettier": "^1.18.2",
     "rimraf": "^2.6.3",
+    "semantic-release": "^15.13.18",
     "ts-node": "^8.3.0",
     "typescript": "^3.5.2",
     "yargs": "^13.2.4"
