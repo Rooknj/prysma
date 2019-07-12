@@ -4,17 +4,10 @@ sudo: required
 services:
   - docker
 cache: yarn
-before_install:
-  - yarn add minimist cross-spawn
-script: yarn docker:build
-before_deploy:
-  - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
-deploy:
-  provider: script
-  skip_cleanup: true
-  script: yarn docker:publish
-  on:
-    all_branches: true
+script: 
+  - yarn lint
+  - yarn test
+  - yarn build
 env:
   global:
     secure: PcdvxsAA2XEq6KftLwTc3wiu64OptyO9eu1qnCBD4MrhheeinpLkEPbMBJZ8IKu6OrruIa6zierd4tgw9aciDoB9mUZjsvgZChpLREJb9quBXt1XHik/L4XYyW6L6heEVkTIvqEYXCBPsn4FAq/3G9+/fZhDXOfEB/gbXKu9gBJxh6fxaqjAtms8bgPcsmMRUYTVNpK/Mgmt5jGk7p0mmlHrHPxssgqkFccOLY4vYW9HcdsjRkf4IOayMnJTWMltncD1sIrRL9zwOEw3lejKPriO7hFD+yWrNU9ho/ASWmFtjl/+q8rhSNZSyYSstDh7/tH94o1nCuc9ZPpbf1rE5274VktvhhXh+dMGzCVUEfehpTrQIg7HHB09rmwnJEhjQ/dVsWJzvWQ5wmJB5WMXNFcTEQXZsZQcVZNT6H2qRRpVW7yNzQgXfusaewr/1VHovCRFna9coED4USXMIYrij5HiUe/vT4kV5Ec9PmnV9RxAg9euKqj/Rryyt6C+X2tuy5pEmLiW2VGP8OsNcjr2+NEgn39x7mjWfhfe9wgzj3KSYnktlONKqI4+mRs8Vtfl5XI9k9+UAV/V9TxPEHZdx6C8baRDYRvaMVq4ZmTq5uwb93DxtrYb6dKNohlNaW8GXRrVIDddJbMvSSQYeHbv1FBC/s0dv9VrMLq/7TVbcis=

@@ -1,36 +1,30 @@
 /* eslint no-console:0 */
 /* eslint import/no-extraneous-dependencies: ["error", {"devDependencies": true}] */
-import spawn from "cross-spawn";
+import { argv } from "yargs";
+import execa from "execa";
 
-// Do this as the first thing so that any code reading it knows the right env.
-process.env.BABEL_ENV = "test";
+// Set Environment Variables
 process.env.NODE_ENV = "test";
 
-// Makes the script crash on unhandled rejections instead of silently
-// ignoring them. In the future, promise rejections that are not handled will
-// terminate the Node.js process with a non-zero exit code.
-process.on(
-  "unhandledRejection",
-  (err): never => {
-    throw err;
-  }
-);
-
-const argv = process.argv.slice(2);
-
-if (argv.indexOf("--no-watch") >= 0) {
-  process.env.CI = "true";
-  argv.splice(argv.indexOf("--no-watch"), 1); // Remove no-watch option from argv so jest doesn't screw up
-}
-
-// Watch unless on CI or in coverage mode
-if (!process.env.CI && argv.indexOf("--coverage") < 0) {
-  argv.push("--watch");
-}
-
-const { status } = spawn.sync("jest", argv, {
-  stdio: ["inherit", "inherit", "inherit"],
+// Crash on unhandled rejections
+process.on("unhandledRejection", (err): never => {
+  throw err;
 });
 
-// If any tests failed, return with an error exit code
-if (status) process.exit(status);
+const jestArgs = process.argv.slice(2);
+
+// Don't watch (set CI flag to true) if --no-watch was specified
+if ("watch" in argv && !argv.watch) {
+  process.env.CI = "true";
+  jestArgs.splice(jestArgs.indexOf("--no-watch"), 1); // Remove no-watch option from argv so jest doesn't screw up
+}
+
+// Watch unless in CI or in coverage mode
+if (!process.env.CI && !argv.coverage) {
+  jestArgs.push("--watchAll");
+}
+
+execa.sync("jest", jestArgs, {
+  stdio: ["inherit", "inherit", "inherit"],
+  preferLocal: true,
+});

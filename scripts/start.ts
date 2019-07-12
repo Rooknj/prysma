@@ -1,27 +1,21 @@
 /* eslint no-console:0 */
 /* eslint import/no-extraneous-dependencies: ["error", {"devDependencies": true}] */
-import spawn from "cross-spawn";
-import { delimiter, resolve as pathResolve } from "path";
-import { execSync } from "child_process";
+import { argv } from "yargs";
+import execa from "execa";
 
+// Set Environment Variables
 process.env.NODE_ENV = "development";
 
 // Crash on unhandled rejections
-process.on(
-  "unhandledRejection",
-  (err): never => {
-    throw err;
-  }
-);
+process.on("unhandledRejection", (err): never => {
+  throw err;
+});
 
-// Get start arguments
-const argv = process.argv.slice(2);
-
-// Handle mock server
-if (argv.indexOf("--mock") >= 0) {
+// Handle cli options
+if (argv.mock) {
   console.log("Starting Prysma using mock services");
   process.env.MOCK = "true";
-} else if (argv.indexOf("--remote") >= 0) {
+} else if (argv.remote) {
   console.log("Starting Prysma using remote services");
   process.env.MQTT_HOST = "prysma.local";
 } else {
@@ -29,16 +23,11 @@ if (argv.indexOf("--mock") >= 0) {
   // Start docker containers
   console.log("Spinning up Local MQTT broker");
   process.env.MQTT_HOST = "localhost";
-  execSync("docker-compose up -d mqtt", {
-    stdio: [process.stdin, process.stdout], // Ignore stderr so nothing prints to the console if this fails.
-  });
+  execa.sync("docker-compose", ["up", "-d", "mqtt"]);
 }
 
-// Start Nodemon with cross-spawn
-spawn.sync("nodemon", ["--ext", "ts", "--watch", "./src", "--exec", "ts-node", "src/index.ts"], {
-  stdio: ["inherit", "inherit", "inherit"],
-  cwd: process.cwd(),
-  env: Object.assign({}, process.env, {
-    PATH: process.env.PATH + delimiter + pathResolve(process.cwd(), "node_modules", ".bin"),
-  }),
+// Start Nodemon
+execa.sync("nodemon", ["--ext", "ts", "--watch", "./src", "--exec", "ts-node", "src/index.ts"], {
+  stdio: "inherit",
+  preferLocal: true,
 });
