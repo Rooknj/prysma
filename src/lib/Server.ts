@@ -29,7 +29,12 @@ class Server {
     this.app.disable("x-powered-by");
 
     // Set up static UI files
-    this.app.use("/", express.static(path.join(__dirname, "..", "..", "ui")));
+    this.app.use(express.static(path.join(__dirname, "..", "..", "ui")));
+
+    // Default every route except the above API routes to send index.html
+    this.app.get("*", (_, res): void => {
+      res.sendFile(path.join(__dirname, "..", "..", "ui", "index.html"));
+    });
 
     // set bodyParser middleware to get form data
     // this.app.use(bodyParser.json());
