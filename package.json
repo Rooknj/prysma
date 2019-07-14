@@ -1,6 +1,6 @@
 {
   "name": "prysma",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "NodeJS Light Management Service",
   "main": "dist/index.js",
   "repository": "https://github.com/Rooknj/prysma.git",
