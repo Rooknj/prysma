@@ -2,5 +2,5 @@
 * text=auto
 
 # remove files from linguist statistics
-ui/** linguist-vendored
+ui/**/* linguist-vendored
 *.js linguist-language=TypeScript
