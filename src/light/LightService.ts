@@ -1,10 +1,8 @@
 import { promisify } from "util";
-import { Repository } from "typeorm";
 import { PubSub } from "graphql-subscriptions";
 import { validate } from "class-validator";
 import throttle from "lodash.throttle";
-import { getDbConnection } from "../lib/connections/dbConnection";
-import { getGraphqlSubscriptionsPubSub } from "../lib/connections/graphqlSubscriptionsPubSub";
+import { getGraphqlSubscriptionsPubSub } from "../lib/clients/graphqlSubscriptionsPubSub";
 import { Light } from "./LightEntity";
 import { LightInput } from "./LightInput";
 import { LightMessenger } from "./LightMessenger";
@@ -31,8 +29,6 @@ const addLightDelay = 500;
 const discoveryDuration = 2000;
 
 export class LightService {
-  private readonly lightRepo: Repository<Light>;
-
   private readonly messenger: LightMessenger;
 
   private readonly pubSub: PubSub;
@@ -41,7 +37,6 @@ export class LightService {
 
   // The constructor parameters are Dependency Injected
   public constructor() {
-    this.lightRepo = getDbConnection().getRepository(Light);
     this.pubSub = getGraphqlSubscriptionsPubSub();
     this.messenger = new LightMessenger();
 
@@ -62,7 +57,7 @@ export class LightService {
     logger.info("Messenger Connected");
 
     // Subscribe to all the lights
-    const lights = await this.lightRepo.find();
+    const lights = await Light.find();
     const subscriptionPromises = lights.map(
       ({ id }): Promise<void> => this.messenger.subscribeToLight(id)
     );
@@ -76,7 +71,7 @@ export class LightService {
     logger.info("Messenger Disconnected");
 
     // Set all light's connected status to false
-    const lights = await this.lightRepo.find();
+    const lights = await Light.find();
     await Promise.all(
       lights.map(({ id }): Promise<Light> => this.updateLight(id, { connected: false }))
     );
@@ -133,7 +128,7 @@ export class LightService {
     // Make sure the light isn't already added
     let lightIsAlreadyAdded = true;
     try {
-      await this.lightRepo.findOneOrFail(name);
+      await Light.findOneOrFail(name);
     } catch (error) {
       lightIsAlreadyAdded = false;
     }
@@ -162,7 +157,7 @@ export class LightService {
     logger.info(`Updating Light: ${id}`);
 
     // Make sure the light is currently added
-    const lightToUpdate = await this.lightRepo.findOneOrFail(id);
+    const lightToUpdate = await Light.findOneOrFail(id);
 
     // Assign the new properties to the light
     Object.assign(lightToUpdate, lightData);
@@ -174,7 +169,7 @@ export class LightService {
     }
 
     // Persist the changes
-    await this.lightRepo.save(lightToUpdate);
+    await Light.save(lightToUpdate);
 
     // Notify subscribers of the new light data
     this.pubSub.publish(LIGHT_CHANGED, lightToUpdate);
@@ -206,19 +201,19 @@ export class LightService {
 
   public findLightById = (id: string): Promise<Light> => {
     logger.info(`Finding Light: ${id}`);
-    return this.lightRepo.findOneOrFail(id);
+    return Light.findOneOrFail(id);
   };
 
   public findAllLights = (): Promise<Light[]> => {
     logger.info(`Finding All Lights`);
-    return this.lightRepo.find();
+    return Light.find();
   };
 
   // This physically sends a command message to the light if any state fields are specified
   public changeLight = async (id: string, lightData: LightInput): Promise<Light> => {
     logger.info(`Changing Light: ${id}`);
     // Make sure the light exists and is connected
-    const lightToChange = await this.lightRepo.findOneOrFail(id);
+    const lightToChange = await Light.findOneOrFail(id);
     if (!lightToChange.connected) throw new Error(`"${id}" is not connected`);
 
     const { name, ...stateData } = lightData;
@@ -249,7 +244,7 @@ export class LightService {
     // Make sure the light was not already added
     let lightAlreadyExists = true;
     try {
-      await this.lightRepo.findOneOrFail(id);
+      await Light.findOneOrFail(id);
     } catch (error) {
       lightAlreadyExists = false;
     }
@@ -262,7 +257,7 @@ export class LightService {
     // Create the new light object
     const light = Light.createDefaultLight(id);
 
-    await this.lightRepo.insert(light);
+    await Light.insert(light);
 
     // Subscribe to the light
     try {
@@ -283,7 +278,7 @@ export class LightService {
     await asyncSetTimeout(addLightDelay);
 
     // Return the added light with the find operation
-    return this.lightRepo.findOneOrFail(id);
+    return Light.findOneOrFail(id);
   };
 
   public removeLightById = async (id: string): Promise<Light> => {
@@ -292,7 +287,7 @@ export class LightService {
     // Make sure the light is currently added
     let lightToRemove: Light;
     try {
-      lightToRemove = await this.lightRepo.findOneOrFail(id);
+      lightToRemove = await Light.findOneOrFail(id);
     } catch (error) {
       throw new Error(`${id} is not currently added`);
     }
@@ -306,7 +301,7 @@ export class LightService {
       // TODO: Do nothing if the error was due to the messenger not being connected, throw otherwise
     }
 
-    await this.lightRepo.delete(id);
+    await Light.delete(id);
 
     return lightToRemove;
   };

@@ -1,6 +1,6 @@
 import { ObjectType, Field, ID, Int } from "type-graphql";
 import { GraphQLScalarType } from "graphql";
-import { Entity, PrimaryColumn, Column } from "typeorm";
+import { Entity, PrimaryColumn, Column, BaseEntity } from "typeorm";
 import {
   IsBoolean,
   IsInt,
@@ -13,11 +13,10 @@ import {
   IsIP,
   Matches,
 } from "class-validator";
-import { plainToClass } from "class-transformer";
 
 @Entity()
 @ObjectType({ description: "Object representing a Light" })
-export class Light {
+export class Light extends BaseEntity {
   @PrimaryColumn({ length: 255 })
   @Field((): GraphQLScalarType => ID)
   @Length(1, 255)
@@ -121,7 +120,7 @@ export class Light {
   public stripType!: string;
 
   public static createDefaultLight(id: string): Light {
-    const defaultLightData: Required<Light> = {
+    const defaultLightData: Partial<Light> = {
       id,
       name: id,
       connected: false,
@@ -140,6 +139,6 @@ export class Light {
       colorOrder: "RGB",
       stripType: "WS2812B",
     };
-    return plainToClass(Light, defaultLightData);
+    return this.create(defaultLightData);
   }
 }

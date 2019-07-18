@@ -2,12 +2,12 @@
 
 /* eslint no-console:0 */
 import "reflect-metadata";
-import { initDbConnection, closeDbConnection } from "./lib/connections/dbConnection";
-import { initMqttClient, closeMqttClient } from "./lib/connections/mqttClient";
+import { createConnection, getConnection, getConnectionOptions } from "typeorm";
+import { initMqttClient, closeMqttClient } from "./lib/clients/mqttClient";
 import {
   initGraphqlSubscriptionsPubSub,
   closeGraphqlSubscriptionsPubSub,
-} from "./lib/connections/graphqlSubscriptionsPubSub";
+} from "./lib/clients/graphqlSubscriptionsPubSub";
 import { Light } from "./light/LightEntity";
 import * as config from "./config";
 import { MockLight } from "./light/MockLight";
@@ -33,7 +33,8 @@ process.on(
   "SIGINT",
   async (): Promise<void> => {
     logger.info("SIGINT signal received, shutting down gracefully...");
-    await Promise.all([closeDbConnection(), closeMqttClient(), closeGraphqlSubscriptionsPubSub()]);
+    const dbConnection = await getConnection();
+    await Promise.all([dbConnection.close(), closeMqttClient(), closeGraphqlSubscriptionsPubSub()]);
     logger.info("Successfully shut down. Goodbye");
     process.exit(0);
   }
@@ -41,10 +42,13 @@ process.on(
 
 // Wrap index.js inside an immediately invoked async function
 (async (): Promise<void> => {
+  // Connect to the db
+  const connectionOptions = await getConnectionOptions();
+  createConnection({ ...connectionOptions, entities: [Light] });
+
   // Connect to outside dependencies
   const [pubSub] = await Promise.all([
     initGraphqlSubscriptionsPubSub(),
-    initDbConnection({ ...config.db, entities: [Light] }),
     initMqttClient(config.mqtt.host, config.mqtt.options),
   ]);
 

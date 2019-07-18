@@ -2,7 +2,7 @@ import { AsyncMqttClient } from "async-mqtt";
 import { EventEmitter } from "events";
 import { validate } from "class-validator";
 import { plainToClass } from "class-transformer";
-import { getMqttClient } from "../lib/connections/mqttClient";
+import { getMqttClient } from "../lib/clients/mqttClient";
 import {
   MessageType,
   ConnectionPayload,
