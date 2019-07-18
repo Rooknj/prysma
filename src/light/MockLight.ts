@@ -48,8 +48,9 @@ export class MockLight {
     this.topics = mqttConfig.topics;
     const { top, connected } = this.topics;
 
-    this.client = MQTT.connect(mqttConfig.host, {
-      ...mqttConfig.options,
+    const { host, ...mqttClientOptions } = mqttConfig.options;
+    this.client = MQTT.connect(host, {
+      ...mqttClientOptions,
       will: {
         topic: `${top}/${this.id}/${connected}`,
         payload: JSON.stringify({ name: this.id, connection: 0 }),

@@ -2,7 +2,7 @@ import { promisify } from "util";
 import { PubSub } from "graphql-subscriptions";
 import { validate } from "class-validator";
 import throttle from "lodash.throttle";
-import { getGraphqlSubscriptionsPubSub } from "../lib/clients/graphqlSubscriptionsPubSub";
+import GqlPubSub from "../lib/clients/GqlPubSub";
 import { Light } from "./LightEntity";
 import { LightInput } from "./LightInput";
 import { LightMessenger } from "./LightMessenger";
@@ -37,7 +37,7 @@ export class LightService {
 
   // The constructor parameters are Dependency Injected
   public constructor() {
-    this.pubSub = getGraphqlSubscriptionsPubSub();
+    this.pubSub = GqlPubSub.getClient();
     this.messenger = new LightMessenger();
 
     if (this.messenger.connected) {

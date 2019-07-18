@@ -2,7 +2,7 @@ import { AsyncMqttClient } from "async-mqtt";
 import { EventEmitter } from "events";
 import { validate } from "class-validator";
 import { plainToClass } from "class-transformer";
-import { getMqttClient } from "../lib/clients/mqttClient";
+import Mqtt from "../lib/clients/Mqtt";
 import {
   MessageType,
   ConnectionPayload,
@@ -23,7 +23,7 @@ export class LightMessenger extends EventEmitter {
 
   public constructor() {
     super();
-    this.client = getMqttClient();
+    this.client = Mqtt.getClient();
     this.connected = this.client.connected;
     this.client.on("connect", this.handleClientConnect);
     this.client.on("offline", this.handleClientDisconnect);
