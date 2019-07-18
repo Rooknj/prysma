@@ -2,20 +2,18 @@
 
 /* eslint no-console:0 */
 import "reflect-metadata";
-import path from "path";
-import { buildSchema } from "type-graphql";
 import { initDbConnection, closeDbConnection } from "./lib/connections/dbConnection";
 import { initMqttClient, closeMqttClient } from "./lib/connections/mqttClient";
 import {
   initGraphqlSubscriptionsPubSub,
   closeGraphqlSubscriptionsPubSub,
 } from "./lib/connections/graphqlSubscriptionsPubSub";
-import { LightResolver } from "./light/LightResolver";
 import { Light } from "./light/LightEntity";
 import * as config from "./config";
 import { MockLight } from "./light/MockLight";
 import GraphqlServer from "./lib/GraphqlServer";
 import logger from "./lib/logger";
+import { createSchema } from "./lib/createSchema";
 
 console.log(`💡  Initializing Prysma 💡`);
 
@@ -51,15 +49,7 @@ process.on(
   ]);
 
   // build TypeGraphQL executable schema
-  const schema = await buildSchema({
-    resolvers: [LightResolver],
-    // Automatically create `schema.gql` file with schema definition in current folder if not running from a pkg executable
-    // Don't create the schema file if running from a pkg executable
-    emitSchemaFile:
-      process.env.NODE_ENV === "development" ? path.resolve(__dirname, "schema.gql") : false,
-    // Use our custom PubSub system
-    pubSub,
-  });
+  const schema = await createSchema(pubSub);
 
   // Create GraphQL server
   const graphqlServer = new GraphqlServer(config.server.port, schema);
