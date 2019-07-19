@@ -88,7 +88,7 @@ module.exports = {
   // notifyMode: "failure-change",
 
   // A preset that is used as a base for Jest's configuration
-  // preset: null,
+  preset: "ts-jest",
 
   // Run tests from one or more projects
   // projects: null,
@@ -142,7 +142,7 @@ module.exports = {
   // ],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
-  testPathIgnorePatterns: ["/node_modules/", "/scripts/", "/__plainOldJavascript__/"],
+  testPathIgnorePatterns: ["/node_modules/", "/scripts/"],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files
   // testRegex: [],
