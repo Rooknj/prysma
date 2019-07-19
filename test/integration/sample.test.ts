@@ -3,6 +3,9 @@ import { AsyncMqttClient } from "async-mqtt";
 import { testDbConnection, testMqttClient, testGqlPubSub } from "../utils/testConnections";
 import { executeGraphql } from "../utils/executeGraphql";
 
+// TODO: Setup ability to create and start MockLights (maybe add a mockLight reset function)
+// TODO: Setup ability to pass in LightService as context?
+
 let conn: Connection;
 let mqttClient: AsyncMqttClient;
 beforeAll(
