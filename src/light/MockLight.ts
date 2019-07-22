@@ -39,7 +39,7 @@ export class MockLight {
 
   private client: MQTT.AsyncMqttClient;
 
-  private state = { ...INITIAL_STATE };
+  private state: LightState;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private config: any;
@@ -61,9 +61,7 @@ export class MockLight {
       numLeds: 60,
       udpPort: 7778,
     };
-    if (initialState) {
-      this.state = { ...INITIAL_STATE, ...initialState };
-    }
+    this.state = initialState || INITIAL_STATE;
     const { top, connected } = topics;
 
     const { host, ...mqttClientOptions } = mqttConfig;
@@ -117,6 +115,14 @@ export class MockLight {
   private async handleDiscoveryMessage(): Promise<void> {
     logger.debug(`Received Discovery message`);
     await this.publishToDiscoveryResponse(this.config);
+  }
+
+  public setState(state: LightState): void {
+    this.state = state;
+  }
+
+  public end(): Promise<void> {
+    return this.client.end();
   }
 
   public async publishToState(stateMessage: StatePayload): Promise<void> {
