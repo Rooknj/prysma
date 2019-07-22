@@ -12,20 +12,8 @@ export const server = {
 };
 
 export const mqtt = {
-  options: {
-    host: `tcp://${MQTT_HOST}:${MQTT_PORT}`,
-    reconnectPeriod: parseInt(MQTT_RECONNECT_PERIOD), // Amount of time between reconnection attempts
-    username: MQTT_USERNAME,
-    password: MQTT_PASSWORD,
-  },
-  topics: {
-    top: "prysmalight",
-    connected: "connected",
-    state: "state",
-    command: "command",
-    effectList: "effects",
-    config: "config",
-    discovery: "discovery",
-    discoveryResponse: "hello",
-  },
+  host: `tcp://${MQTT_HOST}:${MQTT_PORT}`,
+  reconnectPeriod: parseInt(MQTT_RECONNECT_PERIOD), // Amount of time between reconnection attempts
+  username: MQTT_USERNAME,
+  password: MQTT_PASSWORD,
 };

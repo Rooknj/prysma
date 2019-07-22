@@ -11,15 +11,13 @@ import {
   ConfigPayload,
   CommandPayload,
 } from "./message-types";
-import { mqtt } from "../config";
+import { topics } from "../lib/mqttConstants";
 import logger from "../lib/logger";
 
 export class LightMessenger extends EventEmitter {
   private readonly client: AsyncMqttClient;
 
   public connected: boolean;
-
-  private readonly topics = mqtt.topics;
 
   public constructor() {
     super();
@@ -43,7 +41,7 @@ export class LightMessenger extends EventEmitter {
   };
 
   private handleMessage = async (topic: string, message: Buffer): Promise<void> => {
-    const { top, connected, state, effectList, config, discoveryResponse } = this.topics;
+    const { top, connected, state, effectList, config, discoveryResponse } = topics;
     const topicTokens = topic.split("/");
 
     // Validate the topic the message came in on
@@ -126,7 +124,7 @@ export class LightMessenger extends EventEmitter {
       throw new Error(errorMessage);
     }
 
-    const { top, connected, state, effectList, config } = this.topics;
+    const { top, connected, state, effectList, config } = topics;
 
     // Subscribe to all relevant fields
     const connectedPromise = this.client.subscribe(`${top}/${id}/${connected}`);
@@ -151,7 +149,7 @@ export class LightMessenger extends EventEmitter {
       throw new Error(errorMessage);
     }
 
-    const { top, connected, state, effectList, config } = this.topics;
+    const { top, connected, state, effectList, config } = topics;
 
     // Subscribe to all relevant fields
     const connectedPromise = this.client.unsubscribe(`${top}/${id}/${connected}`);
@@ -165,13 +163,13 @@ export class LightMessenger extends EventEmitter {
   };
 
   public startDiscovery = async (): Promise<void> => {
-    const { top, discoveryResponse } = this.topics;
+    const { top, discoveryResponse } = topics;
     await this.client.subscribe(`${top}/+/${discoveryResponse}`);
     logger.info(`Started Light Discovery`);
   };
 
   public stopDiscovery = async (): Promise<void> => {
-    const { top, discoveryResponse } = this.topics;
+    const { top, discoveryResponse } = topics;
     await this.client.unsubscribe(`${top}/+/${discoveryResponse}`);
     logger.info(`Stopped Light Discovery`);
   };
@@ -182,7 +180,7 @@ export class LightMessenger extends EventEmitter {
       throw new Error(errorMessage);
     }
 
-    const { top, discovery } = this.topics;
+    const { top, discovery } = topics;
     await this.client.publish(`${top}/${discovery}`, "ping");
     logger.info(`Successfully sent Discovery Query`);
   };
@@ -204,7 +202,7 @@ export class LightMessenger extends EventEmitter {
       this.on(MessageType.State, onStateMessage);
 
       // Convert the commandPayload into a JSON buffer
-      const { top, command } = this.topics;
+      const { top, command } = topics;
       const payload = Buffer.from(JSON.stringify(commandPayload));
 
       // Send the command and wait for a response

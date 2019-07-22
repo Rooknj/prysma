@@ -44,7 +44,7 @@ process.on(
   createConnection({ ...connectionOptions, entities: [Light] });
 
   // Create an MQTT client (stored in a singleton)
-  Mqtt.createClient(config.mqtt.options);
+  Mqtt.createClient(config.mqtt);
 
   // Create a graphql pubsub (stored in a singleton)
   GqlPubSub.createClient();

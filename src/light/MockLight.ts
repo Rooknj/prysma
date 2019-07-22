@@ -1,4 +1,4 @@
-import MQTT from "async-mqtt";
+import MQTT, { IClientOptions } from "async-mqtt";
 import {
   CommandPayload,
   ConfigPayload,
@@ -8,22 +8,38 @@ import {
   PowerState,
 } from "./message-types";
 import logger from "../lib/logger";
+import { topics } from "../lib/mqttConstants";
+
+const INITIAL_STATE: LightState = {
+  state: PowerState.off,
+  color: { r: 255, g: 100, b: 0 },
+  brightness: 100,
+  effect: "None",
+  speed: 4,
+};
+
+export interface LightState {
+  state: PowerState;
+  color: {
+    r: number;
+    g: number;
+    b: number;
+  };
+  brightness: number;
+  effect: string;
+  speed: number;
+}
+
+interface MqttClientOptions extends IClientOptions {
+  host: string;
+}
 
 export class MockLight {
   private id: string;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private topics: any;
-
   private client: MQTT.AsyncMqttClient;
 
-  private state = {
-    state: PowerState.off,
-    color: { r: 255, g: 100, b: 0 },
-    brightness: 100,
-    effect: "None",
-    speed: 4,
-  };
+  private state = { ...INITIAL_STATE };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private config: any;
@@ -31,7 +47,7 @@ export class MockLight {
   private effectList = ["Mock 1", "Mock 2", "Mock 3"];
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public constructor(id: string, mqttConfig: any) {
+  public constructor(id: string, mqttConfig: MqttClientOptions, initialState?: LightState) {
     this.id = id;
     this.config = {
       id,
@@ -45,10 +61,12 @@ export class MockLight {
       numLeds: 60,
       udpPort: 7778,
     };
-    this.topics = mqttConfig.topics;
-    const { top, connected } = this.topics;
+    if (initialState) {
+      this.state = { ...INITIAL_STATE, ...initialState };
+    }
+    const { top, connected } = topics;
 
-    const { host, ...mqttClientOptions } = mqttConfig.options;
+    const { host, ...mqttClientOptions } = mqttConfig;
     this.client = MQTT.connect(host, {
       ...mqttClientOptions,
       will: {
@@ -102,7 +120,7 @@ export class MockLight {
   }
 
   public async publishToState(stateMessage: StatePayload): Promise<void> {
-    const { top, state } = this.topics;
+    const { top, state } = topics;
     const topic = `${top}/${this.id}/${state}`;
     const payload = Buffer.from(JSON.stringify(stateMessage));
     try {
@@ -114,7 +132,7 @@ export class MockLight {
   }
 
   public async publishToEffectList(effectListMessage: EffectListPayload): Promise<void> {
-    const { top, effectList } = this.topics;
+    const { top, effectList } = topics;
     const topic = `${top}/${this.id}/${effectList}`;
     const payload = Buffer.from(JSON.stringify(effectListMessage));
     try {
@@ -126,7 +144,7 @@ export class MockLight {
   }
 
   public async publishToConnected(connectedMessage: ConnectionPayload): Promise<void> {
-    const { top, connected } = this.topics;
+    const { top, connected } = topics;
     const topic = `${top}/${this.id}/${connected}`;
     const payload = Buffer.from(JSON.stringify(connectedMessage));
     try {
@@ -138,7 +156,7 @@ export class MockLight {
   }
 
   public async publishToConfig(configMessage: ConfigPayload): Promise<void> {
-    const { top, config } = this.topics;
+    const { top, config } = topics;
     const topic = `${top}/${this.id}/${config}`;
     const payload = Buffer.from(JSON.stringify(configMessage));
     try {
@@ -150,7 +168,7 @@ export class MockLight {
   }
 
   public async publishToDiscoveryResponse(discoveryResponseMessage: ConfigPayload): Promise<void> {
-    const { top, discoveryResponse } = this.topics;
+    const { top, discoveryResponse } = topics;
     const topic = `${top}/${this.id}/${discoveryResponse}`;
     const payload = Buffer.from(JSON.stringify(discoveryResponseMessage));
     try {
@@ -162,7 +180,7 @@ export class MockLight {
   }
 
   public async subscribeToCommands(): Promise<void> {
-    const { top, command } = this.topics;
+    const { top, command } = topics;
     const topic = `${top}/${this.id}/${command}`;
     try {
       await this.client.subscribe(topic);
@@ -172,7 +190,7 @@ export class MockLight {
   }
 
   public async subscribeToDiscovery(): Promise<void> {
-    const { top, discovery } = this.topics;
+    const { top, discovery } = topics;
     const topic = `${top}/${discovery}`;
     try {
       await this.client.subscribe(topic);
@@ -182,7 +200,7 @@ export class MockLight {
   }
 
   public async handleMessage(topic: string, message: object): Promise<void> {
-    const { top, command, discovery } = this.topics;
+    const { top, command, discovery } = topics;
 
     // Parse the JSON into a usable javascript object
     if (topic === `${top}/${this.id}/${command}`) {
