@@ -55,7 +55,7 @@ query light($id: String!) {
 }
 `;
 
-describe("tests", (): void => {
+describe("lightQuery", (): void => {
   test("You can get a light that is currently added", async (): Promise<void> => {
     const lightId = generateFakeLightId();
     await executeGraphql({

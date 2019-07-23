@@ -73,7 +73,7 @@ mutation addLight($id: String!) {
 }
 `;
 
-describe("addLight Mutation", (): void => {
+describe("addLightMutation", (): void => {
   test("You can add a light", async (): Promise<void> => {
     const lightId = generateFakeLightId();
     const response = await executeGraphql({
