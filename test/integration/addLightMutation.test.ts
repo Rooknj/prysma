@@ -6,7 +6,7 @@ import { executeGraphql } from "../utils/executeGraphql";
 import { MockLight, LightState } from "../../src/light/MockLight";
 import { PowerState } from "../../src/light/message-types";
 
-const MOCK_LIGHT_ID = "Prysma-Mock";
+const MOCK_LIGHT_ID = "Prysma-addLightMock";
 const MOCK_LIGHT_INITIAL_STATE: LightState = {
   state: PowerState.off,
   color: { r: 255, g: 255, b: 0 },
@@ -76,12 +76,12 @@ mutation addLight($id: String!) {
 
 describe("addLight Mutation", (): void => {
   test("You can add a light", async (): Promise<void> => {
-    const lightId = "Prysma-Mock1";
+    const lightId = "Prysma-addLightOnce";
 
     const response = await executeGraphql({
       source: addMutation,
       variableValues: {
-        id: "Prysma-Mock1",
+        id: lightId,
       },
     });
 
@@ -113,17 +113,18 @@ describe("addLight Mutation", (): void => {
   });
 
   test("You can not add a light twice", async (): Promise<void> => {
+    const lightId = "Prysma-addLightTwice";
     await executeGraphql({
       source: addMutation,
       variableValues: {
-        id: "Prysma-Mock2",
+        id: lightId,
       },
     });
 
     const response = await executeGraphql({
       source: addMutation,
       variableValues: {
-        id: "Prysma-Mock2",
+        id: lightId,
       },
     });
 
