@@ -1,6 +1,7 @@
 import { Connection } from "typeorm";
 import { AsyncMqttClient } from "async-mqtt";
 import { GraphQLError } from "graphql";
+import { generateFakeLightId } from "../utils/generateFakeLightId";
 import { testDbConnection, testMqttClient, testGqlPubSub } from "../utils/testConnections";
 import { executeGraphql } from "../utils/executeGraphql";
 import { MockLight, LightState } from "../../src/light/MockLight";
@@ -45,8 +46,6 @@ afterEach(
   async (): Promise<void> => {
     // Reset the state of the mock light
     mockLight.setState(MOCK_LIGHT_INITIAL_STATE);
-    // Clear the db after each test
-    await conn.synchronize(true);
   }
 );
 
@@ -76,8 +75,7 @@ mutation addLight($id: String!) {
 
 describe("addLight Mutation", (): void => {
   test("You can add a light", async (): Promise<void> => {
-    const lightId = "Prysma-addLightOnce";
-
+    const lightId = generateFakeLightId();
     const response = await executeGraphql({
       source: addMutation,
       variableValues: {
@@ -113,7 +111,7 @@ describe("addLight Mutation", (): void => {
   });
 
   test("You can not add a light twice", async (): Promise<void> => {
-    const lightId = "Prysma-addLightTwice";
+    const lightId = generateFakeLightId();
     await executeGraphql({
       source: addMutation,
       variableValues: {

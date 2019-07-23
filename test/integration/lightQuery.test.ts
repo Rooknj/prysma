@@ -3,6 +3,7 @@ import { AsyncMqttClient } from "async-mqtt";
 import { GraphQLError } from "graphql";
 import { testDbConnection, testMqttClient, testGqlPubSub } from "../utils/testConnections";
 import { executeGraphql } from "../utils/executeGraphql";
+import { generateFakeLightId } from "../utils/generateFakeLightId";
 
 let conn: Connection;
 let mqttClient: AsyncMqttClient;
@@ -19,13 +20,6 @@ afterAll(
   async (): Promise<void> => {
     // Close all connections and the mock light
     await Promise.all([conn.close(), mqttClient.end()]);
-  }
-);
-
-afterEach(
-  async (): Promise<void> => {
-    // Clear the db after each test
-    await conn.synchronize(true);
   }
 );
 
@@ -63,7 +57,7 @@ query light($id: String!) {
 
 describe("tests", (): void => {
   test("You can get a light that is currently added", async (): Promise<void> => {
-    const lightId = "Prysma-getLightMock";
+    const lightId = generateFakeLightId();
     await executeGraphql({
       source: addMutation,
       variableValues: {
@@ -106,7 +100,7 @@ describe("tests", (): void => {
   });
 
   test("You can not get a light that is not currently added", async (): Promise<void> => {
-    const lightId = "Prysma-getLightMockError";
+    const lightId = generateFakeLightId();
     const response = await executeGraphql({
       source: lightQuery,
       variableValues: {

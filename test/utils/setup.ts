@@ -1,8 +1,16 @@
+/* eslint no-console:0 */
 import execa from "execa";
 import { testDbConnection } from "./testConnections";
 
-// Clear out the test database
-testDbConnection(true).then((): void => process.exit());
+const setup = async (): Promise<void> => {
+  // Clear out the test database
+  console.log("Clearing Database");
+  await testDbConnection(true);
 
-// Start the MQTT broker
-execa.sync("docker-compose", ["up", "-d", "mqtt"], { stdio: "inherit" });
+  // Start the MQTT broker
+  console.log("Starting MQTT Broker");
+  execa.sync("docker-compose", ["up", "-d", "mqtt"], { stdio: "inherit" });
+  console.log("Done");
+};
+
+export default setup;
