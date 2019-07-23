@@ -12,6 +12,12 @@
 - sqlite v3.28.0
 - mqtt broker
 
+## scripts
+- yarn start [--local]
+- yarn build [--createExecutable]
+- yarn test [--no-watch, --coverage]
+- yarn clean
+
 ## Common ENV vars (the rest are located in .env.template)
 
 ### SERVER CONFIG

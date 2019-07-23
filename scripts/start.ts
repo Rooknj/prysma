@@ -15,15 +15,15 @@ process.on("unhandledRejection", (err): never => {
 if (argv.mock) {
   console.log("Starting Prysma using mock services");
   process.env.MOCK = "true";
-} else if (argv.remote) {
-  console.log("Starting Prysma using remote services");
-  process.env.MQTT_HOST = "prysma.local";
-} else {
+} else if (argv.local) {
   console.log("Starting Prysma using local services");
+  process.env.MQTT_HOST = "localhost";
   // Start docker containers
   console.log("Spinning up Local MQTT broker");
-  process.env.MQTT_HOST = "localhost";
   execa.sync("docker-compose", ["up", "-d", "mqtt"]);
+} else {
+  console.log("Starting Prysma using remote services");
+  process.env.MQTT_HOST = "prysma.local";
 }
 
 // Start Nodemon
