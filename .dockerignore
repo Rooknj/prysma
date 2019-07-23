@@ -6,7 +6,6 @@ docker-compose.yml
 *.db
 .prysma
 
-
 # production
 /build
 /dist
@@ -75,6 +74,7 @@ typings/
 
 # MacOS files
 .DS_Store
+
 
 
 

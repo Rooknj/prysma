@@ -35,6 +35,11 @@ npm install -g prysma
 prysma
 ```
 
+Notes: 
+- The default database is a sqlite database created at ~/.prysma/prysma.db
+- The default MQTT Broker host used by prysma is localhost:1883
+- These can be changed in the configuration (see section below)
+
 ## Configuration
 
 Prysma is configurable using environment variables
@@ -133,6 +138,14 @@ Compile Typescript and generate an executable using zeit/pkg (executable located
 
 ```
 yarn build --createExecutable
+```
+
+Build and publish Docker Image
+
+Note: This docker image stores the database in the /data directory. Create a volume on it to persist data across container starts
+```
+yarn docker:build -t <tagName>
+yarn docker:publish -t <tagName>
 ```
 
 ### Clean temporary Files
