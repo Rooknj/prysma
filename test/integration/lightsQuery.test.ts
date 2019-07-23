@@ -30,6 +30,14 @@ mutation addLight($id: String!) {
 }
 `;
 
+const removeMutation = `
+mutation removeLight($id: String!) {
+  removeLight(id: $id) {
+    id
+  }
+}
+`;
+
 const lightsQuery = `
 query lights {
   lights{
@@ -63,6 +71,45 @@ describe("lightsQuery", (): void => {
     expect(response.data).toEqual(
       expect.objectContaining({
         lights: expect.arrayContaining([
+          expect.objectContaining({
+            id: lightId,
+            name: lightId,
+          }),
+        ]),
+      })
+    );
+  });
+
+  test("The light doesn't show up in the lights query after it is removed", async (): Promise<
+    void
+  > => {
+    const lightId = generateFakeLightId();
+    await executeGraphql({
+      source: addMutation,
+      variableValues: {
+        id: lightId,
+      },
+    });
+
+    await executeGraphql({
+      source: removeMutation,
+      variableValues: {
+        id: lightId,
+      },
+    });
+
+    const response = await executeGraphql({
+      source: lightsQuery,
+      variableValues: {
+        id: lightId,
+      },
+    });
+
+    expect(response.errors).toBeUndefined();
+    expect(response.data).toBeDefined();
+    expect(response.data).toEqual(
+      expect.objectContaining({
+        lights: expect.not.arrayContaining([
           expect.objectContaining({
             id: lightId,
             name: lightId,

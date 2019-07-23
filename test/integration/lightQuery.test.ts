@@ -31,6 +31,14 @@ mutation addLight($id: String!) {
 }
 `;
 
+const removeMutation = `
+mutation removeLight($id: String!) {
+  removeLight(id: $id) {
+    id
+  }
+}
+`;
+
 const lightQuery = `
 query light($id: String!) {
   light(id: $id) {
@@ -101,6 +109,34 @@ describe("lightQuery", (): void => {
 
   test("You can not get a light that is not currently added", async (): Promise<void> => {
     const lightId = generateFakeLightId();
+    const response = await executeGraphql({
+      source: lightQuery,
+      variableValues: {
+        id: lightId,
+      },
+    });
+
+    expect(response.errors).toBeDefined();
+    expect(response.data).toBeNull();
+    expect(response.errors).toContainEqual(expect.any(GraphQLError));
+  });
+
+  test("you can't get a light after it is removed", async (): Promise<void> => {
+    const lightId = generateFakeLightId();
+    await executeGraphql({
+      source: addMutation,
+      variableValues: {
+        id: lightId,
+      },
+    });
+
+    await executeGraphql({
+      source: removeMutation,
+      variableValues: {
+        id: lightId,
+      },
+    });
+
     const response = await executeGraphql({
       source: lightQuery,
       variableValues: {

@@ -14,4 +14,7 @@ describe("tests", (): void => {
   test.todo("you can't change a light that isn't currently added");
 
   test.todo("you can't change a light that isn't connected");
+
+  test.todo("you can't change a light after it is removed");
+
 });
