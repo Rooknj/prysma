@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/Rooknj/prysma/compare/v1.0.1...v1.1.0) (2019-07-23)
+
+
+### Features
+
+* added dotenv ([67bc543](https://github.com/Rooknj/prysma/commit/67bc543))
+
 ## [1.0.1](https://github.com/Rooknj/prysma/compare/v1.0.0...v1.0.1) (2019-07-14)
 
 ### Bug Fixes
