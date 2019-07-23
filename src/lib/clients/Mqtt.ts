@@ -29,7 +29,7 @@ export default class Mqtt extends ClientSingleton {
       logger.debug(`Failed to get connection to mqtt broker at ${host}`);
     });
     mqttClient.on("offline", (): void => {
-      logger.warn("Mqtt client now offline.");
+      logger.warn("Mqtt client offline.");
     });
 
     return mqttClient;

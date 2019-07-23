@@ -21,7 +21,7 @@ if (argv.mock) {
   // Start docker containers
   console.log("Spinning up Local MQTT broker");
   execa.sync("docker-compose", ["up", "-d", "mqtt"]);
-} else {
+} else if (argv.remote) {
   console.log("Starting Prysma using remote services");
   process.env.MQTT_HOST = "prysma.local";
 }
