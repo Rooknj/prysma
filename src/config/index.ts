@@ -50,7 +50,7 @@ const getBaseConfigPath = (): string => {
 
 export const dbDefault: ConnectionOptions = {
   type: "sqlite",
-  database: `${getBaseConfigPath}/.prysma/prysma.db`,
+  database: `${getBaseConfigPath()}/.prysma/prysma.db`,
   synchronize: true,
   logging: false,
 };

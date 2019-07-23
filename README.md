@@ -17,7 +17,7 @@ NodeJS Light Management Service
 ### Pre-recs
 
 - Nodejs v10.15.3 or greater is required. Check by running `node -v`
-- A Running MQTT broker
+- A Running MQTT broker (default location is localhost:1883. See Configuration section to change)
 
 ### Install globally with Yarn or NPM
 
@@ -48,7 +48,7 @@ Prysma is configurable using environment variables
 - MQTT_PASSWORD=""
 - MQTT_RECONNECT_PERIOD=5000
 - TYPEORM_CONNECTION=sqlite
-- TYPEORM_DATABASE=~/.prysma/prysma.db (or [projectRoot]/.prysma/prysma.db if NODE_ENV=development)
+- TYPEORM_DATABASE=[home directory]/.prysma/prysma.db (or [projectRoot]/.prysma/prysma.db if NODE_ENV=development)
 - TYPEORM_SYNCHRONIZE=true
 - TYPEORM_LOGGING=false
 
