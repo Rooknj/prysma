@@ -66,10 +66,10 @@ View available configuration environment variables in [.env.template](/.env.temp
 
 ### Pre-recs
 
-- Nodejs v10.15.3 or greater is required. Check by running `node -v`
-- Yarn
-- Docker
-- Docker-compose
+- Nodejs v10.15.3 or greater is required. (Check by running `node -v`)
+- Yarn (Check by running `yarn -v`)
+- Docker (Check by running `docker -v`) (Used for tests and running an MQTT broker locally)
+- Docker-compose (Check by running `docker-compose -v`) (Used for tests and running an MQTT broker locally)
 
 ### Install Prysma locally on your computer
 
@@ -81,32 +81,65 @@ yarn install
 
 ### Run Prysma locally
 
-With an MQTT broker running at prysma.local:1883
+Using environment configuration (specified in .env file) or default configuration options
+
+Note: run `docker-compose up` to start local services (or just use `yarn start --local`)
 
 ```
 yarn start
 ```
 
-With an MQTT broker running on localhost:1883
+With an automatically started MQTT broker running on localhost:1883 (Note: This requires docker and docker-compose to be installed)
 
 ```
 yarn start --local
 ```
 
+With an MQTT broker running at prysma.local:1883
+
+```
+yarn start --remote
+```
+
 ### Testing
+
+Run tests on watch mode:
 
 ```
 yarn test
 ```
 
-<!-- - SQLite3 v3.28.0 -->
+Run tests with coverage:
 
-## scripts
+```
+yarn test --coverage
+```
 
-- yarn start [--local]
-- yarn build [--createExecutable]
-- yarn test [--no-watch, --coverage]
-- yarn clean
+Run tests once:
+
+```
+yarn test --no-watch
+```
+
+### Building
+
+Compile Typescript (outputs to /dist)
+
+```
+yarn build
+```
+
+Compile Typescript and generate an executable using zeit/pkg (executable located in /build)
+
+```
+yarn build --createExecutable
+```
+
+### Clean temporary Files
+
+```
+yarn clean
+```
 
 ## License
 
