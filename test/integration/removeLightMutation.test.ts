@@ -4,48 +4,22 @@ import { GraphQLError } from "graphql";
 import { generateFakeLightId } from "../utils/generateFakeLightId";
 import { testDbConnection, testMqttClient, testGqlPubSub } from "../utils/testConnections";
 import { executeGraphql } from "../utils/executeGraphql";
-import { MockLight, LightState } from "../../src/light/MockLight";
-import { PowerState } from "../../src/light/message-types";
-
-const MOCK_LIGHT_ID = "Prysma-addLightMock";
-const MOCK_LIGHT_INITIAL_STATE: LightState = {
-  state: PowerState.off,
-  color: { r: 255, g: 255, b: 0 },
-  brightness: 100,
-  effect: "None",
-  speed: 4,
-};
 
 let conn: Connection;
 let mqttClient: AsyncMqttClient;
-let mockLight: MockLight;
 beforeAll(
   async (): Promise<void> => {
     // Initialize all of our outside connections (the clients and connections are all stored in singletons)
     conn = await testDbConnection();
     mqttClient = testMqttClient();
     testGqlPubSub();
-
-    // Initialize the mock light
-    mockLight = new MockLight(
-      MOCK_LIGHT_ID,
-      { host: "tcp://localhost:1883" },
-      MOCK_LIGHT_INITIAL_STATE
-    );
   }
 );
 
 afterAll(
   async (): Promise<void> => {
     // Close all connections and the mock light
-    await Promise.all([conn.close(), mqttClient.end(), mockLight.end()]);
-  }
-);
-
-afterEach(
-  async (): Promise<void> => {
-    // Reset the state of the mock light
-    mockLight.setState(MOCK_LIGHT_INITIAL_STATE);
+    await Promise.all([conn.close(), mqttClient.end()]);
   }
 );
 
@@ -81,7 +55,7 @@ mutation removeLight($id: String!) {
 }
 `;
 
-describe("tests", (): void => {
+describe("removeLightMutation", (): void => {
   test("You can remove a light", async (): Promise<void> => {
     const lightId = generateFakeLightId();
     await executeGraphql({
