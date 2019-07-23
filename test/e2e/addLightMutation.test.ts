@@ -1,17 +1,15 @@
 import { Connection } from "typeorm";
 import { AsyncMqttClient } from "async-mqtt";
+import { GraphQLError } from "graphql";
 import { testDbConnection, testMqttClient, testGqlPubSub } from "../utils/testConnections";
 import { executeGraphql } from "../utils/executeGraphql";
 import { MockLight, LightState } from "../../src/light/MockLight";
 import { PowerState } from "../../src/light/message-types";
 
-// TODO: Setup ability to create and start MockLights (maybe add a mockLight reset function)
-// TODO: Setup ability to pass in LightService as context?
-
 const MOCK_LIGHT_ID = "Prysma-Mock";
 const MOCK_LIGHT_INITIAL_STATE: LightState = {
   state: PowerState.off,
-  color: { r: 255, g: 100, b: 0 },
+  color: { r: 255, g: 255, b: 0 },
   brightness: 100,
   effect: "None",
   speed: 4,
@@ -87,31 +85,31 @@ describe("addLight Mutation", (): void => {
       },
     });
 
-    console.log(response.data.addLight);
     expect(response.errors).toBeUndefined();
-    expect(response.data.addLight).toBeDefined();
-    expect(response.data.addLight).toBe(
+    expect(response.data).toBeDefined();
+    expect(response.data).toEqual(
       expect.objectContaining({
-        id: lightId,
-        name: lightId,
-        connected: expect.any(Boolean),
-        on: expect.any(Boolean),
-        brightness: expect.any(Number),
-        color: expect.any(String),
-        effect: expect.any(String),
-        speed: expect.any(Number),
-        supportedEffects: expect.any(Array),
-        ipAddress: expect.any(String),
-        macAddress: expect.any(String),
-        numLeds: expect.any(Number),
-        udpPort: expect.any(Number),
-        version: expect.any(String),
-        hardware: expect.any(String),
-        colorOrder: expect.any(String),
-        stripType: expect.any(String),
+        addLight: {
+          id: lightId,
+          name: lightId,
+          connected: expect.any(Boolean),
+          on: expect.any(Boolean),
+          brightness: expect.any(Number),
+          color: expect.any(String),
+          effect: expect.any(String),
+          speed: expect.any(Number),
+          supportedEffects: expect.any(Array),
+          ipAddress: expect.any(String),
+          macAddress: expect.any(String),
+          numLeds: expect.any(Number),
+          udpPort: expect.any(Number),
+          version: expect.any(String),
+          hardware: expect.any(String),
+          colorOrder: expect.any(String),
+          stripType: expect.any(String),
+        },
       })
     );
-    console.log(response);
   });
 
   test("You can not add a light twice", async (): Promise<void> => {
@@ -129,10 +127,12 @@ describe("addLight Mutation", (): void => {
       },
     });
 
-    console.log(response);
+    expect(response.errors).toBeDefined();
+    expect(response.data).toBeNull();
+    expect(response.errors).toContainEqual(expect.any(GraphQLError));
   });
 
-  test("Adding a connected light returns current state/config instead of default", async (): Promise<
+  test("Adding a connected light returns current state instead of default", async (): Promise<
     void
   > => {
     const response = await executeGraphql({
@@ -141,6 +141,32 @@ describe("addLight Mutation", (): void => {
         id: MOCK_LIGHT_ID,
       },
     });
-    console.log(response);
+
+    expect(response.errors).toBeUndefined();
+    expect(response.data).toBeDefined();
+    expect(response.data).toEqual(
+      expect.objectContaining({
+        addLight: {
+          id: MOCK_LIGHT_ID,
+          name: MOCK_LIGHT_ID,
+          connected: true,
+          on: false,
+          brightness: MOCK_LIGHT_INITIAL_STATE.brightness,
+          color: "#FFFF00",
+          effect: MOCK_LIGHT_INITIAL_STATE.effect,
+          speed: MOCK_LIGHT_INITIAL_STATE.speed,
+          // TODO: Check the config too
+          supportedEffects: expect.any(Array),
+          ipAddress: expect.any(String),
+          macAddress: expect.any(String),
+          numLeds: expect.any(Number),
+          udpPort: expect.any(Number),
+          version: expect.any(String),
+          hardware: expect.any(String),
+          colorOrder: expect.any(String),
+          stripType: expect.any(String),
+        },
+      })
+    );
   });
 });

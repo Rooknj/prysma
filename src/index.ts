@@ -53,6 +53,7 @@ process.on(
   const schema = await createSchema();
 
   // Create GraphQL server
+  // TODO: Setup ability to pass in LightService as context?
   const graphqlServer = new GraphqlServer(config.server.port, schema);
   graphqlServer.start();
 
