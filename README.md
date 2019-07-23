@@ -17,7 +17,6 @@ NodeJS Light Management Service
 ### Pre-recs
 
 - Nodejs v10.15.3 or greater is required. Check by running `node -v`
-
 - A Running MQTT broker
 
 ### Install globally with Yarn or NPM
@@ -36,11 +35,71 @@ npm install -g prysma
 prysma
 ```
 
+## Configuration
+
+Prysma is configurable using environment variables
+
+### Default Configuration
+
+- PORT=80 (or 4001 if NODE_ENV=development)
+- MQTT_HOST=localhost
+- MQTT_PORT=1883
+- MQTT_USERNAME=""
+- MQTT_PASSWORD=""
+- MQTT_RECONNECT_PERIOD=5000
+- TYPEORM_CONNECTION=sqlite
+- TYPEORM_DATABASE=~/.prysma/prysma.db (or [projectRoot]/.prysma/prysma.db if NODE_ENV=development)
+- TYPEORM_SYNCHRONIZE=true
+- TYPEORM_LOGGING=false
+
+### Overriding default configuration with environment variables
+
+1. Duplicate .env.template and rename to .env
+2. Fill in the desired configuration options
+3. Note: For overriding TypeORM configurations, make sure you include all required fields for the database you choose to use
+
+### Other configuration variables
+
+View available configuration environment variables in [.env.template](/.env.template).
+
 ## Local Development
 
+### Pre-recs
+
 - Nodejs v10.15.3 or greater is required. Check by running `node -v`
-- yarn
-- sqlite v3.28.0
+- Yarn
+- Docker
+- Docker-compose
+
+### Install Prysma locally on your computer
+
+```
+git clone https://github.com/Rooknj/prysma.git
+cd prysma
+yarn install
+```
+
+### Run Prysma locally
+
+With an MQTT broker running at prysma.local:1883
+
+```
+yarn start
+```
+
+With an MQTT broker running on localhost:1883
+
+```
+yarn start --local
+```
+
+### Testing
+
+```
+yarn test
+```
+
+<!-- - SQLite3 v3.28.0 -->
 
 ## scripts
 
@@ -48,32 +107,6 @@ prysma
 - yarn build [--createExecutable]
 - yarn test [--no-watch, --coverage]
 - yarn clean
-
-## Common ENV vars (the rest are located in .env.template)
-
-### SERVER CONFIG
-
-- PORT
-- NODE_ENV
-
-### MQTT CONFIG
-
-- MQTT_HOST
-- MQTT_USERNAME
-- MQTT_PASSWORD
-- MQTT_PORT
-
-### TYPEORM CONFIG
-
-- TYPEORM_CONNECTION
-- TYPEORM_HOST
-- TYPEORM_USERNAME
-- TYPEORM_PASSWORD
-- TYPEORM_DATABASE
-- TYPEORM_PORT
-- TYPEORM_SYNCHRONIZE=true
-- TYPEORM_DROP_SCHEMA
-- TYPEORM_LOGGING=false
 
 ## License
 

@@ -3,7 +3,7 @@
 /* eslint no-console:0 */
 import "dotenv/config";
 import "reflect-metadata";
-import { createConnection, getConnection, getConnectionOptions } from "typeorm";
+import { createConnection, getConnection, getConnectionOptions, ConnectionOptions } from "typeorm";
 import Mqtt from "./lib/clients/Mqtt";
 import { Light } from "./light/LightEntity";
 import * as config from "./config";
@@ -40,7 +40,14 @@ process.on(
 // Wrap index.js inside an immediately invoked async function
 (async (): Promise<void> => {
   // Connect to the db (stores db connection in a singleton)
-  const connectionOptions = await getConnectionOptions();
+  let connectionOptions: ConnectionOptions;
+  try {
+    connectionOptions = await getConnectionOptions();
+  } catch (error) {
+    logger.info("TypeORM connection options not provided or incomplete. Using default values");
+    connectionOptions = config.dbDefault;
+  }
+
   createConnection({ ...connectionOptions, entities: [Light] });
 
   // Create an MQTT client (stored in a singleton)
@@ -58,7 +65,7 @@ process.on(
   graphqlServer.start();
 
   if (process.env.NODE_ENV === "development") {
-    console.log("develop");
+    logger.info("Development Environment detected. Starting mock lights");
     for (let i = 1; i < 9; i += 1) {
       // eslint-disable-next-line no-new
       new MockLight(`Prysma-Mock${i}`, config.mqtt);
