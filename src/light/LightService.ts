@@ -101,9 +101,9 @@ export class LightService {
 
   private handleEffectListMessage = async (effectListPayload: EffectListPayload): Promise<void> => {
     logger.info("EffectList Message");
-    const { name } = effectListPayload;
+    const { id } = effectListPayload;
     try {
-      await this.updateLight(name, effectListPayloadToLightFields(effectListPayload));
+      await this.updateLight(id, effectListPayloadToLightFields(effectListPayload));
     } catch (error) {
       logger.error(`Error handling effect list message: ${error}`);
     }
@@ -111,9 +111,9 @@ export class LightService {
 
   private handleConfigMessage = async (configPayload: ConfigPayload): Promise<void> => {
     logger.info("Config Message");
-    const { name } = configPayload;
+    const { id } = configPayload;
     try {
-      await this.updateLight(name, configPayloadToLightFields(configPayload));
+      await this.updateLight(id, configPayloadToLightFields(configPayload));
     } catch (error) {
       logger.error(`Error handling config message: ${error}`);
     }
@@ -123,27 +123,27 @@ export class LightService {
     discoveryResponsePayload: ConfigPayload
   ): Promise<void> => {
     logger.info("Discovery Response Message");
-    const { name } = discoveryResponsePayload;
+    const { id } = discoveryResponsePayload;
 
     // Make sure the light isn't already added
     let lightIsAlreadyAdded = true;
     try {
-      await Light.findOneOrFail(name);
+      await Light.findOneOrFail(id);
     } catch (error) {
       lightIsAlreadyAdded = false;
     }
     if (lightIsAlreadyAdded) {
-      logger.info(`${name} is already added. Ignoring discovery response.`);
+      logger.info(`${id} is already added. Ignoring discovery response.`);
       return;
     }
 
     // Make sure we didn't already discover the light
-    if (this.discoveredLights.find((light): boolean => light.id === name)) {
-      logger.info(`${name} was already discovered. Ignoring discovery response.`);
+    if (this.discoveredLights.find((light): boolean => light.id === id)) {
+      logger.info(`${id} was already discovered. Ignoring discovery response.`);
     }
 
     // Add the discovered light to this.discoveredLights
-    const discoveredLight = Light.createDefaultLight(name);
+    const discoveredLight = Light.createDefaultLight(id);
     Object.assign(discoveredLight, configPayloadToLightFields(discoveryResponsePayload));
     this.discoveredLights.push(discoveredLight);
   };

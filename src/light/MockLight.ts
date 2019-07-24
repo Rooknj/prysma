@@ -80,7 +80,7 @@ export class MockLight {
       this.subscribeToDiscovery();
       this.publishToState({ id: this.id, ...this.state });
       this.publishToEffectList({
-        name: this.id,
+        id: this.id,
         effectList: this.effectList,
       });
       this.publishToConnected({ id: this.id, connected: true });

@@ -114,7 +114,7 @@ export class StatePayload {
 export class EffectListPayload {
   @IsString()
   @Length(1, 255)
-  public name!: string;
+  public id!: string;
 
   @IsArray()
   @IsString({ each: true })
@@ -125,10 +125,6 @@ export class ConfigPayload {
   @IsString()
   @Length(1, 255)
   public id!: string;
-
-  @IsString()
-  @Length(1, 255)
-  public name!: string;
 
   @IsString()
   public version!: string;
