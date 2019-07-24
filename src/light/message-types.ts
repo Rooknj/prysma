@@ -2,7 +2,6 @@ import {
   IsInt,
   IsString,
   Length,
-  IsEnum,
   Min,
   Max,
   IsOptional,
@@ -19,11 +18,6 @@ export enum MessageType {
   EffectList = "effectListMessage",
   Config = "configMessage",
   DiscoveryResponse = "discoveryResponseMessage",
-}
-
-export enum PowerState {
-  on = "ON",
-  off = "OFF",
 }
 
 export class RGB {
@@ -47,13 +41,9 @@ export class CommandPayload {
   @IsString()
   public mutationId!: string;
 
-  @IsString()
-  @Length(1, 255)
-  public name!: string;
-
-  @IsEnum(PowerState)
+  @IsBoolean()
   @IsOptional()
-  public state?: PowerState;
+  public on?: boolean;
 
   @IsOptional()
   public color?: RGB;
@@ -95,11 +85,11 @@ export class StatePayload {
 
   @IsString()
   @Length(1, 255)
-  public name!: string;
+  public id!: string;
 
-  @IsEnum(PowerState)
+  @IsBoolean()
   @IsOptional()
-  public state!: PowerState;
+  public on!: boolean;
 
   @IsOptional()
   public color!: RGB;

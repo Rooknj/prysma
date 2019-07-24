@@ -91,9 +91,9 @@ export class LightService {
 
   private handleStateMessage = async (statePayload: StatePayload): Promise<void> => {
     logger.info("State Message");
-    const { name } = statePayload;
+    const { id } = statePayload;
     try {
-      await this.updateLight(name, statePayloadToLightFields(statePayload));
+      await this.updateLight(id, statePayloadToLightFields(statePayload));
     } catch (error) {
       logger.error(`Error handling state message: ${error}`);
     }
@@ -228,7 +228,7 @@ export class LightService {
     // The actual database update will be performed by handleStateMessage
     if (Object.keys(stateData).length) {
       // Generate the command to send
-      const commandPayload = lightInputToCommandPayload(id, stateData);
+      const commandPayload = lightInputToCommandPayload(stateData);
       // Actually send the command and wait for a response
       const statePayload = await this.messenger.commandLight(id, commandPayload);
       // Update the return object with the new state data

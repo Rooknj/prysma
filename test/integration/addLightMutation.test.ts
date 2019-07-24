@@ -5,11 +5,10 @@ import { generateFakeLightId } from "../utils/generateFakeLightId";
 import { testDbConnection, testMqttClient, testGqlPubSub } from "../utils/testConnections";
 import { executeGraphql } from "../utils/executeGraphql";
 import { MockLight, LightState } from "../../src/light/MockLight";
-import { PowerState } from "../../src/light/message-types";
 
 const MOCK_LIGHT_ID = "Prysma-addLightMock";
 const MOCK_LIGHT_INITIAL_STATE: LightState = {
-  state: PowerState.off,
+  on: false,
   color: { r: 255, g: 255, b: 0 },
   brightness: 100,
   effect: "None",
