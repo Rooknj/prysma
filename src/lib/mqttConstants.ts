@@ -1,10 +1,11 @@
 export const topics = {
-  top: "prysmalight",
+  top: "prysma",
   connected: "connected",
   state: "state",
   command: "command",
-  effectList: "effects",
+  effectList: "effectList",
   config: "config",
   discovery: "discovery",
-  discoveryResponse: "hello",
+  discoveryResponse: "discoveryResponse",
+  identify: "identify",
 };
