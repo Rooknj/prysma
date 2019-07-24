@@ -11,6 +11,7 @@ import {
   IsIP,
   Matches,
 } from "class-validator";
+import uuidv4 from "uuid/v4";
 
 export enum MessageType {
   Connected = "connectedMessage",
@@ -74,9 +75,7 @@ export class CommandPayload {
   public speed?: number;
 
   public constructor() {
-    // TODO: Implement String Uuid on hardware instead of using an int (unless this hurts performance)
-    // This is the max number supported by the esp8266 lights (it's 2^32 because its a 32 bit int)
-    this.mutationId = Math.floor(Math.random() * 4294967296);
+    this.mutationId = uuidv4();
   }
 }
 
@@ -92,7 +91,7 @@ export class ConnectionPayload {
 export class StatePayload {
   @IsInt()
   @IsOptional()
-  public mutationId?: number;
+  public mutationId?: string;
 
   @IsString()
   @Length(1, 255)
