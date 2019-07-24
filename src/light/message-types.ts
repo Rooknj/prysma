@@ -6,10 +6,10 @@ import {
   Min,
   Max,
   IsOptional,
-  IsIn,
   IsArray,
   IsIP,
   Matches,
+  IsBoolean,
 } from "class-validator";
 import uuidv4 from "uuid/v4";
 
@@ -44,8 +44,8 @@ export class RGB {
 }
 
 export class CommandPayload {
-  @IsInt()
-  public mutationId!: number;
+  @IsString()
+  public mutationId!: string;
 
   @IsString()
   @Length(1, 255)
@@ -79,17 +79,17 @@ export class CommandPayload {
   }
 }
 
-export class ConnectionPayload {
+export class ConnectedPayload {
   @IsString()
   @Length(1, 255)
-  public name!: string;
+  public id!: string;
 
-  @IsIn(["0", "2"])
-  public connection!: "0" | "2";
+  @IsBoolean()
+  public connected!: boolean;
 }
 
 export class StatePayload {
-  @IsInt()
+  @IsString()
   @IsOptional()
   public mutationId?: string;
 

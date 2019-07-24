@@ -4,7 +4,7 @@ import {
   CommandPayload,
   PowerState,
   StatePayload,
-  ConnectionPayload,
+  ConnectedPayload,
   EffectListPayload,
   ConfigPayload,
 } from "./message-types";
@@ -71,10 +71,10 @@ export const lightInputToCommandPayload = (id: string, lightInput: LightInput): 
   return publishPayload;
 };
 
-export const connectionPayloadToLightFields = (
-  connectionPayload: ConnectionPayload
+export const connectedPayloadToLightFields = (
+  connectedPayload: ConnectedPayload
 ): Partial<Light> => {
-  return { connected: connectionPayload.connection === "2" };
+  return { connected: connectedPayload.connected };
 };
 
 export const statePayloadToLightFields = (statePayload: StatePayload): Partial<Light> => {

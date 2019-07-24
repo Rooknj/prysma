@@ -5,7 +5,7 @@ import { plainToClass } from "class-transformer";
 import Mqtt from "../lib/clients/Mqtt";
 import {
   MessageType,
-  ConnectionPayload,
+  ConnectedPayload,
   StatePayload,
   EffectListPayload,
   ConfigPayload,
@@ -66,8 +66,8 @@ export class LightMessenger extends EventEmitter {
     const possibleTopicsMap = {
       [connected]: {
         event: MessageType.Connected,
-        toClass: (obj: object): ConnectionPayload => {
-          return plainToClass(ConnectionPayload, obj);
+        toClass: (obj: object): ConnectedPayload => {
+          return plainToClass(ConnectedPayload, obj);
         },
       },
       [state]: {

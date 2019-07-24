@@ -7,7 +7,7 @@ import { Light } from "./LightEntity";
 import { LightInput } from "./LightInput";
 import { LightMessenger } from "./LightMessenger";
 import {
-  ConnectionPayload,
+  ConnectedPayload,
   MessageType,
   StatePayload,
   EffectListPayload,
@@ -17,7 +17,7 @@ import { LIGHT_CHANGED } from "./light-events";
 import {
   lightInputToCommandPayload,
   statePayloadToLightFields,
-  connectionPayloadToLightFields,
+  connectedPayloadToLightFields,
   effectListPayloadToLightFields,
   configPayloadToLightFields,
 } from "./light-utils";
@@ -79,11 +79,11 @@ export class LightService {
 
   // TODO: Make these message handlers more generic using the Strategy Pattern
   // TODO: Be more specific on the type of error that can/cannot be thrown by updateLight
-  private handleConnectionMessage = async (connectionPayload: ConnectionPayload): Promise<void> => {
+  private handleConnectionMessage = async (connectedPayload: ConnectedPayload): Promise<void> => {
     logger.info("connection Message");
-    const { name } = connectionPayload;
+    const { id } = connectedPayload;
     try {
-      await this.updateLight(name, connectionPayloadToLightFields(connectionPayload));
+      await this.updateLight(id, connectedPayloadToLightFields(connectedPayload));
     } catch (error) {
       logger.error(`Error handling connection message: ${error}`);
     }

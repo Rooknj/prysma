@@ -2,7 +2,7 @@ import MQTT, { IClientOptions } from "async-mqtt";
 import {
   CommandPayload,
   ConfigPayload,
-  ConnectionPayload,
+  ConnectedPayload,
   StatePayload,
   EffectListPayload,
   PowerState,
@@ -84,7 +84,7 @@ export class MockLight {
         name: this.id,
         effectList: this.effectList,
       });
-      this.publishToConnected({ name: this.id, connection: "2" });
+      this.publishToConnected({ id: this.id, connected: true });
       this.publishToConfig(this.config);
     });
     this.client.on("message", this.handleMessage.bind(this));
@@ -149,7 +149,7 @@ export class MockLight {
     }
   }
 
-  public async publishToConnected(connectedMessage: ConnectionPayload): Promise<void> {
+  public async publishToConnected(connectedMessage: ConnectedPayload): Promise<void> {
     const { top, connected } = topics;
     const topic = `${top}/${this.id}/${connected}`;
     const payload = Buffer.from(JSON.stringify(connectedMessage));
