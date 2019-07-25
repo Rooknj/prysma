@@ -100,7 +100,7 @@ export class LightMessenger extends EventEmitter {
     const errors = await validate(payload);
 
     if (errors.length > 0) {
-      logger.error(`Invalid message on ${topic}: Ignoring\n`, errors);
+      logger.error(`Invalid message on ${topic}: Ignoring\n${errors}`);
       return;
     }
 
