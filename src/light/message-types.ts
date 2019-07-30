@@ -2,15 +2,15 @@ import {
   IsInt,
   IsString,
   Length,
-  IsEnum,
   Min,
   Max,
   IsOptional,
-  IsIn,
   IsArray,
   IsIP,
   Matches,
+  IsBoolean,
 } from "class-validator";
+import uuidv4 from "uuid/v4";
 
 export enum MessageType {
   Connected = "connectedMessage",
@@ -18,11 +18,6 @@ export enum MessageType {
   EffectList = "effectListMessage",
   Config = "configMessage",
   DiscoveryResponse = "discoveryResponseMessage",
-}
-
-export enum PowerState {
-  on = "ON",
-  off = "OFF",
 }
 
 export class RGB {
@@ -43,16 +38,12 @@ export class RGB {
 }
 
 export class CommandPayload {
-  @IsInt()
-  public mutationId!: number;
-
   @IsString()
-  @Length(1, 255)
-  public name!: string;
+  public mutationId!: string;
 
-  @IsEnum(PowerState)
+  @IsBoolean()
   @IsOptional()
-  public state?: PowerState;
+  public on?: boolean;
 
   @IsOptional()
   public color?: RGB;
@@ -74,33 +65,31 @@ export class CommandPayload {
   public speed?: number;
 
   public constructor() {
-    // TODO: Implement String Uuid on hardware instead of using an int (unless this hurts performance)
-    // This is the max number supported by the esp8266 lights (it's 2^32 because its a 32 bit int)
-    this.mutationId = Math.floor(Math.random() * 4294967296);
+    this.mutationId = uuidv4();
   }
 }
 
-export class ConnectionPayload {
+export class ConnectedPayload {
   @IsString()
   @Length(1, 255)
-  public name!: string;
+  public id!: string;
 
-  @IsIn(["0", "2"])
-  public connection!: "0" | "2";
+  @IsBoolean()
+  public connected!: boolean;
 }
 
 export class StatePayload {
-  @IsInt()
+  @IsString()
   @IsOptional()
-  public mutationId?: number;
+  public mutationId?: string;
 
   @IsString()
   @Length(1, 255)
-  public name!: string;
+  public id!: string;
 
-  @IsEnum(PowerState)
+  @IsBoolean()
   @IsOptional()
-  public state!: PowerState;
+  public on!: boolean;
 
   @IsOptional()
   public color!: RGB;
@@ -125,7 +114,7 @@ export class StatePayload {
 export class EffectListPayload {
   @IsString()
   @Length(1, 255)
-  public name!: string;
+  public id!: string;
 
   @IsArray()
   @IsString({ each: true })
@@ -136,10 +125,6 @@ export class ConfigPayload {
   @IsString()
   @Length(1, 255)
   public id!: string;
-
-  @IsString()
-  @Length(1, 255)
-  public name!: string;
 
   @IsString()
   public version!: string;

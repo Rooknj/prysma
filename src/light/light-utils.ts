@@ -2,9 +2,8 @@ import { plainToClass } from "class-transformer";
 import {
   RGB,
   CommandPayload,
-  PowerState,
   StatePayload,
-  ConnectionPayload,
+  ConnectedPayload,
   EffectListPayload,
   ConfigPayload,
 } from "./message-types";
@@ -37,23 +36,13 @@ export const rgbToHexString = (rgb: RGB): string => {
   return `#${componentToHex(rgb.r)}${componentToHex(rgb.g)}${componentToHex(rgb.b)}`;
 };
 
-export const onToPowerState = (on: boolean | undefined): PowerState => {
-  return on ? PowerState.on : PowerState.off;
-};
-
-export const powerStateToOn = (state: PowerState): boolean => {
-  return state === PowerState.on;
-};
-
-export const lightInputToCommandPayload = (id: string, lightInput: LightInput): CommandPayload => {
+export const lightInputToCommandPayload = (lightInput: LightInput): CommandPayload => {
   const { on, brightness, color, effect, speed } = lightInput;
   const publishPayload = new CommandPayload();
-  publishPayload.name = id;
 
   // Need to check if the properties are in lightStateInput because they can be falsy values like false or 0
   if ("on" in lightInput) {
-    // TODO: Implement the hardware to support on instead of state
-    publishPayload.state = onToPowerState(on);
+    publishPayload.on = on;
   }
   if ("brightness" in lightInput) {
     publishPayload.brightness = brightness;
@@ -71,15 +60,15 @@ export const lightInputToCommandPayload = (id: string, lightInput: LightInput): 
   return publishPayload;
 };
 
-export const connectionPayloadToLightFields = (
-  connectionPayload: ConnectionPayload
+export const connectedPayloadToLightFields = (
+  connectedPayload: ConnectedPayload
 ): Partial<Light> => {
-  return { connected: connectionPayload.connection === "2" };
+  return { connected: connectedPayload.connected };
 };
 
 export const statePayloadToLightFields = (statePayload: StatePayload): Partial<Light> => {
   return {
-    on: powerStateToOn(statePayload.state),
+    on: statePayload.on,
     brightness: statePayload.brightness,
     color: rgbToHexString(statePayload.color),
     effect: statePayload.effect,

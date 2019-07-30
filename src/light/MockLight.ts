@@ -2,16 +2,15 @@ import MQTT, { IClientOptions } from "async-mqtt";
 import {
   CommandPayload,
   ConfigPayload,
-  ConnectionPayload,
+  ConnectedPayload,
   StatePayload,
   EffectListPayload,
-  PowerState,
 } from "./message-types";
 import logger from "../lib/logger";
 import { topics } from "../lib/mqttConstants";
 
 const INITIAL_STATE: LightState = {
-  state: PowerState.off,
+  on: false,
   color: { r: 255, g: 100, b: 0 },
   brightness: 100,
   effect: "None",
@@ -19,7 +18,7 @@ const INITIAL_STATE: LightState = {
 };
 
 export interface LightState {
-  state: PowerState;
+  on: boolean;
   color: {
     r: number;
     g: number;
@@ -79,12 +78,12 @@ export class MockLight {
       logger.debug("Mock: Connected to MQTT");
       this.subscribeToCommands();
       this.subscribeToDiscovery();
-      this.publishToState({ name: this.id, ...this.state });
+      this.publishToState({ id: this.id, ...this.state });
       this.publishToEffectList({
-        name: this.id,
+        id: this.id,
         effectList: this.effectList,
       });
-      this.publishToConnected({ name: this.id, connection: "2" });
+      this.publishToConnected({ id: this.id, connected: true });
       this.publishToConfig(this.config);
     });
     this.client.on("message", this.handleMessage.bind(this));
@@ -92,23 +91,23 @@ export class MockLight {
 
   private async handleCommandMessage(data: CommandPayload): Promise<void> {
     logger.debug("Received command message:", data);
-    const { mutationId, state, color, brightness, effect, speed } = data;
+    const { mutationId, on, color, brightness, effect, speed } = data;
     // Set the new state
-    if ("state" in data && state !== undefined) this.state.state = state;
+    if ("on" in data && on !== undefined) this.state.on = on;
     if ("color" in data && color !== undefined) {
       this.state.effect = "None";
       this.state.color = color;
-      this.state.state = PowerState.on;
+      this.state.on = true;
     }
     if ("brightness" in data && brightness !== undefined) this.state.brightness = brightness;
     if ("effect" in data && effect !== undefined) {
       this.state.effect = effect;
       this.state.color = { r: 255, g: 255, b: 255 };
-      this.state.state = PowerState.on;
+      this.state.on = true;
     }
     if ("speed" in data && speed !== undefined) this.state.speed = speed;
 
-    const response = { name: this.id, mutationId, ...this.state };
+    const response = { id: this.id, mutationId, ...this.state };
     await this.publishToState(response);
   }
 
@@ -149,7 +148,7 @@ export class MockLight {
     }
   }
 
-  public async publishToConnected(connectedMessage: ConnectionPayload): Promise<void> {
+  public async publishToConnected(connectedMessage: ConnectedPayload): Promise<void> {
     const { top, connected } = topics;
     const topic = `${top}/${this.id}/${connected}`;
     const payload = Buffer.from(JSON.stringify(connectedMessage));
