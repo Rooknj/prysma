@@ -83,7 +83,7 @@
     "lodash.throttle": "^4.1.1",
     "logform": "^2.1.2",
     "reflect-metadata": "^0.1.13",
-    "sqlite3": "4.0.9",
+    "sqlite3": "4.1.0",
     "type-graphql": "^0.17.4",
     "typeorm": "^0.2.18",
     "uuid": "^3.3.2",
